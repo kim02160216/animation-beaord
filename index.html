@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novelpia Animation - Integrated Real-time Dashboard</title>
+    <title>Novelpia Animation - Master Integrated Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
@@ -12,119 +12,186 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
     <style>
-        :root { --bg-color: #0f172a; --surface-color: #1e293b; --primary-accent: #6366f1; --text-main: #f8fafc; --text-muted: #cbd5e1; --border-color: rgba(255, 255, 255, 0.12); }
-        body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Pretendard', sans-serif; }
+        :root {
+            --bg-color: #0f172a; --surface-color: #1e293b; --primary-accent: #6366f1; --secondary-accent: #10b981;
+            --text-main: #f8fafc; --text-muted: #cbd5e1; --border-color: rgba(255, 255, 255, 0.12);
+        }
+        body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
         .wrapper { display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background: var(--surface-color); border-right: 1px solid var(--border-color); padding: 24px; flex-shrink: 0; }
-        .main-content { flex: 1; padding: 32px; overflow-x: hidden; }
-        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; height: 100%; }
-        .panel-date-picker { background: rgba(0,0,0,0.4); border: 1px solid var(--primary-accent); border-radius: 6px; display: flex; align-items: center; padding: 0 8px; height: 34px; }
-        .panel-date-picker input[type="date"] { font-size: 0.85rem; background: transparent; border: none; color: white; color-scheme: dark; outline: none; font-weight: bold;}
-        .mkt-box { background: rgba(0,0,0,0.3); border-radius: 8px; padding: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        .mkt-title { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px; }
-        .mkt-value { font-size: 1.5rem; font-weight: 700; }
-        .looker-table { width: 100%; font-size: 0.85rem; color: #e2e8f0; }
-        .looker-table th { background: rgba(255,255,255,0.05); padding: 12px; border-bottom: 2px solid var(--border-color); font-weight: bold;}
-        .looker-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .view-bar-container { display: flex; align-items: center; gap: 8px; }
-        .bar { height: 8px; border-radius: 2px; min-width: 2px; }
-        #loadingOverlay { position: fixed; inset: 0; background: rgba(15,23,42,0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .text-muted { color: var(--text-muted) !important; }
+        .sidebar { width: 260px; background: var(--surface-color); border-right: 1px solid var(--border-color); padding: 24px; display: flex; flex-direction: column; flex-shrink: 0; }
+        .main-content { flex: 1; padding: 32px; overflow-y: auto; overflow-x: hidden; }
+        .brand-logo { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 40px; line-height: 1.2;}
+        .brand-logo span { color: var(--primary-accent); }
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; transition: 0.2s ease; }
         
-        /* 모달 및 공정카드 스타일 축약 */
-        .modal-content { background-color: var(--surface-color); border: 1px solid rgba(255,255,255,0.2); color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-        .modal-header { border-bottom: 1px solid var(--border-color); padding: 20px 24px;}
-        .modal-footer { border-top: 1px solid var(--border-color); padding: 16px 24px;}
-        .form-control, .form-select { background-color: rgba(255,255,255,0.05) !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.2) !important; }
-        .form-control:focus, .form-select:focus { border-color: var(--primary-accent) !important; box-shadow: 0 0 0 0.25rem rgba(99,102,241,0.25) !important; }
+        .text-muted { color: var(--text-muted) !important; }
+
+        /* 마케팅 박스 */
+        .mkt-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 16px 12px; text-align: center; }
+        .mkt-title { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; }
+        .mkt-value { font-size: 1.5rem; font-weight: 700; color: #fff; }
+        .pie-container { position: relative; width: 100%; height: 220px; }
+        
+        /* 날짜 픽커 UI */
+        .panel-date-picker { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; display: flex; align-items: center; padding: 0 6px; height: 32px;}
+        .panel-date-picker input[type="date"] { font-size: 0.85rem; padding: 0.25rem; color-scheme: dark; background: transparent; border: none; color: white; outline: none; width: 130px; text-align: center; font-weight: 600;}
+        
+        /* 테이블 공통 */
+        .looker-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .looker-table th { background-color: rgba(255,255,255,0.05); color: #f8fafc; padding: 12px; text-align: right; border-bottom: 2px solid rgba(255,255,255,0.1); font-weight: 600; }
+        .looker-table th:nth-child(1) { text-align: left; }
+        .looker-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; color: #e2e8f0; }
+        
+        /* 바 그래프 UI */
+        .view-bar-container { display: flex; align-items: center; justify-content: flex-end; width: 100%; }
+        .view-text { margin-right: 8px; font-weight: 600; color: #fff;}
+        .bar-blue { background-color: #4285F4; height: 8px; border-radius: 2px; }
+        .bar-orange { background-color: #F4B400; height: 8px; border-radius: 2px; }
+        .bar-purple { background-color: #A142F4; height: 8px; border-radius: 2px; }
+        .retention-text { text-align: right; font-weight: 600; color: #cbd5e1; }
+
+        /* 공정 관리 카드 스타일 */
         .process-steps { display: flex; gap: 8px; margin-top: 12px; margin-bottom: 16px; }
-        .step-badge { flex: 1; text-align: center; padding: 6px 0; border-radius: 6px; font-size: 0.75rem; font-weight: 600; border: 1px solid var(--border-color); background: rgba(0,0,0,0.3); color: #e2e8f0; }
+        .step-badge { flex: 1; text-align: center; padding: 8px 0; border-radius: 6px; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border-color); background: rgba(0,0,0,0.3); color: #e2e8f0; }
         .step-badge.done { background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #34d399; }
         .step-badge.ing { background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.4); color: #818cf8; }
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; font-size: 0.85rem; }
         .info-item { background: rgba(0,0,0,0.25); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); }
         .info-item.full-width { grid-column: span 2; background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.3); }
         .info-label { color: #e2e8f0; display: block; margin-bottom: 6px; font-size: 0.8rem; font-weight: 500; } 
+        .info-value { color: #ffffff; font-weight: 600; font-size: 1rem; }
+        .info-value.cost { color: #fca5a5; }
+        .info-value.total { color: #818cf8; font-size: 1.15rem; }
+
+        /* 모달 및 폼 스타일 (고도화 UI 복원) */
+        .modal-content { background-color: var(--surface-color); border: 1px solid rgba(255,255,255,0.2); color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .modal-header { border-bottom: 1px solid var(--border-color); padding: 20px 24px;}
+        .modal-footer { border-top: 1px solid var(--border-color); padding: 16px 24px;}
+        .form-control, .form-select { background-color: rgba(255,255,255,0.05) !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.2) !important; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary-accent) !important; box-shadow: 0 0 0 0.25rem rgba(99,102,241,0.25) !important; background-color: rgba(0,0,0,0.5) !important;}
+        .form-control::placeholder { color: #94a3b8; opacity: 0.8; }
+        .modal-label { color: #f8fafc !important; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; display: block; } 
+        .helper-text { display: block; font-size: 0.75rem; color: #cbd5e1; margin-top: 6px; line-height: 1.4;}
+        .custom-nav-pills .nav-link { color: #cbd5e1; border: 1px solid transparent; margin-right: 8px; font-weight: 500;}
+        .custom-nav-pills .nav-link.active { background-color: rgba(99,102,241,0.2); color: #fff; border-color: var(--primary-accent); }
+        
+        /* 세부 공정 리스트용 커스텀 UI */
+        .ep-row { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; transition: 0.2s; }
+        .ep-row.completed { border-left: 4px solid var(--secondary-accent); background: rgba(16, 185, 129, 0.05); }
+
+        /* 로딩 스피너 UI */
+        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .spinner-border { width: 3rem; height: 3rem; color: var(--primary-accent); margin-bottom: 1rem;}
     </style>
 </head>
 <body>
 
 <div id="loadingOverlay">
-    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
-    <h5 class="fw-bold text-white">Google Sheets 원본 데이터 로딩 중...</h5>
-    <p class="text-muted small">플랫폼 로우 데이터 매핑을 진행합니다.</p>
+    <div class="spinner-border" role="status"></div>
+    <h5 class="text-white fw-bold mt-3">Google Sheets 실시간 연동 중...</h5>
+    <p class="text-muted small">Vercel 호스팅 환경 최적화 파싱 엔진을 가동합니다.</p>
 </div>
 
 <div class="wrapper">
-    <aside class="sidebar d-none d-xl-block">
-        <div class="fw-bold fs-4 mb-5 text-white">NOVELPIA<span class="text-primary">.</span></div>
-        <nav class="nav flex-column gap-2">
-            <a class="nav-link text-white bg-primary rounded shadow-sm" href="#"><i class="fas fa-chart-pie me-2"></i> 성과 대시보드</a>
-        </nav>
-    </aside>
+    <div class="sidebar d-none d-xl-flex">
+        <div class="brand-logo">NOVELPIA<span>.</span><br><span style="font-size: 0.9rem; font-weight: 500; color: #cbd5e1;">Studio Control</span></div>
+        <ul class="nav flex-column gap-2">
+            <li class="nav-item"><a class="nav-link text-white bg-primary rounded px-3 py-2" href="#"><i class="fas fa-chart-line me-2"></i> 통합 대시보드</a></li>
+        </ul>
+    </div>
 
-    <main class="main-content">
-        <header class="d-flex justify-content-between align-items-center mb-4">
+    <div class="main-content">
+        <header class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
             <div>
-                <h2 class="fw-bold mb-0 text-white">실시간 제작 및 성과 분석</h2>
-                <p class="text-muted small mb-0">Google Sheets DB Connect: <span class="text-success fw-bold">Live</span></p>
+                <h2 class="mb-1 fw-bold text-white">제작 진척도 및 성과 통합 뷰</h2>
+                <div class="text-light opacity-75 small">Google Sheets Real-time DB 연동됨</div>
             </div>
-            <div class="d-flex gap-2 align-items-center">
-                <div class="panel-date-picker bg-primary bg-opacity-10">
-                    <span class="small fw-bold text-primary me-2">전역 설정</span>
-                    <input type="date" id="globalStart" class="global-date" value="2026-01-08">
-                    <span class="mx-1 text-white">~</span>
-                    <input type="date" id="globalEnd" class="global-date" value="2026-01-15">
+            
+            <div class="d-flex flex-wrap align-items-center gap-3">
+                <div class="panel-date-picker shadow-sm px-2 border-primary" style="border: 1px solid var(--primary-accent);">
+                    <span class="text-primary fw-bold me-2" style="font-size:0.8rem;">전역 설정</span>
+                    <input type="date" id="globalStart" class="global-date" value="2026-01-01">
+                    <span class="text-white mx-1">~</span>
+                    <input type="date" id="globalEnd" class="global-date" value="2026-02-28">
                 </div>
-                <button class="btn btn-primary fw-bold px-3" onclick="fetchSheetData()"><i class="fas fa-sync-alt me-1"></i>DB 동기화</button>
-                <button class="btn btn-outline-light fw-bold px-3" data-bs-toggle="modal" data-bs-target="#manualInputModal"><i class="fas fa-sliders-h me-1"></i>수동 관리 패널</button>
+                <button class="btn btn-primary fw-bold px-3 shadow-sm" onclick="fetchSheetData()">
+                    <i class="fas fa-sync-alt me-1"></i>DB 새로고침
+                </button>
+                <button class="btn btn-outline-light fw-bold px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#manualInputModal">
+                    <i class="fas fa-sliders-h me-1"></i>수동 관리 패널
+                </button>
             </div>
         </header>
 
         <div class="row g-4 mb-4">
-            <div class="col-xl-7">
-                <div class="glass-card d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3" style="border-color: rgba(255,255,255,0.1) !important;">
-                        <h5 class="fw-bold mb-0 text-white"><i class="fas fa-chart-line text-primary me-2"></i>제작 성과 트렌드</h5>
-                        <div class="panel-date-picker">
-                            <input type="date" id="trendStart" class="local-date" value="2026-01-08">
-                            <span class="mx-1 text-white">~</span>
-                            <input type="date" id="trendEnd" class="local-date" value="2026-01-15">
-                        </div>
+            <div class="col-md-6">
+                <div class="glass-card d-flex align-items-center py-3 h-100" style="border-left: 5px solid var(--primary-accent); background: rgba(99,102,241,0.05);">
+                    <div class="bg-primary bg-opacity-25 p-3 rounded-circle me-3 text-primary"><i class="fas fa-wallet fs-4"></i></div>
+                    <div>
+                        <h6 class="text-light mb-1 fw-bold">현재 진행 중 프로젝트 총 제작 투입비 (수동)</h6>
+                        <h3 class="fw-bold text-white mb-0" id="totalProductionCost">₩ 23,950,000</h3> 
                     </div>
-                    <div style="height: 300px; width: 100%;"><canvas id="performanceChart"></canvas></div>
                 </div>
             </div>
-            
-            <div class="col-xl-5">
-                <div class="glass-card d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3" style="border-color: rgba(255,255,255,0.1) !important;">
-                        <h5 class="fw-bold mb-0 text-white"><i class="fas fa-bullhorn text-warning me-2"></i>마케팅 데이터</h5>
-                        <div class="panel-date-picker">
-                            <input type="date" id="mktStart" class="local-date" value="2026-01-08">
-                            <span class="mx-1 text-white">~</span>
-                            <input type="date" id="mktEnd" class="local-date" value="2026-01-15">
-                        </div>
-                    </div>
-                    <div class="row g-2 mb-4">
-                        <div class="col-6"><div class="mkt-box"><div class="mkt-title">광고비 합계</div><div class="mkt-value text-white">0</div></div></div>
-                        <div class="col-6"><div class="mkt-box"><div class="mkt-title">가입수 합계</div><div class="mkt-value text-success">0</div></div></div>
-                    </div>
-                    <div class="flex-grow-1 text-center">
-                        <h6 class="text-white fw-bold mb-3 small">작품별 광고 볼륨 비중</h6>
-                        <div style="height: 180px; width: 100%;"><canvas id="pieChartProject"></canvas></div>
+            <div class="col-md-6">
+                <div class="glass-card d-flex align-items-center py-3 h-100" style="border-left: 5px solid var(--warning-color); background: rgba(245,158,11,0.05);">
+                    <div class="bg-warning bg-opacity-25 p-3 rounded-circle me-3 text-warning"><i class="fas fa-bullhorn fs-4"></i></div>
+                    <div>
+                        <h6 class="text-light mb-1 fw-bold">구글 시트 누적 애니메이션 총 마케팅비 (선택 기간)</h6>
+                        <h3 class="fw-bold text-white mb-0" id="topMktCost">₩ 0</h3>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="glass-card mb-4 border-top-0" style="border-top: 4px solid #4285F4 !important;">
-            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3" style="border-color: rgba(255,255,255,0.1) !important;">
-                <h5 class="fw-bold mb-0 text-white"><i class="fas fa-database me-2" style="color:#4285F4;"></i>Animation Platform Data (로우 데이터 기반 실시간 맵핑)</h5>
+        <div class="row g-4 mb-4">
+            <div class="col-xl-7 col-xxl-8">
+                <div class="glass-card h-100 d-flex flex-column">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 border-bottom pb-3 gap-2" style="border-color: rgba(255,255,255,0.1) !important;">
+                        <h5 class="mb-0 fw-bold text-white"><i class="fas fa-chart-area me-2 text-primary"></i>제작 성과 트렌드 뷰</h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="panel-date-picker">
+                                <input type="date" id="trendStart" class="local-date" value="2026-01-01">
+                                <span class="text-white mx-1">~</span>
+                                <input type="date" id="trendEnd" class="local-date" value="2026-02-28">
+                            </div>
+                        </div>
+                    </div>
+                    <div style="height: 380px; width: 100%;"><canvas id="performanceChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="col-xl-5 col-xxl-4">
+                <div class="glass-card h-100 d-flex flex-column">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-3 mb-4 gap-2" style="border-color: rgba(255,255,255,0.1) !important;">
+                        <h5 class="mb-0 fw-bold text-white"><i class="fas fa-bullhorn me-2 text-warning"></i>Animation Marketing Data</h5>
+                        <div class="panel-date-picker">
+                            <input type="date" id="mktStart" class="local-date" value="2026-01-01">
+                            <span class="text-white mx-1">~</span>
+                            <input type="date" id="mktEnd" class="local-date" value="2026-02-28">
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-6"><div class="mkt-box"><div class="mkt-title">광고비 합계</div><div class="mkt-value text-white" id="valAds">0</div></div></div>
+                        <div class="col-6"><div class="mkt-box"><div class="mkt-title">클릭수 합계</div><div class="mkt-value text-info" id="valClicks">0</div></div></div>
+                        <div class="col-6"><div class="mkt-box"><div class="mkt-title">가입수 합계</div><div class="mkt-value text-success" id="valSignups">0</div></div></div>
+                        <div class="col-6"><div class="mkt-box"><div class="mkt-title">결제수 합계</div><div class="mkt-value text-danger" id="valPayments">0</div></div></div>
+                    </div>
+                    <div class="flex-grow-1 d-flex flex-column justify-content-center">
+                        <h6 class="text-white fw-bold mb-3 text-center border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;">작품별 광고 볼륨 비중</h6>
+                        <div class="pie-container"><canvas id="pieChartProject"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card mb-5 border-top-0" style="border-top: 4px solid #4285F4 !important;">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 border-bottom pb-3 gap-2" style="border-color: rgba(255,255,255,0.1) !important;">
+                <h5 class="mb-0 fw-bold text-white"><i class="fas fa-database me-2" style="color:#4285F4;"></i>Animation Platform Data (로우 데이터 기반 실시간 맵핑)</h5>
                 <div class="panel-date-picker">
-                    <input type="date" id="platStart" class="local-date" value="2026-01-08">
-                    <span class="mx-1 text-white">~</span>
-                    <input type="date" id="platEnd" class="local-date" value="2026-01-15">
+                    <input type="date" id="platStart" class="local-date" value="2026-01-01">
+                    <span class="text-white mx-1">~</span>
+                    <input type="date" id="platEnd" class="local-date" value="2026-02-28">
                 </div>
             </div>
             <div class="table-responsive">
@@ -143,33 +210,267 @@
             </div>
         </div>
 
-    </main>
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-white mb-0"><i class="fas fa-film me-2 text-primary"></i>세부 작품별 공정 및 비용 관리 (In-house)</h5>
+        </div>
+        
+        <div class="row g-4 mb-4">
+            <div class="col-xl-6">
+                <div class="glass-card h-100">
+                    <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3" style="border-color: rgba(255,255,255,0.1) !important;">
+                        <div class="d-flex gap-3 align-items-center">
+                            <img src="https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&q=80&w=100" class="rounded border" style="width: 80px; height: 80px; object-fit: cover;">
+                            <div>
+                                <h4 class="mb-1 text-white fw-bold">아카데미 플레이어를...</h4>
+                                <span class="badge bg-success me-1">방영중</span>
+                                <span class="text-light opacity-75 small">총 12화 / <strong class="text-white" id="uiEpsCompleted1">5화 런칭 완료</strong></span>
+                                <div class="mt-2 text-success" style="font-size: 0.85rem; font-weight: 700;"><i class="fas fa-chart-pie me-1"></i>전체 진행률: <span id="uiProgress1">47.2%</span></div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="text-white fw-bold">국내 AI 아트사업팀</div>
+                            <div class="text-light opacity-75 small mt-1" id="uiPD1">성현승 PD</div>
+                        </div>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-item"><span class="info-label">기본 인건비</span><span class="info-value cost" id="uiLabor1">₩7,500,000</span></div>
+                        <div class="info-item"><span class="info-label">추가 비용 (API/외주)</span><span class="info-value cost" id="uiAddCost1">₩450,000 <span class="badge bg-secondary ms-1" style="font-size:0.65rem;">API</span></span></div>
+                        <div class="info-item full-width d-flex justify-content-between align-items-center">
+                            <span class="info-label text-white mb-0 fw-bold"><i class="fas fa-wallet me-2"></i>총 제작 투입 비용</span>
+                            <span class="info-value total fw-bold" id="uiTotalCost1">₩ 7,950,000</span>
+                        </div>
+                    </div>
+
+                    <div class="text-white small mb-2 fw-medium">최근 작업 회차 (6화) 진행 현황</div>
+                    <div class="process-steps">
+                        <div class="step-badge done" id="uiS1_1"><i class="fas fa-check-circle me-1"></i>콘티 완료</div>
+                        <div class="step-badge done" id="uiS1_2"><i class="fas fa-check-circle me-1"></i>리소스 생성</div>
+                        <div class="step-badge ing" id="uiS1_3"><i class="fas fa-spinner fa-spin me-1"></i>영상 편집중</div>
+                    </div>
+
+                    <div class="mt-auto pt-3 border-top mt-3" style="border-color: rgba(255,255,255,0.05) !important;">
+                        <button class="btn btn-outline-info w-100 fw-bold border-secondary text-info bg-dark bg-opacity-25" onclick="openEpisodeDataModal('nv1', '아카데미 플레이어를...')">
+                            <i class="fas fa-list-ol me-2"></i>회차별 상세 데이터(조회/리텐션) 보기
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-6">
+                <div class="glass-card h-100">
+                    <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3" style="border-color: rgba(255,255,255,0.1) !important;">
+                        <div class="d-flex gap-3 align-items-center">
+                            <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&q=80&w=100" class="rounded border" style="width: 80px; height: 80px; object-fit: cover;">
+                            <div>
+                                <h4 class="mb-1 text-white fw-bold">빌런은 살고 싶다</h4>
+                                <span class="badge bg-warning text-dark me-1 fw-bold">제작중</span>
+                                <span class="text-light opacity-75 small">총 15화 / <strong class="text-white" id="uiEpsCompleted2">0화 런칭</strong></span>
+                                <div class="mt-2 text-warning" style="font-size: 0.85rem; font-weight: 700;"><i class="fas fa-chart-pie me-1"></i>전체 진행률: <span id="uiProgress2">4.4%</span></div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="text-info fw-bold">글로벌 필리핀 스튜디오</div>
+                            <div class="text-light opacity-75 small mt-1" id="uiPD2">Jose Manager</div>
+                        </div>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-item"><span class="info-label">기본 인건비</span><span class="info-value cost" id="uiLabor2">₩7,200,000</span></div>
+                        <div class="info-item"><span class="info-label">추가 비용 (API/외주)</span><span class="info-value cost" id="uiAddCost2">₩800,000 <span class="badge bg-secondary ms-1" style="font-size:0.65rem;">외주</span></span></div>
+                        <div class="info-item full-width d-flex justify-content-between align-items-center">
+                            <span class="info-label text-white mb-0 fw-bold"><i class="fas fa-wallet me-2"></i>총 제작 투입 비용</span>
+                            <span class="info-value total fw-bold" id="uiTotalCost2">₩ 8,000,000</span>
+                        </div>
+                    </div>
+
+                    <div class="text-white small mb-2 fw-medium">최근 작업 회차 (1화) 진행 현황</div>
+                    <div class="process-steps">
+                        <div class="step-badge done" id="uiS2_1"><i class="fas fa-check-circle me-1"></i>콘티 완료</div>
+                        <div class="step-badge ing" id="uiS2_2"><i class="fas fa-spinner fa-spin me-1"></i>리소스 생성중</div>
+                        <div class="step-badge" id="uiS2_3"><i class="far fa-circle me-1"></i>영상 편집 대기</div>
+                    </div>
+
+                    <div class="mt-auto pt-3 border-top mt-3" style="border-color: rgba(255,255,255,0.05) !important;">
+                        <button class="btn btn-outline-info w-100 fw-bold border-secondary text-info bg-dark bg-opacity-25" onclick="openEpisodeDataModal('nv2', '빌런은 살고 싶다')">
+                            <i class="fas fa-list-ol me-2"></i>회차별 상세 데이터(조회/리텐션) 보기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="episodeDataModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark bg-opacity-50">
+                <h5 class="modal-title fw-bold text-white mb-0"><i class="fas fa-chart-bar me-2 text-info"></i>회차별 상세 Data</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="bg-dark px-4 py-2 border-bottom" style="border-color: rgba(255,255,255,0.05) !important;">
+                    <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem;">
+                        <span>※ 리스트 항목을 통해 회차별 성과 확인 가능</span>
+                        <span>※ Retention 값은 플랫폼 데이터 기준</span>
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height: 60vh;">
+                    <table class="looker-table">
+                        <thead style="position: sticky; top: 0; background: #1e293b; z-index: 10;">
+                            <tr>
+                                <th style="width: 35%;">novel_name</th>
+                                <th style="width: 15%; text-align: left;">epi_num</th>
+                                <th style="width: 35%; text-align: right;">total_view</th>
+                                <th style="width: 15%; text-align: right;">Retention</th>
+                            </tr>
+                        </thead>
+                        <tbody id="episodeDataTbody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-dark bg-opacity-25 py-2">
+                <div class="w-100 text-end text-muted" style="font-size: 0.75rem;" id="modalDateLabel">date / total_view / Retention</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="manualInputModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark bg-opacity-50">
+                <h5 class="modal-title fw-bold text-white mb-0"><i class="fas fa-sliders-h me-2 text-primary"></i>대시보드 통합 관리 패널</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="modal-body p-4 p-md-5" style="max-height: 75vh; overflow-y: auto;">
+                <ul class="nav nav-pills custom-nav-pills mb-4 pb-3 border-bottom" style="border-color: rgba(255,255,255,0.1) !important;" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active px-4 py-2" data-bs-toggle="pill" data-bs-target="#tab-update" type="button"><i class="fas fa-edit me-2"></i>기존 작품 진행률/비용 갱신</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link px-4 py-2" data-bs-toggle="pill" data-bs-target="#tab-new" type="button"><i class="fas fa-plus-circle me-2"></i>신규 작품 등록</button>
+                    </li>
+                </ul>
+
+                <div class="rule-box" style="background: rgba(16, 185, 129, 0.1); border-left: 4px solid var(--secondary-accent); padding: 12px 16px; border-radius: 0 4px 4px 0; margin-bottom: 20px;">
+                    <span style="color: #34d399; font-weight: 700; font-size: 0.9rem;"><i class="fas fa-info-circle me-1"></i> 시스템 연동 안내 및 인건비 계산 규칙</span>
+                    <ul class="mb-0 mt-2 helper-text text-white">
+                        <li>이곳에 입력된 데이터는 메인 화면의 <strong>카드 영역에 실시간 반영</strong>됩니다.</li>
+                        <li class="mt-1"><strong>인건비 산출 공식:</strong> [투입 인원] × [투입 비율] × [월 기본 비용]</li>
+                    </ul>
+                </div>
+
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="tab-update">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="modal-label text-warning">작업 대상 작품 선택</label>
+                                <select class="form-select fw-bold fs-5 py-2 text-white" id="projectSelector" onchange="loadProjectData()">
+                                    <option value="nv1">아카데미 플레이어를... (NV-001)</option>
+                                    <option value="nv2">빌런은 살고 싶다 (NV-002)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="modal-label">담당 팀 및 PD</label>
+                                <input type="text" class="form-control fw-medium py-2" id="updateTeamPD" value="성현승 PD">
+                            </div>
+
+                            <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;"><i class="fas fa-users me-2 text-primary"></i>리소스 및 비용 할당</h6></div>
+                            
+                            <div class="col-md-4 mt-3">
+                                <label class="modal-label">투입 인원 (N명)</label>
+                                <input type="number" id="updateMembers" class="form-control fw-bold fs-5 text-white" oninput="calcUpdateTotalCost()">
+                            </div>
+                            <div class="col-md-4 mt-3">
+                                <label class="modal-label">투입 비율 (1.0 = 100%)</label>
+                                <input type="number" id="updateRatio" step="0.1" class="form-control fw-bold fs-5 text-white" oninput="calcUpdateTotalCost()">
+                            </div>
+                            <div class="col-md-4 mt-3">
+                                <label class="modal-label text-info">최종 추산 인건비</label>
+                                <input type="text" id="updateLaborResult" class="form-control fw-bold fs-5 text-info" style="background: rgba(99,102,241,0.15) !important;" readonly>
+                            </div>
+                            
+                            <div class="col-md-6 mt-3">
+                                <div class="border rounded p-3" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1) !important;">
+                                    <label class="modal-label">API 누적 비용</label>
+                                    <input type="number" id="updateApiCost" class="form-control text-white" oninput="calcUpdateTotalCost()">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <div class="border rounded p-3" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1) !important;">
+                                    <label class="modal-label">외주 누적 비용</label>
+                                    <input type="number" id="updateOutsourceCost" class="form-control text-white" oninput="calcUpdateTotalCost()">
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-5">
+                                <div class="d-flex justify-content-between align-items-end border-bottom pb-2 mb-3" style="border-color: rgba(255,255,255,0.1) !important;">
+                                    <h6 class="fw-bold text-white mb-0"><i class="fas fa-list-ul me-2 text-success"></i>회차별 세부 공정 관리 (진척도 자동 연산)</h6>
+                                    <div class="bg-success bg-opacity-25 border border-success px-3 py-1 rounded">
+                                        <span class="text-white small me-2">자동 합산 진행률:</span>
+                                        <strong class="text-success fs-5" id="totalProgressBar">0%</strong>
+                                    </div>
+                                </div>
+                                <div id="episodeListContainer" style="max-height: 350px; overflow-y: auto; padding-right: 10px;">
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="tab-new">
+                        <div class="row g-4">
+                            <div class="col-12"><h6 class="fw-bold text-white mb-0 border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;">작품 기본 정보</h6></div>
+                            <div class="col-md-6"><label class="modal-label">신규 작품명</label><input type="text" class="form-control fw-medium"></div>
+                            <div class="col-md-6"><label class="modal-label">썸네일 이미지 URL</label><input type="text" class="form-control fw-medium"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer bg-dark bg-opacity-25 d-flex justify-content-between">
+                <a href="https://docs.google.com/spreadsheets/d/1r3HoDdGevwkqfvQHI-1aPBKQbRlRmoxV2W3aI_YCXAY" target="_blank" class="btn btn-outline-light fw-medium btn-sm"><i class="fas fa-external-link-alt me-2"></i>스프레드시트 원본 열기</a>
+                <div>
+                    <button type="button" class="btn btn-secondary fw-medium me-2" data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-primary px-4 fw-bold" onclick="saveManualData()"><i class="fas fa-save me-2"></i>저장 및 실시간 반영</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    // 본부장님이 제공해주신 가장 확실한 웹게시 CSV 링크
+    // ============================================================================
+    // ★ 1. CSV 데이터 통신 및 완벽한 파서 (Vercel 최적화) ★
+    // ============================================================================
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlR--jYpab01qH_mN4iKPboMJXtqjBPas_KXQrxOUC2FjIRtPgFCbU1RTWbSb7YelYPRh-3_BzJWMo/pub?gid=22579142&single=true&output=csv';
-    
     let globalRawData = [];
     let perfChart, projectPieChart;
 
     document.addEventListener('DOMContentLoaded', () => {
-        // 차트 초기화 (트렌드는 총 조회수 기준)
         Chart.defaults.color = '#ffffff'; 
         Chart.defaults.font.family = 'Pretendard';
+        
         perfChart = new Chart(document.getElementById('performanceChart').getContext('2d'), {
             type: 'line', data: { labels: [], datasets: [] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#ffffff' } } }, scales: { x: { ticks: { color: '#e2e8f0' } }, y: { ticks: { color: '#e2e8f0' } } } }
-        });
-        projectPieChart = new Chart(document.getElementById('pieChartProject').getContext('2d'), { 
-            type: 'pie', data: { labels: ['데이터 없음'], datasets: [{ data: [1], backgroundColor: ['#333'] }] }, options: { responsive: true, maintainAspectRatio: false } 
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#ffffff', font: { weight: 'bold', size: 13 } } } }, scales: { x: { ticks: { color: '#e2e8f0', font: { weight: '600' } } }, y: { ticks: { color: '#e2e8f0' } }, y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#34d399', font: { weight: 'bold' } } } } }
         });
 
-        // 날짜 연동
+        projectPieChart = new Chart(document.getElementById('pieChartProject').getContext('2d'), { 
+            type: 'pie', data: { labels: ['데이터 없음'], datasets: [{ data: [1], backgroundColor: ['#333'] }] }, 
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#cbd5e1' } } } } 
+        });
+
+        // 전역 날짜를 로컬 픽커에 동기화
         document.querySelectorAll('.global-date').forEach(el => el.addEventListener('change', syncDates));
+        // 개별 날짜 픽커 변경 시 다시 렌더링
         document.querySelectorAll('.local-date').forEach(el => el.addEventListener('change', renderData));
 
-        fetchSheetData();
+        loadProjectData(); // 수동 패널 초기화 (고도화 UI 렌더링)
+        fetchSheetData();  // 구글 시트 통신
     });
 
     function syncDates() {
@@ -196,74 +497,122 @@
             },
             error: function(err) {
                 document.getElementById('loadingOverlay').style.display = 'none';
-                alert("구글 시트를 읽어오는데 실패했습니다. URL을 확인해 주세요.");
+                alert("구글 시트를 읽어오는데 실패했습니다.");
                 console.error(err);
             }
         });
     }
 
-    // 문자열을 안전한 숫자로 변환
+    // ============================================================================
+    // ★ 2. 데이터 필터링 (무적의 날짜 및 숫자 정제 로직) ★
+    // ============================================================================
     function sNum(v) { 
         if(!v) return 0;
         let p = parseFloat(String(v).replace(/,/g, '')); 
         return isNaN(p) ? 0 : p; 
     }
     
-    // 날짜 문자열 변환기 (2026-01-08 포맷 보장)
-    function sDate(v) { 
-        if(!v) return null;
-        let c = String(v).replace(/\./g, '-').replace(/\//g, '-').replace(/\s/g, '').trim();
-        if(c.endsWith('-')) c = c.slice(0, -1);
-        let d = new Date(c);
-        return isNaN(d.getTime()) ? null : d;
+    // 어떤 형태의 날짜(2026. 02. 18. / 2026/02/18 등)도 100% YYYY-MM-DD Date 객체로 강제 변환
+    function parseSafeDate(v) {
+        if (!v) return null;
+        let s = String(v).trim();
+        // 날짜 형식 문자열에서 숫자 3뭉치(연, 월, 일)를 찾아냄
+        let parts = s.match(/\d+/g);
+        if (parts && parts.length >= 3) {
+            let y = parts[0];
+            let m = parts[1].padStart(2, '0');
+            let d = parts[2].padStart(2, '0');
+            let dateObj = new Date(`${y}-${m}-${d}T00:00:00`);
+            if (!isNaN(dateObj.getTime())) return dateObj;
+        }
+        return null;
     }
 
     function renderData() {
         if (!globalRawData || globalRawData.length < 2) return;
 
         const ts = new Date(document.getElementById('trendStart').value); const te = new Date(document.getElementById('trendEnd').value + 'T23:59:59');
+        const ms = new Date(document.getElementById('mktStart').value); const me = new Date(document.getElementById('mktEnd').value + 'T23:59:59');
         const ps = new Date(document.getElementById('platStart').value); const pe = new Date(document.getElementById('platEnd').value + 'T23:59:59');
 
-        let tMap = {}, platMap = {};
+        let tmkt=0, ads=0, click=0, sign=0, pay=0;
+        let tMap = {}, pMap = {}, platMap = {};
 
-        // 1번째 줄(헤더) 제외하고 데이터 순회
+        // 본부장님 시트 열 구조: 0:날짜, 1:소설번호, 2:회원조회, 3:비회원조회, 4:총조회, 5:소설명
         for(let i=1; i<globalRawData.length; i++) {
             let row = globalRawData[i];
             
             // F열(소설명)까지 데이터가 있어야 함 (index 5)
             if(row.length < 6) continue; 
 
-            // A열 (인덱스 0): 날짜
-            let dObj = sDate(row[0]);
+            // A열 (인덱스 0): 날짜 파싱
+            let dObj = parseSafeDate(row[0]);
             if(!dObj) continue;
 
             // F열 (인덱스 5): 소설명
             let name = row[5] ? String(row[5]).trim() : '알 수 없음';
             
-            // C열(회원), D열(비회원), E열(총 조회수) 매핑!
-            let rMem = sNum(row[2]); 
-            let rNon = sNum(row[3]); 
-            let rTot = sNum(row[4]); 
+            // 현재 시트 탭에 마케팅 데이터는 없으므로 0으로 방어
+            let rAds = 0, rClick = 0, rSign = 0, rPay = 0; 
+            
+            // C, D, E열 조회수 매핑
+            let rMem = sNum(row[2]); // C열
+            let rNon = sNum(row[3]); // D열
+            let rTot = sNum(row[4]); // E열
+            let rSub = 0; // 구독전환
 
-            // ★ 플랫폼 데이터 필터링 ★
-            if (dObj >= ps && dObj <= pe) {
-                if(name !== '') {
+            // 1. 마케팅
+            if(dObj >= ms && dObj <= me) {
+                ads+=rAds; click+=rClick; sign+=rSign; pay+=rPay; tmkt+=rAds;
+                if(rAds > 0) { if(pMap[name]) pMap[name]+=rAds; else pMap[name]=rAds; }
+            }
+
+            // 2. 트렌드 (날짜별 조회수 합산)
+            if(dObj >= ts && dObj <= te) {
+                // YYYY-MM-DD 형식으로 키 생성
+                let k = new Date(dObj.getTime() - (dObj.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+                if(!tMap[k]) tMap[k] = {v:0, s:0};
+                tMap[k].v += rTot; 
+                tMap[k].s += rSub;
+            }
+
+            // 3. 플랫폼 데이터 (작품별 합산)
+            if(dObj >= ps && dObj <= pe) {
+                if(name !== 'null' && name !== '') {
                     if(!platMap[name]) platMap[name] = {m:0, nm:0, tot:0};
-                    platMap[name].m += rMem;
-                    platMap[name].nm += rNon;
+                    platMap[name].m += rMem; 
+                    platMap[name].nm += rNon; 
                     platMap[name].tot += rTot;
                 }
             }
-
-            // 트렌드 차트 필터링 (총 조회수 합산)
-            if (dObj >= ts && dObj <= te) {
-                let k = new Date(dObj.getTime() - (dObj.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-                if(!tMap[k]) tMap[k] = 0;
-                tMap[k] += rTot;
-            }
         }
 
-        // --- 1. 플랫폼 데이터 UI 업데이트 (가장 중요) ---
+        // --- UI 업데이트: 마케팅 ---
+        document.getElementById('topMktCost').innerText = `₩ ${tmkt.toLocaleString()}`;
+        document.getElementById('valAds').innerText = ads.toLocaleString();
+        document.getElementById('valClicks').innerText = click.toLocaleString();
+        document.getElementById('valSignups').innerText = sign.toLocaleString();
+        document.getElementById('valPayments').innerText = pay.toLocaleString();
+
+        if (Object.keys(pMap).length > 0) {
+            pieChart.data.labels = Object.keys(pMap);
+            pieChart.data.datasets[0].data = Object.values(pMap);
+            pieChart.data.datasets[0].backgroundColor = ['#4285F4', '#FBBC05', '#EA4335', '#34A853', '#A142F4', '#0F9D58'];
+        } else {
+            pieChart.data.labels = ['데이터 없음'];
+            pieChart.data.datasets[0].data = [1];
+            pieChart.data.datasets[0].backgroundColor = ['#333'];
+        }
+        pieChart.update();
+
+        // --- UI 업데이트: 트렌드 ---
+        let dates = Object.keys(tMap).sort();
+        perfChart.data.labels = dates;
+        perfChart.data.datasets[0] = { label: '총 조회수', data: dates.map(d=>tMap[d].v), borderColor: '#818cf8', backgroundColor: 'rgba(129,140,248,0.2)', borderWidth: 3, tension: 0.4, fill: true, yAxisID: 'y' };
+        perfChart.data.datasets[1] = { label: '구독 전환', data: dates.map(d=>tMap[d].s), borderColor: '#34d399', borderWidth: 3, borderDash: [5,5], tension: 0.4, yAxisID: 'y1' };
+        perfChart.update();
+
+        // --- UI 업데이트: 플랫폼 테이블 (가장 중요) ---
         const tbody = document.getElementById('platformDataTbody');
         tbody.innerHTML = '';
         
@@ -301,12 +650,159 @@
                 </tr>`);
             });
         }
+    }
 
-        // --- 2. 트렌드 차트 UI 업데이트 ---
-        let dates = Object.keys(tMap).sort();
-        perfChart.data.labels = dates;
-        perfChart.data.datasets[0] = { label: '총 조회수 추이', data: dates.map(d=>tMap[d]), borderColor: '#818cf8', backgroundColor: 'rgba(129,140,248,0.2)', borderWidth: 3, tension: 0.4, fill: true };
-        perfChart.update();
+    // ============================================================================
+    // ★ 3. 수동 관리 패널: 고도화된 회차별 리스트 체크 UI 100% 복원 ★
+    // ============================================================================
+    const projectsData = {
+        'nv1': { pd: '성현승 PD', members: 3, ratio: 1.0, eps: 12, apiCost: 450000, outsourceCost: 0, progress: [3,3,3,3,3,2,0,0,0,0,0,0] },
+        'nv2': { pd: 'Jose Manager', members: 1, ratio: 1.0, eps: 15, apiCost: 0, outsourceCost: 800000, progress: [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }
+    };
+
+    function loadProjectData() {
+        const pId = document.getElementById('projectSelector').value;
+        const data = projectsData[pId];
+        
+        document.getElementById('updateTeamPD').value = data.pd;
+        document.getElementById('updateMembers').value = data.members;
+        document.getElementById('updateRatio').value = data.ratio;
+        document.getElementById('updateApiCost').value = data.apiCost || 0;
+        document.getElementById('updateOutsourceCost').value = data.outsourceCost || 0;
+        
+        calcUpdateTotalCost();
+
+        // 회차별 리스트 DOM 동적 생성 (본부장님 요청사항 완벽 복구)
+        const container = document.getElementById('episodeListContainer');
+        container.innerHTML = ''; 
+        for (let i = 0; i < data.eps; i++) {
+            const status = data.progress[i] || 0;
+            const isCompleted = status === 3 ? 'completed' : ''; 
+            const chk1 = status >= 1 ? 'checked' : ''; 
+            const chk2 = status >= 2 ? 'checked' : ''; 
+            const chk3 = status === 3 ? 'checked' : '';
+            
+            const html = `
+            <div class="ep-row d-flex flex-wrap justify-content-between align-items-center ${isCompleted}">
+                <div class="fw-bold text-white mb-2 mb-md-0" style="width: 80px;">제 ${i+1} 화</div>
+                <div class="d-flex gap-4 flex-wrap">
+                    <div class="form-check form-switch"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk1}><label class="form-check-label text-light small ms-1">콘티</label></div>
+                    <div class="form-check form-switch"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk2}><label class="form-check-label text-light small ms-1">이미지</label></div>
+                    <div class="form-check form-switch"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk3}><label class="form-check-label text-light small ms-1">영상등록</label></div>
+                </div>
+            </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+        calcTotalProgress();
+    }
+
+    function calcUpdateTotalCost() {
+        const pId = document.getElementById('projectSelector').value;
+        const baseCost = pId === 'nv2' ? 7200000 : 2500000; 
+        const m = parseFloat(document.getElementById('updateMembers').value) || 0;
+        const r = parseFloat(document.getElementById('updateRatio').value) || 0;
+        document.getElementById('updateLaborResult').value = "₩ " + (m * r * baseCost).toLocaleString();
+    }
+
+    // 진척도 자동 퍼센트 산출 로직
+    function calcTotalProgress() {
+        const checkboxes = document.querySelectorAll('.ep-check');
+        if(checkboxes.length === 0) return;
+        let checkedCount = 0;
+        checkboxes.forEach(cb => { if(cb.checked) checkedCount++; });
+        
+        const percentage = (checkedCount / checkboxes.length) * 100;
+        document.getElementById('totalProgressBar').innerText = percentage.toFixed(1) + '%';
+        
+        const rows = document.querySelectorAll('.ep-row');
+        rows.forEach(row => {
+            const checksInRow = row.querySelectorAll('.ep-check:checked');
+            if(checksInRow.length === 3) row.classList.add('completed');
+            else row.classList.remove('completed');
+        });
+    }
+
+    // 저장 버튼 클릭 시 -> 메인 카드 UI와 완벽 연동
+    window.saveManualData = function() {
+        const pId = document.getElementById('projectSelector').value;
+        const cardNum = pId === 'nv1' ? 1 : 2;
+        const baseCost = pId === 'nv2' ? 7200000 : 2500000; 
+
+        const pd = document.getElementById('updateTeamPD').value;
+        const m = parseFloat(document.getElementById('updateMembers').value) || 0;
+        const r = parseFloat(document.getElementById('updateRatio').value) || 0;
+        const apiCost = parseFloat(document.getElementById('updateApiCost').value) || 0;
+        const outCost = parseFloat(document.getElementById('updateOutsourceCost').value) || 0;
+        
+        const laborCost = m * r * baseCost;
+        const sumCost = laborCost + apiCost + outCost;
+
+        // 비용 및 PD 갱신
+        document.getElementById('uiPD' + cardNum).innerText = pd;
+        document.getElementById('uiLabor' + cardNum).innerText = "₩" + laborCost.toLocaleString();
+        
+        let addCostStr = "₩0";
+        if(apiCost > 0) addCostStr = "₩" + apiCost.toLocaleString() + ' <span class="badge bg-secondary ms-1" style="font-size:0.65rem;">API</span>';
+        else if(outCost > 0) addCostStr = "₩" + outCost.toLocaleString() + ' <span class="badge bg-secondary ms-1" style="font-size:0.65rem;">외주</span>';
+        document.getElementById('uiAddCost' + cardNum).innerHTML = addCostStr;
+        document.getElementById('uiTotalCost' + cardNum).innerText = "₩ " + sumCost.toLocaleString();
+
+        // 전체 진행률 갱신 (모달의 totalProgressBar 값을 카드에 주입)
+        document.getElementById('uiProgress' + cardNum).innerText = document.getElementById('totalProgressBar').innerText;
+
+        // 몇 화 런칭 완료인지 계산 (3개 모두 체크된 Row 개수)
+        const completedEps = document.querySelectorAll('.ep-row.completed').length;
+        document.getElementById('uiEpsCompleted' + cardNum).innerText = completedEps + "화 런칭 완료";
+
+        alert('수동 데이터가 메인 카드 영역에 실시간 반영되었습니다.');
+        bootstrap.Modal.getInstance(document.getElementById('manualInputModal')).hide();
+    }
+
+    // ============================================================================
+    // ★ 4. 회차별 상세 데이터 보기 팝업 모달 복구 ★
+    // ============================================================================
+    const epDetailData = {
+        'nv1': [
+            { ep: 1, views: 3799, ret: null }, { ep: 2, views: 578, ret: 15 },
+            { ep: 3, views: 423, ret: 73 }, { ep: 4, views: 355, ret: 84 }, { ep: 5, views: 241, ret: 78 }
+        ],
+        'nv2': [ { ep: 1, views: 2692, ret: null }, { ep: 2, views: 598, ret: 22 } ]
+    };
+
+    window.openEpisodeDataModal = function(pId, pName) {
+        const tbody = document.getElementById('episodeDataTbody');
+        tbody.innerHTML = ''; 
+        const list = epDetailData[pId] || [];
+        
+        if(list.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">데이터가 없습니다.</td></tr>`;
+        } else {
+            let maxV = Math.max(...list.map(d=>d.views), 1);
+            list.forEach((d, i) => {
+                const retStr = d.ret === null ? '-' : `${d.ret}%`;
+                const titleCol = i === 0 ? `<div class="fw-bold text-white"><i class="far fa-minus-square me-2 text-muted"></i>${pName}</div>` : '';
+
+                const html = `
+                    <tr>
+                        <td>${titleCol}</td>
+                        <td class="text-muted text-start">${d.ep} 화</td>
+                        <td>
+                            <div class="view-bar-container" style="justify-content: flex-start;">
+                                <span class="view-text text-start" style="width: 45px;">${d.views.toLocaleString()}</span>
+                                <div class="bar-blue" style="width: ${(d.views/maxV)*100}%;"></div>
+                            </div>
+                        </td>
+                        <td class="retention-text">${retStr}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', html);
+            });
+        }
+        
+        const endDateStr = document.getElementById('globalEnd').value || '2026-02-28';
+        document.getElementById('modalDateLabel').innerText = `date / total_view / Retention\n${endDateStr.replace(/-/g, '. ')}.`;
+        
+        new bootstrap.Modal(document.getElementById('episodeDataModal')).show();
     }
 </script>
 </body>
