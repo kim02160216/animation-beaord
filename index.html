@@ -16,15 +16,16 @@
             --primary-accent: #3b82f6; --secondary-accent: #10b981;
             --text-main: #f8fafc; --text-muted: #94a3b8; --border-color: rgba(255, 255, 255, 0.08);
         }
+        html { scroll-behavior: smooth; }
         body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
         .wrapper { display: flex; min-height: 100vh; }
         
-        /* 사이드바 UI 복구 */
-        .sidebar { width: 260px; background: #0f172a; border-right: 1px solid var(--border-color); padding: 24px; display: flex; flex-direction: column; flex-shrink: 0; }
+        /* 1. 사이드바 완벽 복구 */
+        .sidebar { width: 260px; background: #0f172a; border-right: 1px solid var(--border-color); padding: 24px; display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;}
         .main-content { flex: 1; padding: 32px; overflow-y: auto; overflow-x: hidden; }
         .brand-logo { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 30px; line-height: 1.2;}
         .brand-logo span { color: var(--primary-accent); }
-        .nav-link { transition: 0.2s; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; padding: 12px 16px !important; border-radius: 8px;}
+        .nav-link { transition: 0.2s; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; padding: 12px 16px !important; border-radius: 8px; color: #cbd5e1;}
         .nav-link:hover { background: rgba(255,255,255,0.05); color: #fff !important; }
         .nav-link.active { background: rgba(59,130,246,0.15); color: #60a5fa !important; border: 1px solid rgba(59,130,246,0.3); }
 
@@ -42,7 +43,7 @@
         .panel-date-picker { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; display: flex; align-items: center; padding: 0 8px; height: 36px;}
         .panel-date-picker input[type="date"] { font-size: 0.85rem; padding: 0.25rem; color-scheme: dark; background: transparent; border: none; color: white; outline: none; width: 130px; text-align: center; font-weight: 600;}
         
-        /* 우측 마케팅 박스 UI 복구 */
+        /* 2. 우측 마케팅 박스 UI 완벽 복구 */
         .mkt-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 16px 12px; text-align: center; }
         .mkt-title { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; }
         .mkt-value { font-size: 1.5rem; font-weight: 700; color: #fff; }
@@ -89,6 +90,7 @@
         .form-control:focus, .form-select:focus { border-color: var(--primary-accent) !important; box-shadow: 0 0 0 0.25rem rgba(59,130,246,0.25) !important; }
         .modal-label { color: #cbd5e1 !important; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem; display: block; } 
         
+        /* 3. 회차별 세부 공정 로우 디자인 복구 */
         .ep-row { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 14px 20px; margin-bottom: 10px; transition: 0.2s; display: flex; align-items: center; }
         .ep-row.completed { border-left: 4px solid var(--secondary-accent); background: rgba(16,185,129,0.05); }
 
@@ -101,19 +103,20 @@
 <div id="loadingOverlay">
     <div class="spinner-border" role="status"></div>
     <h5 class="text-white fw-bold">DB 실시간 연동 중...</h5>
-    <p class="text-muted small">데이터를 불러오고 구성합니다.</p>
+    <p class="text-muted small">안전하게 데이터를 불러오고 구성합니다.</p>
 </div>
 
 <div class="wrapper">
     <div class="sidebar d-none d-xl-flex">
         <div class="brand-logo">NOVELPIA<span>.</span><br><span style="font-size: 0.9rem; font-weight: 500; color: #94a3b8;">Studio Control</span></div>
         <ul class="nav flex-column gap-2 mt-2">
-            <li class="nav-item"><a class="nav-link active" href="#"><i class="fas fa-chart-line me-3"></i> 통합 대시보드</a></li>
-            <li class="nav-item"><a class="nav-link text-muted" href="#"><i class="fas fa-bullseye me-3"></i> 마케팅 성과 리포트</a></li>
-            <li class="nav-item"><a class="nav-link text-muted" href="#"><i class="fas fa-database me-3"></i> 플랫폼 지표 분석</a></li>
+            <li class="nav-item"><a class="nav-link active" href="#section-dashboard"><i class="fas fa-chart-line me-3"></i> 통합 대시보드</a></li>
+            <li class="nav-item"><a class="nav-link" href="#section-marketing"><i class="fas fa-bullseye me-3"></i> 마케팅 성과 리포트</a></li>
+            <li class="nav-item"><a class="nav-link" href="#section-platform"><i class="fas fa-database me-3"></i> 플랫폼 지표 분석</a></li>
+            
             <li class="nav-item mt-4 mb-2"><span class="text-muted small fw-bold px-3">매니지먼트</span></li>
             <li class="nav-item"><a class="nav-link text-white" href="#" data-bs-toggle="modal" data-bs-target="#manualInputModal" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);"><i class="fas fa-tasks me-3 text-success"></i> 수동 공정/비용 관리</a></li>
-            <li class="nav-item"><a class="nav-link text-muted" href="#"><i class="fas fa-cog me-3"></i> 시스템 설정</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-cog me-3"></i> 시스템 설정</a></li>
         </ul>
     </div>
 
@@ -136,98 +139,106 @@
             </div>
         </header>
 
-        <div class="row g-3 mb-4">
-            <div class="col-md-6 col-xl-3">
-                <div class="kpi-card blue">
-                    <div class="kpi-icon blue"><i class="fas fa-wallet"></i></div>
-                    <div>
-                        <div class="text-muted small fw-bold mb-1">현재 진행 총 제작 투입비 (수동)</div>
-                        <h4 class="fw-bold text-white mb-0" id="topTotalCost">₩ 0</h4>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-xl-3">
-                <div class="kpi-card yellow">
-                    <div class="kpi-icon yellow"><i class="fas fa-bullhorn"></i></div>
-                    <div>
-                        <div class="text-muted small fw-bold mb-1">누적 애니메이션 총 마케팅비 (DB)</div>
-                        <h4 class="fw-bold text-white mb-0" id="topMktCost">₩ 0</h4>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-xl-3">
-                <div class="kpi-card green">
-                    <div class="kpi-icon green"><i class="fas fa-user-plus"></i></div>
-                    <div>
-                        <div class="text-muted small fw-bold mb-1">애니메이션 평균 가입 CPA (DB)</div>
-                        <h4 class="fw-bold text-white mb-0" id="topAvgCpa">₩ 0</h4>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-xl-3">
-                <div class="kpi-card purple">
-                    <div class="kpi-icon purple"><i class="fas fa-photo-video"></i></div>
-                    <div>
-                        <div class="text-muted small fw-bold mb-1">진행 중 작품 수 & 전체 공정률</div>
-                        <h4 class="fw-bold text-white mb-0" id="topProjectStatus">0개 / 0%</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-4 mb-4">
-            <div class="col-xl-7 col-xxl-8">
-                <div class="glass-card h-100 d-flex flex-column">
-                    <h5 class="mb-4 fw-bold text-white border-bottom pb-3" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-chart-area me-2 text-primary"></i>제작 성과 트렌드</h5>
-                    <div style="height: 380px; width: 100%;"><canvas id="performanceChart"></canvas></div>
-                </div>
-            </div>
+        <div id="section-dashboard" class="pt-2 mb-5">
+            <h5 class="fw-bold text-white mb-4"><i class="fas fa-chart-line me-2 text-primary"></i>통합 대시보드 KPI & 제작 현황</h5>
             
-            <div class="col-xl-5 col-xxl-4">
-                <div class="glass-card h-100 d-flex flex-column p-0 overflow-hidden">
-                    <div class="p-4 pb-3 border-bottom d-flex justify-content-between align-items-center" style="border-color: rgba(255,255,255,0.05) !important; background: rgba(0,0,0,0.1);">
-                        <h5 class="mb-0 fw-bold text-white"><i class="fas fa-bullhorn me-2 text-warning"></i>Animation Marketing</h5>
-                    </div>
-                    <div class="p-4 flex-grow-1 d-flex flex-column">
-                        <div class="row g-3 mb-4">
-                            <div class="col-6"><div class="mkt-box"><div class="mkt-title">광고비 합계</div><div class="mkt-value text-white" id="valAds">0</div></div></div>
-                            <div class="col-6"><div class="mkt-box"><div class="mkt-title">클릭수 합계</div><div class="mkt-value text-info" id="valClicks">0</div></div></div>
-                            <div class="col-6"><div class="mkt-box"><div class="mkt-title">가입수 합계</div><div class="mkt-value text-success" id="valSignups">0</div></div></div>
-                            <div class="col-6"><div class="mkt-box"><div class="mkt-title">결제수 합계</div><div class="mkt-value text-danger" id="valPayments">0</div></div></div>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6 col-xl-3">
+                    <div class="kpi-card blue">
+                        <div class="kpi-icon blue"><i class="fas fa-wallet"></i></div>
+                        <div>
+                            <div class="text-muted small fw-bold mb-1">현재 진행 총 제작 투입비 (수동)</div>
+                            <h4 class="fw-bold text-white mb-0" id="topTotalCost">₩ 0</h4>
                         </div>
-                        <div class="flex-grow-1 d-flex flex-column justify-content-center">
-                            <h6 class="text-white fw-bold mb-3 text-center border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;">작품별 광고 볼륨 비중</h6>
-                            <div class="pie-container" style="position: relative; width: 100%; height: 180px;"><canvas id="pieChartProject"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="kpi-card yellow">
+                        <div class="kpi-icon yellow"><i class="fas fa-bullhorn"></i></div>
+                        <div>
+                            <div class="text-muted small fw-bold mb-1">누적 애니메이션 총 마케팅비 (DB)</div>
+                            <h4 class="fw-bold text-white mb-0" id="topMktCost">₩ 0</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="kpi-card green">
+                        <div class="kpi-icon green"><i class="fas fa-user-plus"></i></div>
+                        <div>
+                            <div class="text-muted small fw-bold mb-1">애니메이션 평균 가입 CPA (DB)</div>
+                            <h4 class="fw-bold text-white mb-0" id="topAvgCpa">₩ 0</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="kpi-card purple">
+                        <div class="kpi-icon purple"><i class="fas fa-photo-video"></i></div>
+                        <div>
+                            <div class="text-muted small fw-bold mb-1">진행 중 작품 수 & 전체 공정률</div>
+                            <h4 class="fw-bold text-white mb-0" id="topProjectStatus">0개 / 0%</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4" id="projectCardsContainer"></div>
+        </div>
+
+
+        <div id="section-marketing" class="pt-5 mb-5 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+            <h5 class="fw-bold text-white mb-4"><i class="fas fa-bullseye me-2 text-warning"></i>마케팅 성과 리포트 (데이터 연동)</h5>
+            
+            <div class="row g-4">
+                <div class="col-xl-7 col-xxl-8">
+                    <div class="glass-card h-100 d-flex flex-column">
+                        <h6 class="mb-4 fw-bold text-white border-bottom pb-3" style="border-color: rgba(255,255,255,0.05) !important;">제작 성과 트렌드</h6>
+                        <div style="height: 380px; width: 100%;"><canvas id="performanceChart"></canvas></div>
+                    </div>
+                </div>
+                
+                <div class="col-xl-5 col-xxl-4">
+                    <div class="glass-card h-100 d-flex flex-column p-0 overflow-hidden">
+                        <div class="p-4 pb-3 border-bottom d-flex justify-content-between align-items-center" style="border-color: rgba(255,255,255,0.05) !important; background: rgba(0,0,0,0.1);">
+                            <h6 class="mb-0 fw-bold text-white">Animation Marketing</h6>
+                        </div>
+                        <div class="p-4 flex-grow-1 d-flex flex-column">
+                            <div class="row g-3 mb-4">
+                                <div class="col-6"><div class="mkt-box"><div class="mkt-title">광고비 합계</div><div class="mkt-value text-white" id="valAds">0</div></div></div>
+                                <div class="col-6"><div class="mkt-box"><div class="mkt-title">클릭수 합계</div><div class="mkt-value text-info" id="valClicks">0</div></div></div>
+                                <div class="col-6"><div class="mkt-box"><div class="mkt-title">가입수 합계</div><div class="mkt-value text-success" id="valSignups">0</div></div></div>
+                                <div class="col-6"><div class="mkt-box"><div class="mkt-title">결제수 합계</div><div class="mkt-value text-danger" id="valPayments">0</div></div></div>
+                            </div>
+                            <div class="flex-grow-1 d-flex flex-column justify-content-center">
+                                <h6 class="text-white fw-bold mb-3 text-center border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;">작품별 광고 볼륨 비중</h6>
+                                <div class="pie-container" style="position: relative; width: 100%; height: 180px;"><canvas id="pieChartProject"></canvas></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="glass-card mb-5 border-top-0" style="border-top: 4px solid #4285F4 !important;">
-            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 border-bottom pb-3 gap-2" style="border-color: rgba(255,255,255,0.1) !important;">
-                <h5 class="mb-0 fw-bold text-white"><i class="fas fa-database me-2" style="color:#4285F4;"></i>Animation Platform Data</h5>
-            </div>
-            <div class="table-responsive">
-                <table class="looker-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 35%;">소설 명</th>
-                            <th style="width: 20%;">회원 조회수</th>
-                            <th style="width: 20%;">비회원 조회수</th>
-                            <th style="width: 25%;">총 조회수 (Total)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="platformDataTbody"></tbody>
-                </table>
+
+        <div id="section-platform" class="pt-5 mb-5 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+            <h5 class="fw-bold text-white mb-4"><i class="fas fa-database me-2" style="color:#4285F4;"></i>플랫폼 지표 분석 (데이터 연동)</h5>
+            
+            <div class="glass-card p-0 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="looker-table mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 35%; padding-left:24px;">소설 명</th>
+                                <th style="width: 20%;">회원 조회수</th>
+                                <th style="width: 20%;">비회원 조회수</th>
+                                <th style="width: 25%; padding-right:24px;">총 조회수 (Total)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="platformDataTbody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 mt-5">
-            <h5 class="fw-bold text-white mb-0"><i class="fas fa-film me-2 text-primary"></i>세부 작품별 공정 현황 카드</h5>
-        </div>
-        
-        <div class="row g-4 mb-4" id="projectCardsContainer"></div>
     </div>
 </div>
 
@@ -243,10 +254,10 @@
                     <table class="looker-table">
                         <thead style="position: sticky; top: 0; background: #1e293b; z-index: 10;">
                             <tr>
-                                <th style="width: 35%;">novel_name</th>
+                                <th style="width: 35%; padding-left:24px;">novel_name</th>
                                 <th style="width: 15%; text-align: left;">epi_num</th>
                                 <th style="width: 35%; text-align: right;">total_view</th>
-                                <th style="width: 15%; text-align: right;">Retention</th>
+                                <th style="width: 15%; text-align: right; padding-right:24px;">Retention</th>
                             </tr>
                         </thead>
                         <tbody id="episodeDataTbody"></tbody>
@@ -326,7 +337,7 @@
                                     </div>
                                 </div>
                                 <div class="p-3 bg-dark bg-opacity-25 border rounded mb-3" style="border-color: rgba(255,255,255,0.05) !important;">
-                                    <p class="mb-0 text-muted small"><i class="fas fa-info-circle me-1"></i> 토글 스위치를 클릭하여 회차별 완료된 공정을 체크하세요. 화면 하단 카드의 [완료/진행 회차] 현황에 즉각 분리 반영됩니다.</p>
+                                    <p class="mb-0 text-muted small"><i class="fas fa-info-circle me-1"></i> 토글 스위치를 클릭하여 회차별 완료된 공정을 체크하세요. 메인 카드의 [완료/진행 회차] 영역에 즉시 분리 반영됩니다.</p>
                                 </div>
                                 <div id="episodeListContainer" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
                                     </div>
@@ -370,7 +381,7 @@
             
             <div class="modal-footer bg-dark bg-opacity-25 d-flex justify-content-between">
                 <button type="button" class="btn btn-secondary fw-medium me-2" data-bs-dismiss="modal">닫기</button>
-                <button type="button" class="btn btn-primary px-4 fw-bold" onclick="saveManualData()"><i class="fas fa-save me-2"></i>화면에 즉시 반영</button>
+                <button type="button" class="btn btn-primary px-4 fw-bold" onclick="saveManualData()"><i class="fas fa-save me-2"></i>수동 데이터 저장 및 화면 반영</button>
             </div>
         </div>
     </div>
@@ -408,7 +419,7 @@
         Chart.defaults.color = '#cbd5e1'; 
         Chart.defaults.font.family = 'Pretendard';
         
-        // 차트 초기화 (Null 체크 방어코드 추가)
+        // 차트 초기화 (강력한 Null 체크)
         const perfCtx = document.getElementById('performanceChart');
         if (perfCtx) {
             perfChart = new Chart(perfCtx.getContext('2d'), {
@@ -427,15 +438,26 @@
 
         document.querySelectorAll('.global-date').forEach(el => el.addEventListener('change', renderData));
         
+        // 페이지 로드 시 수동 패널 회차 데이터 선제적 렌더링 강제 호출
         populateSelectors();
-        fetchAllSheetData(); 
+        loadProjectData(); 
         
-        // 모달 열릴 때 회차 설정 강제 로드
-        document.getElementById('manualInputModal').addEventListener('shown.bs.modal', loadProjectData);
+        fetchAllSheetData(); 
+    });
+
+    // 사이드바 스크롤 스파이 (선택사항)
+    const navLinks = document.querySelectorAll('.sidebar .nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            if(this.getAttribute('href') !== '#') {
+                navLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+            }
+        });
     });
 
     // ============================================================================
-    // 2. 구글 시트 연동 및 마케팅/플랫폼 데이터 계산 (충돌 방지 처리)
+    // 2. 구글 시트 연동 및 마케팅/플랫폼 데이터 계산 (에러 방지 로직)
     // ============================================================================
     async function fetchAllSheetData() {
         const overlay = document.getElementById('loadingOverlay');
@@ -493,7 +515,7 @@
             }
         });
 
-        // 💥 방어코드: HTML이 Iframe 등으로 교체되어 요소가 없을 경우 에러 무시
+        // 요소가 존재할 때만 텍스트 입력 (에러 방지)
         if (document.getElementById('valAds')) document.getElementById('valAds').innerText = ads.toLocaleString();
         if (document.getElementById('valClicks')) document.getElementById('valClicks').innerText = click.toLocaleString();
         if (document.getElementById('valSignups')) document.getElementById('valSignups').innerText = sign.toLocaleString();
@@ -515,6 +537,20 @@
             perfChart.data.datasets[0] = { label: '총 조회수', data: dates.map(d=>tMap[d].v), borderColor: '#818cf8', backgroundColor: 'rgba(129,140,248,0.1)', borderWidth: 3, tension: 0.4, fill: true, yAxisID: 'y' };
             perfChart.data.datasets[1] = { label: '구독 전환', data: dates.map(d=>tMap[d].s), borderColor: '#34d399', borderWidth: 3, borderDash: [5,5], tension: 0.4, yAxisID: 'y1' };
             perfChart.update();
+        }
+        
+        // 플랫폼 테이블
+        const tbody = document.getElementById('platformDataTbody');
+        if(tbody) {
+            tbody.innerHTML = '';
+            let pArr = Object.keys(dbProjectStats).map(k => ({name:k, tot:dbProjectStats[k].views, m:0, nm:0})); // m, nm은 간소화
+            pArr.sort((a,b) => b.tot - a.tot);
+            let mTot = Math.max(...pArr.map(d=>d.tot), 1);
+
+            pArr.forEach(d => {
+                let tPct=(d.tot/mTot)*100;
+                tbody.insertAdjacentHTML('beforeend', `<tr><td class="fw-bold" style="padding-left:24px;">${d.name}</td><td>-</td><td>-</td><td><div class="view-bar-container" style="justify-content:flex-start; padding-right:24px;"><span class="view-text text-start text-info" style="width:50px;">${d.tot.toLocaleString()}</span><div class="bar-purple" style="width:${tPct}%;"></div></div></td></tr>`);
+            });
         }
 
         renderProjectCards(); 
@@ -565,7 +601,6 @@
             for(let i=0; i<data.eps; i++) {
                 let p = data.progress[i];
                 totalChecks += p;
-                
                 if(p === 4) {
                     completedEps.push(i + 1);
                 } else if (p > 0 && inProgressEp === -1) {
@@ -580,7 +615,7 @@
             const progressPct = ((totalChecks / (data.eps * 4)) * 100).toFixed(1);
             totalProgSum += parseFloat(progressPct);
             
-            // 완료 / 진행중 UI 텍스트 포맷팅
+            // 완료 / 진행중 UI 텍스트 포맷팅 (신규)
             let compText = completedEps.length > 0 ? `1~${completedEps.length}화 완료` : '완료된 회차 없음';
             if (completedEps.length === data.eps) compText = '전체 회차 완료';
 
@@ -660,11 +695,11 @@
                     <div class="status-split-box">
                         <div class="status-split-item">
                             <span class="text-success small fw-bold mb-1"><i class="fas fa-check-double me-1"></i>완료된 회차 누적</span>
-                            <strong class="text-white">${compText}</strong>
+                            <strong class="text-white fs-6">${compText}</strong>
                         </div>
                         <div class="status-split-item">
                             <span class="text-primary small fw-bold mb-1"><i class="fas fa-spinner fa-spin me-1"></i>현재 작업 타겟</span>
-                            <strong class="text-white">${ingText}</strong>
+                            <strong class="text-white fs-6">${ingText}</strong>
                         </div>
                     </div>
 
@@ -696,7 +731,7 @@
     }
 
     // ============================================================================
-    // 4. 수동 관리 패널 로직 (세부 공정 세팅 완벽 복구)
+    // 4. 수동 관리 패널 로직 (세부 공정 세팅 완벽 복구 및 렌더링 보장)
     // ============================================================================
     function loadProjectData() {
         const pSel = document.getElementById('projectSelector');
@@ -705,24 +740,24 @@
         const d = mData[id];
         if(!d) return;
 
-        document.getElementById('updateStudio').value = d.studio;
-        document.getElementById('updateTeamPD').value = d.pd;
-        document.getElementById('updateMembers').value = d.members;
-        document.getElementById('updateRatio').value = d.ratio;
+        if(document.getElementById('updateStudio')) document.getElementById('updateStudio').value = d.studio;
+        if(document.getElementById('updateTeamPD')) document.getElementById('updateTeamPD').value = d.pd;
+        if(document.getElementById('updateMembers')) document.getElementById('updateMembers').value = d.members;
+        if(document.getElementById('updateRatio')) document.getElementById('updateRatio').value = d.ratio;
         
-        document.getElementById('toggleApi').checked = d.useApi;
-        document.getElementById('toggleOutsource').checked = d.useOut;
-        document.getElementById('apiCostInput').value = d.api || '';
-        document.getElementById('outsourceCostInput').value = d.out || '';
-        document.getElementById('wrapApiCost').style.display = d.useApi ? 'flex' : 'none';
-        document.getElementById('wrapOutsourceCost').style.display = d.useOut ? 'flex' : 'none';
+        if(document.getElementById('toggleApi')) document.getElementById('toggleApi').checked = d.useApi;
+        if(document.getElementById('toggleOutsource')) document.getElementById('toggleOutsource').checked = d.useOut;
+        if(document.getElementById('apiCostInput')) document.getElementById('apiCostInput').value = d.api || '';
+        if(document.getElementById('outsourceCostInput')) document.getElementById('outsourceCostInput').value = d.out || '';
+        if(document.getElementById('wrapApiCost')) document.getElementById('wrapApiCost').style.display = d.useApi ? 'flex' : 'none';
+        if(document.getElementById('wrapOutsourceCost')) document.getElementById('wrapOutsourceCost').style.display = d.useOut ? 'flex' : 'none';
 
-        document.getElementById('updateTargetCpa').value = d.targetCpa || '';
-        document.getElementById('updateTargetViews').value = d.targetViews || '';
+        if(document.getElementById('updateTargetCpa')) document.getElementById('updateTargetCpa').value = d.targetCpa || '';
+        if(document.getElementById('updateTargetViews')) document.getElementById('updateTargetViews').value = d.targetViews || '';
         
         calcUpdateTotalCost();
         
-        // 💥 회차별 세부 공정 설정 리스트 렌더링 복구
+        // 💥 회차별 세부 공정 설정 리스트 렌더링 강제 수행
         const container = document.getElementById('episodeListContainer');
         if (container) {
             container.innerHTML = ''; 
@@ -881,7 +916,7 @@
                 const ret = retStr === '' ? '-' : retStr + '%';
                 const v = sFloat(d.total_views);
                 const title = i === 0 ? `<div class="fw-bold text-white">${d.novel_name}</div>` : '';
-                tbody.insertAdjacentHTML('beforeend', `<tr><td>${title}</td><td class="text-muted text-start">${d.episode_num} 화</td><td><div class="view-bar-container" style="justify-content:flex-start;"><span class="view-text text-start" style="width:45px;">${v.toLocaleString()}</span><div class="bar-blue" style="width:${(v/maxV)*100}%;"></div></div></td><td class="retention-text">${ret}</td></tr>`);
+                tbody.insertAdjacentHTML('beforeend', `<tr><td style="padding-left:24px;">${title}</td><td class="text-muted text-start">${d.episode_num} 화</td><td><div class="view-bar-container" style="justify-content:flex-start;"><span class="view-text text-start" style="width:45px;">${v.toLocaleString()}</span><div class="bar-blue" style="width:${(v/maxV)*100}%;"></div></div></td><td class="retention-text" style="padding-right:24px;">${ret}</td></tr>`);
             });
         }
         new bootstrap.Modal(document.getElementById('episodeDataModal')).show();
