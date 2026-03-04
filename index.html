@@ -20,6 +20,7 @@
         body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
         .wrapper { display: flex; min-height: 100vh; }
         
+        /* 사이드바 */
         .sidebar { width: 260px; background: #0f172a; border-right: 1px solid var(--border-color); padding: 24px; display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;}
         .main-content { flex: 1; padding: 32px; overflow-y: auto; overflow-x: hidden; }
         .brand-logo { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 30px; line-height: 1.2;}
@@ -31,6 +32,7 @@
         .glass-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; }
         .text-muted { color: var(--text-muted) !important; }
 
+        /* 상단 KPI 카드 */
         .kpi-card { background: linear-gradient(145deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.9) 100%); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px; transition: 0.2s; position: relative; overflow: hidden; }
         .kpi-card::before { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px; border-radius: 4px 0 0 4px; }
         .kpi-card.blue::before { background-color: #3b82f6; } .kpi-card.yellow::before { background-color: #eab308; } .kpi-card.green::before { background-color: #10b981; } .kpi-card.purple::before { background-color: #8b5cf6; }
@@ -104,8 +106,9 @@
             <li class="nav-item"><a class="nav-link" href="#section-marketing"><i class="fas fa-bullseye me-3"></i> 마케팅 성과 리포트</a></li>
             <li class="nav-item"><a class="nav-link" href="#section-platform"><i class="fas fa-database me-3"></i> 플랫폼 지표 분석</a></li>
             
-            <li class="nav-item mt-4 mb-2"><span class="text-muted small fw-bold px-3">DB 매니지먼트</span></li>
-            <li class="nav-item"><a class="nav-link text-white" href="#" data-bs-toggle="modal" data-bs-target="#manualInputModal" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);"><i class="fas fa-cloud-upload-alt me-3 text-success"></i> 시트 DB 동기화 패널</a></li>
+            <li class="nav-item mt-4 mb-2"><span class="text-muted small fw-bold px-3">매니지먼트</span></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#" data-bs-toggle="modal" data-bs-target="#manualInputModal" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);"><i class="fas fa-tasks me-3 text-success"></i> 수동 공정/비용 관리</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-cog me-3"></i> 시스템 설정</a></li>
         </ul>
     </div>
 
@@ -124,7 +127,7 @@
                     <input type="date" id="globalEnd" class="global-date">
                 </div>
                 <button class="btn btn-primary fw-bold px-3 shadow-sm" onclick="fetchAllSheetData()"><i class="fas fa-sync-alt me-2"></i>DB 갱신</button>
-                <button class="btn btn-outline-light fw-bold px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#manualInputModal"><i class="fas fa-database me-2"></i>데이터 제어 패널</button>
+                <button class="btn btn-outline-light fw-bold px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#manualInputModal"><i class="fas fa-edit me-2"></i>수동 패널 열기</button>
             </div>
         </header>
 
@@ -137,14 +140,14 @@
                         <div class="d-flex align-items-center gap-3 w-100 mb-3">
                             <div class="kpi-icon blue"><i class="fas fa-wallet"></i></div>
                             <div>
-                                <div class="text-muted small fw-bold mb-1">현재 진행 총 제작 투입비 (DB)</div>
+                                <div class="text-muted small fw-bold mb-1">현재 진행 총 제작 투입비 (수동)</div>
                                 <h4 class="fw-bold text-white mb-0" id="topTotalCost">₩ 0</h4>
                             </div>
                         </div>
                         <div class="w-100 d-flex justify-content-between border-top pt-2" style="border-color: rgba(255,255,255,0.1) !important; font-size: 0.75rem;">
-                            <div><span class="text-muted">국내인건비:</span> <strong class="text-white" id="topCostDom">₩0</strong></div>
-                            <div><span class="text-muted">PH인건비:</span> <strong class="text-white" id="topCostPh">₩0</strong></div>
-                            <div><span class="text-muted">API/외주:</span> <strong class="text-white" id="topCostOther">₩0</strong></div>
+                            <div><span class="text-muted">국내:</span> <strong class="text-white" id="topCostDom">₩0</strong></div>
+                            <div><span class="text-muted">PH:</span> <strong class="text-white" id="topCostPh">₩0</strong></div>
+                            <div><span class="text-muted">외주:</span> <strong class="text-white" id="topCostOther">₩0</strong></div>
                         </div>
                     </div>
                 </div>
@@ -177,13 +180,12 @@
                 </div>
             </div>
 
-            <div class="row g-4" id="projectCardsContainer">
-                <div class="col-12 text-center text-muted py-5"><i class="fas fa-spinner fa-spin me-2"></i>구글 시트에서 프로젝트 데이터를 불러오는 중입니다...</div>
-            </div>
+            <div class="row g-4" id="projectCardsContainer"></div>
         </div>
 
         <div id="section-marketing" class="pt-5 mb-5 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
             <h5 class="fw-bold text-white mb-4"><i class="fas fa-bullseye me-2 text-warning"></i>마케팅 성과 리포트 (데이터 연동)</h5>
+            
             <div class="row g-4">
                 <div class="col-xl-7 col-xxl-8">
                     <div class="glass-card h-100 d-flex flex-column">
@@ -216,6 +218,7 @@
 
         <div id="section-platform" class="pt-5 mb-5 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
             <h5 class="fw-bold text-white mb-4"><i class="fas fa-database me-2" style="color:#4285F4;"></i>플랫폼 지표 분석 (데이터 연동)</h5>
+            
             <div class="glass-card p-0 overflow-hidden">
                 <div class="table-responsive">
                     <table class="looker-table mb-0">
@@ -261,17 +264,17 @@
     </div>
 </div>
 
-<div class="modal fade" id="manualInputModal" tabindex="-1" data-bs-backdrop="static">
+<div class="modal fade" id="manualInputModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-dark bg-opacity-50">
-                <h5 class="modal-title fw-bold text-white mb-0"><i class="fas fa-cloud-upload-alt me-2 text-primary"></i>구글 시트 DB 실시간 동기화 패널</h5>
+                <h5 class="modal-title fw-bold text-white mb-0"><i class="fas fa-sliders-h me-2 text-primary"></i>대시보드 통합 관리 (프로젝트 & 비용)</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             
             <div class="modal-body p-4 p-md-5" style="max-height: 75vh; overflow-y: auto;">
                 <ul class="nav nav-pills custom-nav-pills mb-4 pb-3 border-bottom" style="border-color: rgba(255,255,255,0.05) !important;" role="tablist">
-                    <li class="nav-item"><button class="nav-link active px-4 py-2" data-bs-toggle="pill" data-bs-target="#tab-update" type="button"><i class="fas fa-edit me-2"></i>기존 작품 데이터 수정</button></li>
+                    <li class="nav-item"><button class="nav-link active px-4 py-2" data-bs-toggle="pill" data-bs-target="#tab-update" type="button"><i class="fas fa-edit me-2"></i>기존 작품 업데이트</button></li>
                     <li class="nav-item"><button class="nav-link px-4 py-2" data-bs-toggle="pill" data-bs-target="#tab-new" type="button"><i class="fas fa-plus-square me-2"></i>신규 작품 등록</button></li>
                 </ul>
 
@@ -279,22 +282,31 @@
                     <div class="tab-pane fade show active" id="tab-update">
                         <div class="row g-4">
                             <div class="col-md-12">
-                                <label class="modal-label text-warning">DB 업데이트 할 작품 선택</label>
+                                <label class="modal-label text-warning">업데이트 할 작품 선택</label>
                                 <select class="form-select fw-bold fs-5 py-2 text-white" id="projectSelector" onchange="loadProjectData()"></select>
                             </div>
                             
-                            <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-info-circle me-2 text-secondary"></i>작품 기본 정보 관리</h6></div>
+                            <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-info-circle me-2 text-secondary"></i>작품 기본 정보 수정</h6></div>
                             <div class="col-md-6 mt-2">
-                                <label class="modal-label">작품명 (시트의 novel_name과 일치해야 실적 연동됨)</label>
+                                <label class="modal-label">작품명 수정 (시트의 novel_name과 일치해야 실적 연동됨)</label>
                                 <input type="text" class="form-control fw-bold text-white" id="updateProjectName">
                             </div>
                             <div class="col-md-6 mt-2">
-                                <label class="modal-label">총 기획 회차 동적 변경</label>
+                                <label class="modal-label">총 기획 회차 (에피소드) 동적 변경</label>
                                 <div class="input-group">
                                     <input type="number" class="form-control fw-bold text-white" id="updateProjectEps" onchange="updateEpisodeCount()">
                                     <span class="input-group-text bg-dark border-secondary text-muted">화</span>
                                 </div>
-                                <span class="text-muted" style="font-size: 0.75rem; margin-top: 4px; display: block;">※ 회차 숫자 변경 시 하단 세부 공정 목록이 즉시 연동됩니다.</span>
+                            </div>
+                            
+                            <div class="col-md-12 mt-2">
+                                <label class="modal-label">썸네일 이미지 교체 (파일 업로드)</label>
+                                <input type="file" id="updateProjectImgFile" class="form-control fw-bold text-white" accept="image/*" onchange="previewImage(this, 'updateImgPreview')">
+                                <div class="mt-2 d-flex align-items-center gap-3">
+                                    <span class="text-muted small">현재/미리보기:</span>
+                                    <img id="updateImgPreview" src="" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; display: none;">
+                                </div>
+                                <input type="hidden" id="updateProjectImg">
                             </div>
 
                             <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-users me-2 text-info"></i>인력 및 비용 세팅 (스튜디오 혼합 지정 가능)</h6></div>
@@ -363,9 +375,6 @@
                                         <span class="text-white small me-2">자동 합산 진행률:</span><strong class="text-success fs-5" id="totalProgressBar">0%</strong>
                                     </div>
                                 </div>
-                                <div class="p-3 bg-dark bg-opacity-25 border rounded mb-3" style="border-color: rgba(255,255,255,0.05) !important;">
-                                    <p class="mb-0 text-muted small"><i class="fas fa-info-circle me-1"></i> 토글 스위치를 클릭하여 회차별 완료된 공정을 체크하세요. 저장 시 구글 시트에 기록되며 메인 카드에 분리 반영됩니다.</p>
-                                </div>
                                 <div id="episodeListContainer" style="max-height: 400px; overflow-y: auto; padding-right: 10px;"></div>
                             </div>
                         </div>
@@ -376,9 +385,15 @@
                             <div class="col-12"><h6 class="fw-bold text-white mb-0 border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;">작품 기본 정보</h6></div>
                             <div class="col-md-6"><label class="modal-label">작품 고유 ID (영/숫자)</label><input type="text" id="newProjectId" class="form-control fw-bold text-white" placeholder="예: nv3"></div>
                             <div class="col-md-6"><label class="modal-label">신규 작품명</label><input type="text" id="newProjectName" class="form-control fw-bold text-white"></div>
-                            <div class="col-md-6"><label class="modal-label">썸네일 이미지 URL</label><input type="text" id="newProjectImg" class="form-control fw-bold text-white" placeholder="https://..."></div>
                             <div class="col-md-6"><label class="modal-label">총 기획 회차</label><div class="input-group"><input type="number" id="newProjectEps" class="form-control fw-bold text-white" value="12"><span class="input-group-text bg-dark border-secondary text-muted">화</span></div></div>
                             
+                            <div class="col-md-6">
+                                <label class="modal-label">썸네일 파일 업로드</label>
+                                <input type="file" id="newProjectImgFile" class="form-control fw-bold text-white" accept="image/*" onchange="previewImage(this, 'newImgPreview')">
+                                <img id="newImgPreview" src="" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; display:none; margin-top:10px;">
+                                <input type="hidden" id="newProjectImg">
+                            </div>
+
                             <div class="col-12 mt-4"><h6 class="fw-bold text-white mb-0 border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;">제작 파이프라인 및 인건비 설계</h6></div>
                             <div class="col-md-4 mt-2"><label class="modal-label">담당 팀 및 PD</label><input type="text" id="newProjectPD" class="form-control fw-bold text-white"></div>
                             <div class="col-md-8 mt-2"><label class="modal-label text-danger">총 기본 인건비 산출액</label><input type="text" id="newLaborResult" class="form-control text-danger fw-bold" readonly style="background: rgba(239, 68, 68, 0.1) !important;"></div>
@@ -428,10 +443,8 @@
     // ============================================================================
     // 1. 연동 API 및 전역 상태 관리
     // ============================================================================
-    // ★ 귀하의 구글 앱스 스크립트 웹앱 URL 입력 (doPost 코드가 포함된 새 버전)
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6DX4XNhxa7ORDJbZd32Hv6fx3PQbiJWOuCwBsBEFVj-mitSCkq6Hq54nWCkZtNOG0/exec';
     
-    // mData는 이제 하드코딩이 아닌, 시트에서 빈 객체로 시작하여 동적으로 채워집니다.
     let mData = {};
     let dbData = { marketing: [], platform: [], episode: [], project: [] };
     let dbProjectStats = {}; 
@@ -466,24 +479,12 @@
 
         document.querySelectorAll('.global-date').forEach(el => el.addEventListener('change', renderData));
         
-        // 페이지 로드 시 구글 시트에서 모든 탭 데이터 Fetch
         fetchAllSheetData(); 
-        
         document.getElementById('manualInputModal').addEventListener('shown.bs.modal', loadProjectData);
     });
 
-    const navLinks = document.querySelectorAll('.sidebar .nav-link');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            if(this.getAttribute('href') !== '#') {
-                navLinks.forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
-            }
-        });
-    });
-
     // ============================================================================
-    // 2. 구글 시트 연동 (GET)
+    // 2. 구글 시트 연동 (GET & 회원/비회원 데이터 연산 보완)
     // ============================================================================
     async function fetchAllSheetData() {
         const overlay = document.getElementById('loadingOverlay');
@@ -492,33 +493,26 @@
             const response = await fetch(SCRIPT_URL);
             dbData = await response.json();
             
-            // 시트에서 가져온 Project_Data를 로컬 mData 객체로 변환
             mData = {};
             if(dbData.project && dbData.project.length > 0) {
                 dbData.project.forEach(row => {
                     if(row.id) {
                         mData[row.id] = {
-                            name: row.name,
-                            studio: row.studio || '',
-                            pd: row.pd || '',
-                            domM: parseFloat(row.domM) || 0,
-                            domR: parseFloat(row.domR) || 0,
-                            phM: parseFloat(row.phM) || 0,
-                            phR: parseFloat(row.phR) || 0,
+                            name: row.name, pd: row.pd || '',
+                            domM: parseFloat(row.domM) || 0, domR: parseFloat(row.domR) || 0,
+                            phM: parseFloat(row.phM) || 0, phR: parseFloat(row.phR) || 0,
                             useApi: row.useApi === true || row.useApi === 'TRUE' || row.useApi === 'true',
                             api: parseFloat(row.api) || 0,
                             useOut: row.useOut === true || row.useOut === 'TRUE' || row.useOut === 'true',
                             out: parseFloat(row.out) || 0,
                             eps: parseInt(row.eps) || 12,
-                            targetCpa: parseFloat(row.targetCpa) || 0,
-                            targetViews: parseFloat(row.targetViews) || 0,
+                            targetCpa: parseFloat(row.targetCpa) || 0, targetViews: parseFloat(row.targetViews) || 0,
                             img: row.img || 'https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&q=80&w=100',
                             progress: (typeof row.progress === 'string') ? JSON.parse(row.progress) : (row.progress || [])
                         };
                     }
                 });
             } else {
-                // 시트에 데이터가 전혀 없을 때 기본값 제공
                 mData['nv1'] = { name: '아카데미 플레이어를...', pd: '성현승 PD', domM: 3, domR: 1.0, phM: 0, phR: 0, useApi: true, api: 450000, useOut: false, out: 0, eps: 12, progress: [4,4,4,4,4,2,0,0,0,0,0,0], targetCpa: 2500, targetViews: 500000, img: 'https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&q=80&w=100' };
             }
 
@@ -526,7 +520,6 @@
             renderData();
         } catch (error) {
             console.error('시트 로드 에러:', error);
-            alert("데이터를 불러오는데 실패했습니다. 네트워크를 확인하세요.");
         } finally {
             if(overlay) overlay.style.display = 'none';
         }
@@ -551,24 +544,29 @@
             if(dObj >= gs && dObj <= ge) {
                 ads += rAds; click += rClick; sign += rSign; pay += rPay; tmkt += rAds;
                 if(pMap[name]) pMap[name]+=rAds; else pMap[name]=rAds;
-                if(!dbProjectStats[name]) dbProjectStats[name] = { ads: 0, signups: 0, views: 0 };
+                if(!dbProjectStats[name]) dbProjectStats[name] = { ads: 0, signups: 0, views: 0, mem: 0, non: 0 };
                 dbProjectStats[name].ads += rAds;
                 dbProjectStats[name].signups += rSign;
             }
         });
 
+        // ★ 회원/비회원 조회수 정상 합산 로직 복구
         (dbData.platform || []).forEach(row => {
             let dObj = new Date(row.date);
             if(isNaN(dObj.getTime())) return;
             let name = row.novel_name || '기타';
             let rTot = sFloat(row.total_views), rSub = sFloat(row.sub_conversions);
+            let rMem = sFloat(row.member_views), rNon = sFloat(row.non_member_views);
             
             if(dObj >= gs && dObj <= ge) {
                 let k = dObj.toISOString().split('T')[0];
                 if(!tMap[k]) tMap[k] = {v:0, s:0};
                 tMap[k].v += rTot; tMap[k].s += rSub;
-                if(!dbProjectStats[name]) dbProjectStats[name] = { ads: 0, signups: 0, views: 0 };
+                
+                if(!dbProjectStats[name]) dbProjectStats[name] = { ads: 0, signups: 0, views: 0, mem: 0, non: 0 };
                 dbProjectStats[name].views += rTot;
+                dbProjectStats[name].mem += rMem;
+                dbProjectStats[name].non += rNon;
             }
         });
 
@@ -595,23 +593,35 @@
             perfChart.update();
         }
         
+        // 테이블: 회원/비회원 분리 표시 적용
         const tbody = document.getElementById('platformDataTbody');
         if(tbody) {
             tbody.innerHTML = '';
-            let pArr = Object.keys(dbProjectStats).map(k => ({name:k, tot:dbProjectStats[k].views, m:0, nm:0})); 
+            let pArr = Object.keys(dbProjectStats).map(k => ({
+                name: k, 
+                tot: dbProjectStats[k].views, 
+                m: dbProjectStats[k].mem || 0, 
+                nm: dbProjectStats[k].non || 0
+            })); 
             pArr.sort((a,b) => b.tot - a.tot);
             let mTot = Math.max(...pArr.map(d=>d.tot), 1);
 
             pArr.forEach(d => {
-                let tPct=(d.tot/mTot)*100;
-                tbody.insertAdjacentHTML('beforeend', `<tr><td class="fw-bold" style="padding-left:24px;">${d.name}</td><td>-</td><td>-</td><td><div class="view-bar-container" style="justify-content:flex-start; padding-right:24px;"><span class="view-text text-start text-info" style="width:50px;">${d.tot.toLocaleString()}</span><div class="bar-purple" style="width:${tPct}%;"></div></div></td></tr>`);
+                let mPct=(d.m/mTot)*100, nmPct=(d.nm/mTot)*100, tPct=(d.tot/mTot)*100;
+                tbody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td class="fw-bold" style="padding-left:24px;">${d.name}</td>
+                    <td><div class="view-bar-container" style="justify-content:flex-start;"><span class="view-text text-start" style="width:45px;">${d.m.toLocaleString()}</span><div class="bar-blue" style="width:${mPct}%;"></div></div></td>
+                    <td><div class="view-bar-container" style="justify-content:flex-start;"><span class="view-text text-start" style="width:45px;">${d.nm.toLocaleString()}</span><div class="bar-orange" style="width:${nmPct}%;"></div></div></td>
+                    <td><div class="view-bar-container" style="justify-content:flex-start; padding-right:24px;"><span class="view-text text-start text-info" style="width:50px;">${d.tot.toLocaleString()}</span><div class="bar-purple" style="width:${tPct}%;"></div></div></td>
+                </tr>`);
             });
         }
         renderProjectCards(); 
     }
 
     // ============================================================================
-    // 3. UI 렌더링 (세부 작품별 현황 카드 및 스튜디오 비용 합산)
+    // 3. UI 렌더링 (세부 작품별 현황 카드)
     // ============================================================================
     function populateSelectors() {
         const pSel = document.getElementById('projectSelector');
@@ -627,36 +637,19 @@
         if(!container) return;
         container.innerHTML = '';
         
-        if (Object.keys(mData).length === 0) {
-            container.innerHTML = '<div class="col-12 text-center text-muted py-5">현재 진행 중인 프로젝트가 없습니다. 수동 패널에서 등록해주세요.</div>';
-            if (document.getElementById('topTotalCost')) document.getElementById('topTotalCost').innerText = "₩ 0";
-            if (document.getElementById('topCostDom')) document.getElementById('topCostDom').innerText = "₩ 0";
-            if (document.getElementById('topCostPh')) document.getElementById('topCostPh').innerText = "₩ 0";
-            if (document.getElementById('topCostOther')) document.getElementById('topCostOther').innerText = "₩ 0";
-            if (document.getElementById('topProjectStatus')) document.getElementById('topProjectStatus').innerText = `0개 / 0%`;
-            return;
-        }
-
-        let globalTotalCost = 0;
-        let costDom = 0;
-        let costPh = 0;
-        let costOther = 0;
-        let projCount = 0;
-        let totalProgSum = 0;
+        let globalTotalCost = 0, costDom = 0, costPh = 0, costOther = 0;
+        let projCount = 0, totalProgSum = 0;
 
         for (const [id, data] of Object.entries(mData)) {
             projCount++;
             
-            // 국내/필리핀 혼합 비용 분리 합산
             const domLabor = (data.domM || 0) * (data.domR || 0) * 2500000;
             const phLabor = (data.phM || 0) * (data.phR || 0) * 600000;
             const laborCost = domLabor + phLabor;
             const totalCost = laborCost + data.api + data.out;
             
             globalTotalCost += totalCost;
-            costDom += domLabor;
-            costPh += phLabor;
-            costOther += data.api + data.out;
+            costDom += domLabor; costPh += phLabor; costOther += data.api + data.out;
             
             let studioLabel = '';
             if (data.domM > 0 && data.phM == 0) studioLabel = '국내 AI 아트사업팀';
@@ -670,10 +663,7 @@
             let memStr = membersLabel.join(' + ');
             if (!memStr) memStr = '인력 없음';
 
-            let totalChecks = 0;
-            let completedEps = [];
-            let inProgressEp = -1;
-            let inProgressStatus = 0;
+            let totalChecks = 0, completedEps = [], inProgressEp = -1, inProgressStatus = 0;
 
             for(let i=0; i<data.eps; i++) {
                 let p = data.progress[i];
@@ -690,17 +680,13 @@
             if (completedEps.length === data.eps) compText = '전체 회차 완료';
 
             let ingText = '';
-            let s1='wait', i1='far fa-circle', t1='콘티 대기';
-            let s2='wait', i2='far fa-circle', t2='이미지 대기';
-            let s3='wait', i3='far fa-circle', t3='영상 대기';
-            let s4='wait', i4='far fa-circle', t4='업로드 대기';
+            let s1='wait', i1='far fa-circle', t1='콘티 대기', s2='wait', i2='far fa-circle', t2='이미지 대기';
+            let s3='wait', i3='far fa-circle', t3='영상 대기', s4='wait', i4='far fa-circle', t4='업로드 대기';
 
             if (completedEps.length === data.eps) {
                 ingText = '진행중인 회차 없음 (완료됨)';
-                s1='done'; i1='fa-check-circle'; t1='콘티 완료';
-                s2='done'; i2='fa-check-circle'; t2='이미지 완료';
-                s3='done'; i3='fa-check-circle'; t3='영상 완료';
-                s4='done'; i4='fa-check-circle'; t4='업로드 완료';
+                s1='done'; i1='fa-check-circle'; t1='콘티 완료'; s2='done'; i2='fa-check-circle'; t2='이미지 완료';
+                s3='done'; i3='fa-check-circle'; t3='영상 완료'; s4='done'; i4='fa-check-circle'; t4='업로드 완료';
             } else {
                 ingText = `<span class="text-primary">${inProgressEp}화</span> 공정 진행 중`;
                 s1 = inProgressStatus >= 1 ? 'done' : 'wait'; i1 = inProgressStatus >= 1 ? 'fa-check-circle' : 'far fa-circle'; t1 = inProgressStatus >= 1 ? '콘티 완료' : '콘티 진행';
@@ -795,7 +781,6 @@
             container.insertAdjacentHTML('beforeend', html);
         }
         
-        // 상단 스튜디오별 분리 합산 데이터 적용
         if (document.getElementById('topTotalCost')) document.getElementById('topTotalCost').innerText = "₩ " + globalTotalCost.toLocaleString();
         if (document.getElementById('topCostDom')) document.getElementById('topCostDom').innerText = "₩" + costDom.toLocaleString();
         if (document.getElementById('topCostPh')) document.getElementById('topCostPh').innerText = "₩" + costPh.toLocaleString();
@@ -806,9 +791,46 @@
     }
 
     // ============================================================================
-    // 4. 수동 관리 패널 (구글 시트 POST 연동)
+    // 4. 수동 관리 패널 (구글 시트 POST 연동 + 이미지 파일 업로드 추가)
     // ============================================================================
     
+    // 이미지 미리보기 함수
+    function previewImage(input, previewId) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById(previewId).src = e.target.result;
+                document.getElementById(previewId).style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // 이미지를 드라이브로 POST 전송하는 함수
+    async function uploadImageToDrive(fileInputId) {
+        const fileInput = document.getElementById(fileInputId);
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) return null; 
+
+        const file = fileInput.files[0];
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64Data = e.target.result;
+                try {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify({ action: 'uploadImage', data: base64Data, filename: file.name })
+                    });
+                    const result = await response.json();
+                    if (result.status === 'success') resolve(result.url); 
+                    else reject(result.message);
+                } catch (err) { reject(err); }
+            };
+            reader.readAsDataURL(file); 
+        });
+    }
+
     function syncCheckboxesToArray(d) {
         const rows = document.querySelectorAll('.ep-row');
         rows.forEach((row, i) => {
@@ -824,7 +846,6 @@
         });
     }
 
-    // 회차 갯수 동적 변경 핸들러
     window.updateEpisodeCount = function() {
         const pSel = document.getElementById('projectSelector');
         if(!pSel) return;
@@ -877,8 +898,16 @@
 
         if(document.getElementById('updateProjectName')) document.getElementById('updateProjectName').value = d.name;
         if(document.getElementById('updateProjectEps')) document.getElementById('updateProjectEps').value = d.eps;
-        if(document.getElementById('updateTeamPD')) document.getElementById('updateTeamPD').value = d.pd;
         
+        // 썸네일 미리보기 리셋 및 초기화
+        if(document.getElementById('updateProjectImgFile')) document.getElementById('updateProjectImgFile').value = '';
+        if(document.getElementById('updateProjectImg')) document.getElementById('updateProjectImg').value = d.img || '';
+        if(document.getElementById('updateImgPreview')) {
+            document.getElementById('updateImgPreview').src = d.img || '';
+            document.getElementById('updateImgPreview').style.display = d.img ? 'block' : 'none';
+        }
+
+        if(document.getElementById('updateTeamPD')) document.getElementById('updateTeamPD').value = d.pd;
         if(document.getElementById('updateDomMembers')) document.getElementById('updateDomMembers').value = d.domM || 0;
         if(document.getElementById('updateDomRatio')) document.getElementById('updateDomRatio').value = d.domR || 1.0;
         if(document.getElementById('updatePhMembers')) document.getElementById('updatePhMembers').value = d.phM || 0;
@@ -932,12 +961,11 @@
         });
     }
 
-    // ★ 구글 시트로 POST 전송하는 함수
     async function sendPostRequest(action, payloadObj) {
         try {
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'text/plain' }, // CORS 방지
+                headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify({ action: action, payload: payloadObj })
             });
             const result = await response.json();
@@ -945,12 +973,10 @@
             return true;
         } catch (error) {
             console.error("DB 기록 실패:", error);
-            alert("DB 기록에 실패했습니다. 인터넷 연결을 확인하세요.");
             return false;
         }
     }
 
-    // 3. 작품 영구 삭제 로직 (DB 연동)
     window.deleteProject = async function() {
         const pSel = document.getElementById('projectSelector');
         if(!pSel) return;
@@ -959,8 +985,6 @@
         const projName = mData[id].name;
         
         if(confirm(`정말 [${projName}] 작품을 DB에서 완전히 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
-            
-            // 버튼 로딩 처리
             const btn = document.querySelector('.btn-outline-danger');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>삭제 중...';
@@ -974,24 +998,22 @@
             if(success) {
                 delete mData[id]; 
                 populateSelectors(); 
-                
                 const newId = document.getElementById('projectSelector').value;
-                if(newId) {
-                    loadProjectData();
-                } else {
+                if(newId) { loadProjectData(); } 
+                else {
                     document.getElementById('updateProjectName').value = '';
                     document.getElementById('episodeListContainer').innerHTML = '';
                     document.getElementById('updateTotalCostResult').innerText = "₩ 0";
                 }
-                
-                renderProjectCards();
+                renderData();
                 alert('DB에서 성공적으로 삭제되었습니다.');
                 bootstrap.Modal.getInstance(document.getElementById('manualInputModal')).hide();
+            } else {
+                alert("삭제에 실패했습니다. 다시 시도해주세요.");
             }
         }
     }
 
-    // 데이터 저장 (DB 연동)
     window.saveManualData = async function() {
         const pSel = document.getElementById('projectSelector');
         if(!pSel) return;
@@ -1003,43 +1025,52 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>DB 기록 중...';
         btn.disabled = true;
 
-        mData[id].id = id;
-        mData[id].name = document.getElementById('updateProjectName').value || mData[id].name;
-        const newEps = parseInt(document.getElementById('updateProjectEps').value) || 1;
-        if(mData[id].eps !== newEps) {
+        try {
+            // 🌟 이미지 업로드 먼저 실행 (선택 안 했으면 기존 이미지 유지)
+            let uploadedUrl = await uploadImageToDrive('updateProjectImgFile');
+            if (uploadedUrl) mData[id].img = uploadedUrl;
+
+            mData[id].id = id;
+            mData[id].name = document.getElementById('updateProjectName').value || mData[id].name;
+            const newEps = parseInt(document.getElementById('updateProjectEps').value) || 1;
+            if(mData[id].eps !== newEps) {
+                syncCheckboxesToArray(mData[id]);
+                if(newEps > mData[id].eps) { for(let i=0; i<newEps-mData[id].eps; i++) mData[id].progress.push(0); }
+                else { mData[id].progress = mData[id].progress.slice(0, newEps); }
+                mData[id].eps = newEps;
+            }
+
+            mData[id].pd = document.getElementById('updateTeamPD').value;
+            mData[id].domM = parseFloat(document.getElementById('updateDomMembers').value) || 0;
+            mData[id].domR = parseFloat(document.getElementById('updateDomRatio').value) || 0;
+            mData[id].phM = parseFloat(document.getElementById('updatePhMembers').value) || 0;
+            mData[id].phR = parseFloat(document.getElementById('updatePhRatio').value) || 0;
+            
+            mData[id].useApi = document.getElementById('toggleApi').checked;
+            mData[id].useOut = document.getElementById('toggleOutsource').checked;
+            mData[id].api = mData[id].useApi ? (parseFloat(document.getElementById('apiCostInput').value) || 0) : 0;
+            mData[id].out = mData[id].useOut ? (parseFloat(document.getElementById('outsourceCostInput').value) || 0) : 0;
+            mData[id].targetCpa = parseFloat(document.getElementById('updateTargetCpa').value) || 0;
+            mData[id].targetViews = parseFloat(document.getElementById('updateTargetViews').value) || 0;
+
             syncCheckboxesToArray(mData[id]);
-            if(newEps > mData[id].eps) { for(let i=0; i<newEps-mData[id].eps; i++) mData[id].progress.push(0); }
-            else { mData[id].progress = mData[id].progress.slice(0, newEps); }
-            mData[id].eps = newEps;
-        }
 
-        mData[id].pd = document.getElementById('updateTeamPD').value;
-        mData[id].domM = parseFloat(document.getElementById('updateDomMembers').value) || 0;
-        mData[id].domR = parseFloat(document.getElementById('updateDomRatio').value) || 0;
-        mData[id].phM = parseFloat(document.getElementById('updatePhMembers').value) || 0;
-        mData[id].phR = parseFloat(document.getElementById('updatePhRatio').value) || 0;
-        
-        mData[id].useApi = document.getElementById('toggleApi').checked;
-        mData[id].useOut = document.getElementById('toggleOutsource').checked;
-        mData[id].api = mData[id].useApi ? (parseFloat(document.getElementById('apiCostInput').value) || 0) : 0;
-        mData[id].out = mData[id].useOut ? (parseFloat(document.getElementById('outsourceCostInput').value) || 0) : 0;
-        mData[id].targetCpa = parseFloat(document.getElementById('updateTargetCpa').value) || 0;
-        mData[id].targetViews = parseFloat(document.getElementById('updateTargetViews').value) || 0;
-
-        syncCheckboxesToArray(mData[id]);
-
-        // 구글 시트로 POST
-        const success = await sendPostRequest('save', mData[id]);
-        
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-
-        if(success) {
-            populateSelectors(); 
-            document.getElementById('projectSelector').value = id; 
-            renderData(); 
-            alert('구글 시트 DB에 저장되고 화면에 반영되었습니다.');
-            bootstrap.Modal.getInstance(document.getElementById('manualInputModal')).hide();
+            const success = await sendPostRequest('save', mData[id]);
+            
+            if(success) {
+                populateSelectors(); 
+                document.getElementById('projectSelector').value = id; 
+                renderData(); 
+                alert('구글 시트 DB에 저장되고 화면에 반영되었습니다.');
+                bootstrap.Modal.getInstance(document.getElementById('manualInputModal')).hide();
+            } else {
+                alert("DB 저장에 실패했습니다.");
+            }
+        } catch(e) {
+            alert("업로드 또는 저장 중 오류가 발생했습니다.");
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
     }
 
@@ -1057,43 +1088,53 @@
         const name = document.getElementById('newProjectName').value.trim();
         const pd = document.getElementById('newProjectPD').value.trim();
         const eps = parseInt(document.getElementById('newProjectEps').value) || 12;
-        const img = document.getElementById('newProjectImg').value.trim() || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=100'; 
-
+        
         if(!id || !name || !pd) { alert("필수 항목(ID, 작품명, 담당자)을 모두 입력해주세요."); return; }
         if(mData[id]) { alert("이미 존재하는 작품 ID입니다."); return; }
 
-        const newProjectData = { 
-            id: id, name: name, pd: pd, 
-            domM: parseFloat(document.getElementById('newDomMembers').value)||0, 
-            domR: parseFloat(document.getElementById('newDomRatio').value)||0, 
-            phM: parseFloat(document.getElementById('newPhMembers').value)||0, 
-            phR: parseFloat(document.getElementById('newPhRatio').value)||0, 
-            useApi: false, api: 0, useOut: false, out: 0, 
-            eps: eps, progress: Array(eps).fill(0), img: img,
-            targetCpa: parseFloat(document.getElementById('newTargetCpa').value) || 0,
-            targetViews: parseFloat(document.getElementById('newTargetViews').value) || 0
-        };
-
         const btn = document.querySelector('.btn-success');
         const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>생성 중...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>업로드 및 생성 중...';
         btn.disabled = true;
 
-        const success = await sendPostRequest('save', newProjectData);
+        try {
+            // 🌟 이미지 업로드 실행 (선택 안 했으면 기본 이미지)
+            let uploadedUrl = await uploadImageToDrive('newProjectImgFile');
+            const imgUrl = uploadedUrl || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=100'; 
 
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+            const newProjectData = { 
+                id: id, name: name, pd: pd, 
+                domM: parseFloat(document.getElementById('newDomMembers').value)||0, 
+                domR: parseFloat(document.getElementById('newDomRatio').value)||0, 
+                phM: parseFloat(document.getElementById('newPhMembers').value)||0, 
+                phR: parseFloat(document.getElementById('newPhRatio').value)||0, 
+                useApi: false, api: 0, useOut: false, out: 0, 
+                eps: eps, progress: Array(eps).fill(0), img: imgUrl,
+                targetCpa: parseFloat(document.getElementById('newTargetCpa').value) || 0,
+                targetViews: parseFloat(document.getElementById('newTargetViews').value) || 0
+            };
 
-        if (success) {
-            mData[id] = newProjectData;
-            populateSelectors(); 
-            renderProjectCards();
-            alert("신규 작품이 DB에 등록되고 대시보드에 생성되었습니다!");
-            
-            document.getElementById('newProjectId').value = ''; document.getElementById('newProjectName').value = ''; document.getElementById('newProjectPD').value = ''; document.getElementById('newProjectImg').value = '';
-            document.querySelector('[data-bs-target="#tab-update"]').click();
-            document.getElementById('projectSelector').value = id;
-            loadProjectData();
+            const success = await sendPostRequest('save', newProjectData);
+
+            if (success) {
+                mData[id] = newProjectData;
+                populateSelectors(); 
+                renderData();
+                alert("신규 작품이 DB에 등록되고 대시보드에 생성되었습니다!");
+                
+                document.getElementById('newProjectId').value = ''; document.getElementById('newProjectName').value = ''; document.getElementById('newProjectPD').value = ''; 
+                document.getElementById('newProjectImgFile').value = ''; document.getElementById('newImgPreview').style.display = 'none';
+                document.querySelector('[data-bs-target="#tab-update"]').click();
+                document.getElementById('projectSelector').value = id;
+                loadProjectData();
+            } else {
+                alert("생성에 실패했습니다.");
+            }
+        } catch(e) {
+            alert("처리 중 오류가 발생했습니다.");
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
     }
 
