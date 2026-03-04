@@ -106,9 +106,9 @@
             <div class="d-flex flex-wrap align-items-center gap-3">
                 <div class="panel-date-picker shadow-sm">
                     <span class="text-primary fw-bold me-2" style="font-size:0.75rem;">전역 설정</span>
-                    <input type="date" id="globalStart" class="global-date" value="2026-02-01">
+                    <input type="date" id="globalStart" class="global-date">
                     <span class="text-muted mx-1">~</span>
-                    <input type="date" id="globalEnd" class="global-date" value="2026-02-28">
+                    <input type="date" id="globalEnd" class="global-date">
                 </div>
                 <button class="btn btn-primary fw-bold px-3 shadow-sm" onclick="fetchAllSheetData()"><i class="fas fa-sync-alt me-2"></i>DB 새로고침</button>
                 <button class="btn btn-outline-light fw-bold px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#manualInputModal"><i class="fas fa-sliders-h me-2"></i>수동 관리 패널</button>
@@ -209,7 +209,7 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-dark bg-opacity-50">
-                <h5 class="modal-title fw-bold text-white mb-0"><i class="fas fa-sliders-h me-2 text-primary"></i>대시보드 통합 관리 패널</h5>
+                <h5 class="modal-title fw-bold text-white mb-0"><i class="fas fa-sliders-h me-2 text-primary"></i>대시보드 통합 관리 (프로젝트 & 비용)</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             
@@ -329,17 +329,25 @@
         '글로벌 필리핀 스튜디오': 600000
     };
 
-    // 로컬 하이브리드 프로젝트 데이터 (targetCpa, targetViews, 4단계 progress 적용)
     let mData = {
         'nv1': { name: '아카데미 플레이어를...', studio: '국내 AI 아트사업팀', pd: '성현승 PD', members: 3, ratio: 1.0, useApi: true, api: 450000, useOut: false, out: 0, eps: 12, progress: [4,4,4,4,4,2,0,0,0,0,0,0], targetCpa: 2500, targetViews: 500000, img: 'https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&q=80&w=100' },
         'nv2': { name: '빌런은 살고 싶다', studio: '글로벌 필리핀 스튜디오', pd: 'Jose Manager', members: 1, ratio: 1.0, useApi: false, api: 0, useOut: true, out: 800000, eps: 15, progress: [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0], targetCpa: 3000, targetViews: 100000, img: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&q=80&w=100' }
     };
 
     let dbData = { marketing: [], platform: [], episode: [] };
-    let dbProjectStats = {}; // DB에서 가져온 실제 성과 저장소
+    let dbProjectStats = {}; 
     let perfChart, projectPieChart;
 
     document.addEventListener('DOMContentLoaded', () => {
+        // --- 전역 설정 날짜 초기화 (이번 달 1일 ~ 오늘) ---
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = String(today.getMonth() + 1).padStart(2, '0');
+        const d = String(today.getDate()).padStart(2, '0');
+        
+        document.getElementById('globalStart').value = `${y}-${m}-01`;
+        document.getElementById('globalEnd').value = `${y}-${m}-${d}`;
+
         Chart.defaults.color = '#cbd5e1'; 
         Chart.defaults.font.family = 'Pretendard';
         
@@ -384,7 +392,7 @@
         const ge = new Date(document.getElementById('globalEnd').value + 'T23:59:59');
         let tmkt=0, ads=0, click=0, sign=0, pay=0;
         let tMap = {}, pMap = {};
-        dbProjectStats = {}; // 초기화
+        dbProjectStats = {}; 
 
         (dbData.marketing || []).forEach(row => {
             let dObj = new Date(row.date);
@@ -418,12 +426,10 @@
             }
         });
 
-        // 상단 카드 업데이트
         const globalCpa = sign > 0 ? (ads / sign) : 0;
         document.getElementById('topMktCost').innerText = `₩ ${tmkt.toLocaleString()}`;
         document.getElementById('topAvgCpa').innerText = `₩ ${Math.round(globalCpa).toLocaleString()}`;
 
-        // 차트 업데이트
         projectPieChart.data.labels = Object.keys(pMap);
         projectPieChart.data.datasets = [{ data: Object.values(pMap), backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444', '#10b981', '#8b5cf6'], borderWidth: 0 }];
         projectPieChart.update();
@@ -434,7 +440,7 @@
         perfChart.data.datasets[1] = { label: '구독 전환', data: dates.map(d=>tMap[d].s), borderColor: '#34d399', borderWidth: 3, borderDash: [5,5], tension: 0.4, yAxisID: 'y1' };
         perfChart.update();
 
-        renderProjectCards(); // 카드 렌더링 호출
+        renderProjectCards(); 
     }
 
     // ============================================================================
@@ -455,7 +461,6 @@
         newStudioSel.insertAdjacentHTML('beforeend', `<option value="custom" class="text-warning fw-bold">+ 스튜디오 직접 추가</option>`);
     }
 
-    // [핵심] 세부 작품별 공정 현황 카드 렌더링
     function renderProjectCards() {
         const container = document.getElementById('projectCardsContainer');
         container.innerHTML = '';
@@ -470,7 +475,6 @@
             const totalCost = laborCost + data.api + data.out;
             globalTotalCost += totalCost;
 
-            // 4단계 공정률 계산 (eps * 4)
             let totalChecks = 0;
             let recentEpIdx = 0;
             for(let i=0; i<data.eps; i++) {
@@ -481,7 +485,6 @@
             totalProgSum += parseFloat(progressPct);
             const rProg = data.progress[recentEpIdx] || 0;
             
-            // 4단계 뱃지 상태
             const s1 = rProg >= 1 ? 'done' : 'wait', i1 = rProg >= 1 ? 'fa-check-circle' : 'far fa-circle', t1 = '콘티 완료';
             const s2 = rProg >= 2 ? 'done' : (rProg==1 ? 'ing':'wait'), i2 = rProg >= 2 ? 'fa-check-circle' : (rProg==1?'fa-spinner fa-spin':'far fa-circle'), t2 = '이미지 완료';
             const s3 = rProg >= 3 ? 'done' : (rProg==2 ? 'ing':'wait'), i3 = rProg >= 3 ? 'fa-check-circle' : (rProg==2?'fa-spinner fa-spin':'far fa-circle'), t3 = '영상 편집중';
@@ -489,18 +492,15 @@
 
             const addBadge = data.useApi ? `<span class="badge bg-secondary ms-1" style="font-size:0.65rem;">API</span>` : (data.useOut ? `<span class="badge bg-secondary ms-1" style="font-size:0.65rem;">외주</span>` : '');
             
-            // DB 실적 가져오기
             const stats = dbProjectStats[data.name] || { ads: 0, signups: 0, views: 0 };
             const actualCpa = stats.signups > 0 ? Math.round(stats.ads / stats.signups) : 0;
             const actualViews = stats.views;
 
-            // 성과 평가 로직
             const cpaSuccess = (actualCpa > 0 && actualCpa <= data.targetCpa) ? 'success' : (actualCpa == 0 ? 'wait' : 'fail');
             const cpaText = cpaSuccess === 'success' ? '달성' : (cpaSuccess === 'fail' ? '미달' : '대기');
             const viewSuccess = actualViews >= data.targetViews ? 'success' : 'ing';
             const viewText = viewSuccess === 'success' ? '달성' : '진행중';
 
-            // 동적 링크 버튼 생성 (progress == 4 인 에피소드만)
             let linksHtml = '';
             for(let i=0; i<data.eps; i++) {
                 if(data.progress[i] === 4) {
@@ -566,14 +566,13 @@
             container.insertAdjacentHTML('beforeend', html);
         }
         
-        // 상단 카드 업데이트
         document.getElementById('topTotalCost').innerText = "₩ " + globalTotalCost.toLocaleString();
         const avgProgress = projCount > 0 ? (totalProgSum / projCount).toFixed(1) : 0;
         document.getElementById('topProjectStatus').innerText = `${projCount}개 / ${avgProgress}%`;
     }
 
     // ============================================================================
-    // 4. 수동 관리 패널 로직 (4단계 대응)
+    // 4. 수동 관리 패널 로직
     // ============================================================================
     function loadProjectData() {
         const id = document.getElementById('projectSelector').value;
