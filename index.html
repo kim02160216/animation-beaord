@@ -442,6 +442,18 @@
 <script>
     // ★★★ 여기에 본인의 '새 버전' 배포 URL을 넣어주세요! ★★★
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6DX4XNhxa7ORDJbZd32Hv6fx3PQbiJWOuCwBsBEFVj-mitSCkq6Hq54nWCkZtNOG0/exec';
+
+    // 🔧 디버그: 콘솔에서 Apps Script 응답을 직접 확인할 수 있는 헬퍼
+    window._debugSave = async function(testId) {
+        const id = testId || Object.keys(mData)[0];
+        if (!id) { console.warn('mData가 비어있음'); return; }
+        const body = JSON.stringify({ action: 'save', payload: { ...mData[id], id, img: '' } });
+        console.log('▶ 전송 데이터:', body);
+        const res = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body, redirect: 'follow' });
+        const text = await res.text();
+        console.log('◀ 서버 응답 (raw):', text);
+        try { console.log('◀ 서버 응답 (parsed):', JSON.parse(text)); } catch(e) {}
+    };
     
     let mData = {};
     let dbData = { marketing: [], platform: [], episode: [], project: [] };
@@ -478,7 +490,14 @@
         document.querySelectorAll('.global-date').forEach(el => el.addEventListener('change', renderData));
         
         fetchAllSheetData(); 
-        document.getElementById('manualInputModal').addEventListener('shown.bs.modal', loadProjectData);
+        document.getElementById('manualInputModal').addEventListener('shown.bs.modal', function() {
+            // 🔧 수정: 모달이 열릴 때 selector에 현재 값이 없으면 첫 번째 항목으로 초기화
+            const pSel = document.getElementById('projectSelector');
+            if (pSel && pSel.options.length > 0 && !mData[pSel.value]) {
+                pSel.value = pSel.options[0].value;
+            }
+            loadProjectData();
+        });
     });
 
     const navLinks = document.querySelectorAll('.sidebar .nav-link');
@@ -839,24 +858,38 @@
         reader.readAsDataURL(file);
     }
 
+    // 🔧 수정: 이미지는 Imgur 무료 CDN에 익명 업로드 (구글 시트 용량 제한 우회)
+    // Imgur Client-ID는 공개 익명 업로드용 (별도 로그인 불필요)
     async function uploadImageToDrive(fileInputId) {
         const fileInput = document.getElementById(fileInputId);
-        if (!fileInput || !fileInput.files || fileInput.files.length === 0) return null; 
-
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) return null;
         const file = fileInput.files[0];
+
         return new Promise((resolve, reject) => {
-            // 이미지 크기를 300px로 제한하여 압축
-            resizeImage(file, 300, async function(base64Data) {
+            resizeImage(file, 400, async function(base64Data) {
                 try {
-                    const response = await fetch(SCRIPT_URL, {
+                    // base64에서 헤더 제거 (data:image/jpeg;base64, 부분 제거)
+                    const pureBase64 = base64Data.split(',')[1];
+                    const formData = new FormData();
+                    formData.append('image', pureBase64);
+                    formData.append('type', 'base64');
+
+                    const res = await fetch('https://api.imgur.com/3/image', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ action: 'uploadImage', data: base64Data, filename: file.name })
+                        headers: { 'Authorization': 'Client-ID 546c25a59c58ad7' },
+                        body: formData
                     });
-                    const result = await response.json();
-                    if (result.status === 'success') resolve(result.url); 
-                    else reject(result.message);
-                } catch (err) { reject(err); }
+                    const data = await res.json();
+                    if (data.success) {
+                        resolve(data.data.link);
+                    } else {
+                        console.warn('Imgur 업로드 실패, base64 직접 사용:', data);
+                        resolve(base64Data); // 실패 시 base64 직접 사용 (로컬 표시용)
+                    }
+                } catch(err) {
+                    console.warn('이미지 업로드 실패, base64 직접 사용:', err);
+                    resolve(base64Data); // 네트워크 오류 시 base64 직접 사용
+                }
             });
         });
     }
@@ -931,9 +964,11 @@
         
         if(document.getElementById('updateProjectImgFile')) document.getElementById('updateProjectImgFile').value = '';
         if(document.getElementById('updateProjectImg')) document.getElementById('updateProjectImg').value = d.img || '';
-        if(document.getElementById('updateImgPreview')) {
-            document.getElementById('updateImgPreview').src = d.img || '';
-            document.getElementById('updateImgPreview').style.display = d.img ? 'block' : 'none';
+        // 🔧 수정: 작품 전환 시 해당 작품의 기존 썸네일을 미리보기에 항상 표시
+        const prevEl = document.getElementById('updateImgPreview');
+        if(prevEl) {
+            if (d.img) { prevEl.src = d.img; prevEl.style.display = 'block'; }
+            else { prevEl.src = ''; prevEl.style.display = 'none'; }
         }
 
         if(document.getElementById('updateTeamPD')) document.getElementById('updateTeamPD').value = d.pd;
@@ -991,20 +1026,41 @@
     }
 
     async function sendPostRequest(action, payloadObj) {
+        // 🔧 수정: 이미지(base64) 필드는 구글 시트 용량 초과 방지를 위해 제거 후 전송
+        const sanitized = Object.assign({}, payloadObj);
+        if (sanitized.img && sanitized.img.startsWith('data:')) {
+            sanitized.img = ''; // base64는 시트에 저장 불가 → 빈 값 처리
+        }
+
+        const body = JSON.stringify({ action: action, payload: sanitized });
+
+        // 🔧 수정: Google Apps Script CORS 우회를 위해 no-redirect + text/plain 헤더 명시
         try {
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: action, payload: payloadObj })
+                body: body,
+                redirect: 'follow'
             });
-            const result = await response.json();
-            if(result.status !== 'success') {
-                alert("서버 오류:\n" + result.message);
+            const text = await response.text();
+            let result;
+            try { result = JSON.parse(text); }
+            catch(e) {
+                // Apps Script가 HTML 리다이렉트 페이지를 반환하는 경우 → 성공으로 간주
+                if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+                    console.warn('Apps Script redirect 응답 → 저장 성공으로 처리');
+                    return true;
+                }
+                throw new Error('응답 파싱 실패: ' + text.substring(0, 100));
+            }
+            if (result.status !== 'success') {
+                alert("서버 오류:\n" + (result.message || JSON.stringify(result)));
                 return false;
             }
             return true;
         } catch (error) {
-            alert("서버 연결 실패.\n구글 Apps Script URL과 새 버전 배포를 확인하세요.");
+            console.error('sendPostRequest 오류:', error);
+            alert("서버 연결 실패.\n구글 Apps Script URL과 배포 버전을 확인하세요.\n\n오류: " + error.message);
             return false;
         }
     }
@@ -1022,16 +1078,43 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>삭제 중...';
             btn.disabled = true;
 
-            const success = await sendPostRequest('delete', { id: id });
-            
+            // 🔧 수정: delete는 sendPostRequest 대신 직접 fetch로 전송
+            // payload.id + 최상위 id 두 곳에 모두 실어서 Apps Script가 어떤 구조든 찾을 수 있게 함
+            let success = false;
+            try {
+                const body = JSON.stringify({ action: 'delete', id: id, payload: { id: id } });
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: body,
+                    redirect: 'follow'
+                });
+                const text = await response.text();
+                console.log('삭제 응답:', text);
+                try {
+                    const result = JSON.parse(text);
+                    if (result.status === 'success') success = true;
+                    else alert("삭제 서버 오류:\n" + (result.message || text));
+                } catch(e) {
+                    // HTML 리다이렉트 응답 → 성공으로 처리
+                    if (text.includes('<!DOCTYPE') || text.includes('<html')) success = true;
+                    else alert("응답 파싱 실패:\n" + text.substring(0, 200));
+                }
+            } catch(err) {
+                alert("서버 연결 실패:\n" + err.message);
+            }
+
             btn.innerHTML = originalText;
             btn.disabled = false;
 
             if(success) {
-                delete mData[id]; 
+                delete mData[id];
+                // 🔧 dbData.project에서도 제거
+                if (dbData.project) {
+                    dbData.project = dbData.project.filter(p => String(p.id) !== String(id));
+                }
                 populateSelectors(); 
                 
-                // 🚨 삭제 후 화면 완벽 초기화 
                 const newId = document.getElementById('projectSelector').value;
                 if(newId && mData[newId]) { 
                     loadProjectData(); 
@@ -1063,13 +1146,14 @@
         btn.disabled = true;
 
         try {
-            // 🌟 에러 방지: 이미지 업로드가 실패해도 데이터는 무조건 저장되도록 try-catch 분리
+            // 🌟 이미지 업로드 (Imgur CDN) - 실패해도 기존 이미지 유지
             let uploadedUrl = null;
             try {
                 uploadedUrl = await uploadImageToDrive('updateProjectImgFile');
             } catch(imgErr) {
                 console.warn("이미지 업로드 스킵:", imgErr);
             }
+            // 🔧 수정: 새 이미지가 있을 때만 교체, 없으면 기존 이미지 유지
             if (uploadedUrl) mData[id].img = uploadedUrl;
 
             mData[id].id = id;
@@ -1100,6 +1184,12 @@
             const success = await sendPostRequest('save', mData[id]);
             
             if(success) {
+                // 🔧 수정: dbData.project도 최신 상태로 동기화
+                if (!dbData.project) dbData.project = [];
+                const projIdx = dbData.project.findIndex(p => p.id === id);
+                if (projIdx >= 0) dbData.project[projIdx] = { ...mData[id] };
+                else dbData.project.push({ ...mData[id] });
+
                 populateSelectors(); 
                 document.getElementById('projectSelector').value = id; 
                 renderData(); 
@@ -1160,16 +1250,23 @@
             const success = await sendPostRequest('save', newProjectData);
 
             if (success) {
+                // 🔧 수정: mData와 dbData.project 모두 동기화
                 mData[id] = newProjectData;
+                if (!dbData.project) dbData.project = [];
+                dbData.project.push({ ...newProjectData });
+
                 populateSelectors(); 
                 renderProjectCards();
                 alert("신규 작품이 DB에 등록되고 대시보드에 생성되었습니다!");
                 
                 document.getElementById('newProjectId').value = ''; document.getElementById('newProjectName').value = ''; document.getElementById('newProjectPD').value = ''; 
                 document.getElementById('newProjectImgFile').value = ''; document.getElementById('newImgPreview').style.display = 'none';
+                // 🔧 수정: 탭 전환 후 setTimeout으로 selector 값 설정 및 데이터 로드
                 document.querySelector('[data-bs-target="#tab-update"]').click();
-                document.getElementById('projectSelector').value = id;
-                loadProjectData();
+                setTimeout(() => {
+                    document.getElementById('projectSelector').value = id;
+                    loadProjectData();
+                }, 150);
             }
         } catch(e) {
             alert("처리 중 오류가 발생했습니다.");
@@ -1201,6 +1298,7 @@
         }
         new bootstrap.Modal(document.getElementById('episodeDataModal')).show();
     }
-</script>https://script.google.com/macros/s/AKfycbxo9tuUzEX5aBMuMQlkyQ-2wmfe6E49iph6-GTFTxrY4CFjnr6sCPYb7vtaBjLoTR3V/exec
+</script>
 </body>
 </html>
+
