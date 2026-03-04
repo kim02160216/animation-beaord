@@ -32,11 +32,11 @@
         .glass-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; }
         .text-muted { color: var(--text-muted) !important; }
 
-        /* 상단 KPI 카드 */
+        /* 상단 KPI 카드 (스튜디오별 합산 공간 추가) */
         .kpi-card { background: linear-gradient(145deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.9) 100%); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px; transition: 0.2s; position: relative; overflow: hidden; }
         .kpi-card::before { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px; border-radius: 4px 0 0 4px; }
         .kpi-card.blue::before { background-color: #3b82f6; } .kpi-card.yellow::before { background-color: #eab308; } .kpi-card.green::before { background-color: #10b981; } .kpi-card.purple::before { background-color: #8b5cf6; }
-        .kpi-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+        .kpi-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;}
         .kpi-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; } .kpi-icon.yellow { background: rgba(234,179,8,0.15); color: #fde047; } .kpi-icon.green { background: rgba(16,185,129,0.15); color: #34d399; } .kpi-icon.purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
         
         .panel-date-picker { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; display: flex; align-items: center; padding: 0 8px; height: 36px;}
@@ -143,11 +143,18 @@
             
             <div class="row g-3 mb-4">
                 <div class="col-md-6 col-xl-3">
-                    <div class="kpi-card blue">
-                        <div class="kpi-icon blue"><i class="fas fa-wallet"></i></div>
-                        <div>
-                            <div class="text-muted small fw-bold mb-1">현재 진행 총 제작 투입비 (수동)</div>
-                            <h4 class="fw-bold text-white mb-0" id="topTotalCost">₩ 0</h4>
+                    <div class="kpi-card blue flex-column align-items-start">
+                        <div class="d-flex align-items-center gap-3 w-100 mb-3">
+                            <div class="kpi-icon blue"><i class="fas fa-wallet"></i></div>
+                            <div>
+                                <div class="text-muted small fw-bold mb-1">현재 진행 총 제작 투입비 (수동)</div>
+                                <h4 class="fw-bold text-white mb-0" id="topTotalCost">₩ 0</h4>
+                            </div>
+                        </div>
+                        <div class="w-100 d-flex justify-content-between border-top pt-2" style="border-color: rgba(255,255,255,0.1) !important; font-size: 0.75rem;">
+                            <div><span class="text-muted">국내:</span> <strong class="text-white" id="topCostDom">₩0</strong></div>
+                            <div><span class="text-muted">필리핀:</span> <strong class="text-white" id="topCostPh">₩0</strong></div>
+                            <div><span class="text-muted">외주/기타:</span> <strong class="text-white" id="topCostOther">₩0</strong></div>
                         </div>
                     </div>
                 </div>
@@ -235,7 +242,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -290,7 +296,7 @@
                                 <label class="modal-label">제작 스튜디오 재할당</label>
                                 <select class="form-select fw-medium py-2" id="updateStudio" onchange="calcUpdateTotalCost()"></select>
                             </div>
-
+                            
                             <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-info-circle me-2 text-secondary"></i>작품 기본 정보 수정</h6></div>
                             <div class="col-md-6 mt-2">
                                 <label class="modal-label">작품명 수정</label>
@@ -302,15 +308,16 @@
                                     <input type="number" class="form-control fw-bold text-white" id="updateProjectEps" onchange="updateEpisodeCount()">
                                     <span class="input-group-text bg-dark border-secondary text-muted">화</span>
                                 </div>
-                                <span class="text-muted" style="font-size: 0.75rem; margin-top: 4px; display: block;">※ 회차 숫자를 늘리거나 줄이면 하단 세부 공정 영역에 즉시 반영됩니다.</span>
+                                <span class="text-muted" style="font-size: 0.75rem; margin-top: 4px; display: block;">※ 회차 변경 시 하단 세부 공정 목록이 즉시 동적 조정됩니다.</span>
                             </div>
+
+                            <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-users me-2 text-info"></i>인력 및 비용 조정</h6></div>
+                            <div class="col-md-3 mt-2"><label class="modal-label">담당 팀 및 PD</label><input type="text" class="form-control fw-bold" id="updateTeamPD"></div>
+                            <div class="col-md-3 mt-2"><label class="modal-label">투입 인원 (명)</label><input type="number" id="updateMembers" class="form-control fw-bold" oninput="calcUpdateTotalCost()"></div>
+                            <div class="col-md-2 mt-2"><label class="modal-label">투입 비율</label><input type="number" id="updateRatio" step="0.1" class="form-control fw-bold" oninput="calcUpdateTotalCost()"></div>
+                            <div class="col-md-4 mt-2"><label class="modal-label text-muted">산출 인건비 (읽기 전용)</label><input type="text" id="updateLaborResult" class="form-control fw-bold text-muted" readonly></div>
                             
-                            <div class="col-md-3 mt-4"><label class="modal-label">담당 팀 및 PD</label><input type="text" class="form-control fw-bold" id="updateTeamPD"></div>
-                            <div class="col-md-3 mt-4"><label class="modal-label">투입 인원 (명)</label><input type="number" id="updateMembers" class="form-control fw-bold" oninput="calcUpdateTotalCost()"></div>
-                            <div class="col-md-2 mt-4"><label class="modal-label">투입 비율</label><input type="number" id="updateRatio" step="0.1" class="form-control fw-bold" oninput="calcUpdateTotalCost()"></div>
-                            <div class="col-md-4 mt-4"><label class="modal-label text-muted">산출 인건비 (읽기 전용)</label><input type="text" id="updateLaborResult" class="form-control fw-bold text-muted" readonly></div>
-                            
-                            <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-flag-checkered me-2 text-info"></i>성과 KPI 목표치 설정</h6></div>
+                            <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-flag-checkered me-2 text-success"></i>성과 KPI 목표치 설정</h6></div>
                             <div class="col-md-6 mt-2">
                                 <label class="modal-label">목표 가입 CPA (₩)</label>
                                 <div class="input-group"><span class="input-group-text bg-dark border-secondary text-muted">₩</span><input type="number" id="updateTargetCpa" class="form-control fw-bold text-white" placeholder="예: 2500"></div>
@@ -342,16 +349,12 @@
 
                             <div class="col-12 mt-5">
                                 <div class="d-flex justify-content-between align-items-end border-bottom pb-2 mb-3" style="border-color: rgba(255,255,255,0.05) !important;">
-                                    <h6 class="fw-bold text-white mb-0"><i class="fas fa-list-ul me-2 text-success"></i>회차별 세부 공정 설정 (4단계)</h6>
+                                    <h6 class="fw-bold text-white mb-0"><i class="fas fa-list-ul me-2 text-warning"></i>회차별 세부 공정 설정 (4단계)</h6>
                                     <div class="bg-success bg-opacity-10 border border-success px-3 py-1 rounded">
                                         <span class="text-white small me-2">자동 합산 진행률:</span><strong class="text-success fs-5" id="totalProgressBar">0%</strong>
                                     </div>
                                 </div>
-                                <div class="p-3 bg-dark bg-opacity-25 border rounded mb-3" style="border-color: rgba(255,255,255,0.05) !important;">
-                                    <p class="mb-0 text-muted small"><i class="fas fa-info-circle me-1"></i> 토글 스위치를 클릭하여 회차별 완료된 공정을 체크하세요. 메인 카드의 [완료/진행 회차] 영역에 즉각 분리 반영됩니다.</p>
-                                </div>
-                                <div id="episodeListContainer" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
-                                </div>
+                                <div id="episodeListContainer" style="max-height: 400px; overflow-y: auto; padding-right: 10px;"></div>
                             </div>
                         </div>
                     </div>
@@ -394,7 +397,7 @@
                 <button type="button" class="btn btn-outline-danger fw-bold" onclick="deleteProject()"><i class="fas fa-trash-alt me-2"></i>작품 영구 삭제</button>
                 <div>
                     <button type="button" class="btn btn-secondary fw-medium me-2" data-bs-dismiss="modal">닫기</button>
-                    <button type="button" class="btn btn-primary px-4 fw-bold" onclick="saveManualData()"><i class="fas fa-save me-2"></i>저장 및 화면 반영</button>
+                    <button type="button" class="btn btn-primary px-4 fw-bold" onclick="saveManualData()"><i class="fas fa-save me-2"></i>수동 데이터 저장 및 화면 반영</button>
                 </div>
             </div>
         </div>
@@ -565,13 +568,15 @@
     }
 
     // ============================================================================
-    // 3. UI 렌더링 (세부 작품별 현황 카드)
+    // 3. UI 렌더링 (세부 작품별 현황 카드 및 스튜디오 비용 합산)
     // ============================================================================
     function populateSelectors() {
         const pSel = document.getElementById('projectSelector');
         if(!pSel) return;
+        const currentVal = pSel.value; // 기존 선택 유지
         pSel.innerHTML = '';
         for (const [key, val] of Object.entries(mData)) { pSel.insertAdjacentHTML('beforeend', `<option value="${key}">${val.name} (${key})</option>`); }
+        if(mData[currentVal]) pSel.value = currentVal;
         
         const updateStudioSel = document.getElementById('updateStudio');
         const newStudioSel = document.getElementById('newStudio');
@@ -589,7 +594,11 @@
         const container = document.getElementById('projectCardsContainer');
         if(!container) return;
         container.innerHTML = '';
+        
         let globalTotalCost = 0;
+        let costDom = 0;
+        let costPh = 0;
+        let costOther = 0;
         let projCount = 0;
         let totalProgSum = 0;
 
@@ -599,6 +608,15 @@
             const laborCost = data.members * data.ratio * baseCost;
             const totalCost = laborCost + data.api + data.out;
             globalTotalCost += totalCost;
+
+            // 1. 국내/필리핀/외주 비용 분리 계산 로직
+            if (data.studio.includes('국내')) {
+                costDom += totalCost;
+            } else if (data.studio.includes('필리핀')) {
+                costPh += totalCost;
+            } else {
+                costOther += totalCost;
+            }
 
             let totalChecks = 0;
             let completedEps = [];
@@ -732,16 +750,21 @@
             container.insertAdjacentHTML('beforeend', html);
         }
         
+        // 1-1. 상단 총 비용 및 스튜디오별 합산 데이터 적용
         if (document.getElementById('topTotalCost')) document.getElementById('topTotalCost').innerText = "₩ " + globalTotalCost.toLocaleString();
+        if (document.getElementById('topCostDom')) document.getElementById('topCostDom').innerText = "₩" + costDom.toLocaleString();
+        if (document.getElementById('topCostPh')) document.getElementById('topCostPh').innerText = "₩" + costPh.toLocaleString();
+        if (document.getElementById('topCostOther')) document.getElementById('topCostOther').innerText = "₩" + costOther.toLocaleString();
+        
         const avgProgress = projCount > 0 ? (totalProgSum / projCount).toFixed(1) : 0;
         if (document.getElementById('topProjectStatus')) document.getElementById('topProjectStatus').innerText = `${projCount}개 / ${avgProgress}%`;
     }
 
     // ============================================================================
-    // 4. 수동 관리 패널 (제목, 회차수정, 삭제 로직 추가)
+    // 4. 수동 관리 패널 및 공정 데이터 로직 (제목 변경/삭제/회차 동적 제어)
     // ============================================================================
     
-    // 현재 체크박스 상태를 배열에 동기화 (회차 갯수 변경 시 데이터 유실 방지)
+    // 현재 체크박스 상태를 배열 데이터로 역동기화 (회차 증감 시 데이터 유실 방지용)
     function syncCheckboxesToArray(d) {
         const rows = document.querySelectorAll('.ep-row');
         rows.forEach((row, i) => {
@@ -757,21 +780,24 @@
         });
     }
 
-    // 회차 변경 이벤트 핸들러
+    // 2-1. 회차 갯수 동적 변경 핸들러
     window.updateEpisodeCount = function() {
-        const id = document.getElementById('projectSelector').value;
+        const pSel = document.getElementById('projectSelector');
+        if(!pSel) return;
+        const id = pSel.value;
         const newEps = parseInt(document.getElementById('updateProjectEps').value) || 1;
         const d = mData[id];
+        if(!d) return;
         
-        syncCheckboxesToArray(d); // 기존 체크상태 저장
-
+        syncCheckboxesToArray(d); 
+        
         if(newEps > d.eps) {
-            for(let i=0; i < newEps - d.eps; i++) d.progress.push(0);
+            for(let i=0; i < newEps - d.eps; i++) d.progress.push(0); // 늘어난 만큼 0(대기)으로 채움
         } else if (newEps < d.eps) {
-            d.progress = d.progress.slice(0, newEps);
+            d.progress = d.progress.slice(0, newEps); // 줄어든 만큼 배열 자르기
         }
         d.eps = newEps;
-        renderEpisodeChecklist(d); // 리스트 다시 그리기
+        renderEpisodeChecklist(d); 
     }
 
     function renderEpisodeChecklist(d) {
@@ -805,9 +831,10 @@
         const d = mData[id];
         if(!d) return;
 
+        // 2-2. 폼에 제목과 회차 데이터 맵핑
         if(document.getElementById('updateProjectName')) document.getElementById('updateProjectName').value = d.name;
         if(document.getElementById('updateProjectEps')) document.getElementById('updateProjectEps').value = d.eps;
-        
+
         if(document.getElementById('updateStudio')) document.getElementById('updateStudio').value = d.studio;
         if(document.getElementById('updateTeamPD')) document.getElementById('updateTeamPD').value = d.pd;
         if(document.getElementById('updateMembers')) document.getElementById('updateMembers').value = d.members;
@@ -860,16 +887,29 @@
         });
     }
 
-    // 작품 영구 삭제 기능
+    // 3. 작품 영구 삭제 로직
     window.deleteProject = function() {
         const pSel = document.getElementById('projectSelector');
         if(!pSel) return;
         const id = pSel.value;
+        if(!id || !mData[id]) return;
         const projName = mData[id].name;
         
-        if(confirm(`정말 [${projName}] 작품을 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.`)) {
-            delete mData[id];
-            populateSelectors();
+        if(confirm(`정말 [${projName}] 작품을 완전히 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
+            delete mData[id]; // 객체에서 제거
+            populateSelectors(); // 셀렉트박스 갱신
+            
+            // 삭제 후 다음 옵션으로 로드
+            const newId = document.getElementById('projectSelector').value;
+            if(newId) {
+                loadProjectData();
+            } else {
+                // 모두 지워졌을 경우 UI 초기화
+                document.getElementById('updateProjectName').value = '';
+                document.getElementById('episodeListContainer').innerHTML = '';
+                document.getElementById('updateTotalCostResult').innerText = "₩ 0";
+            }
+            
             renderProjectCards();
             alert('작품이 안전하게 삭제되었습니다.');
             bootstrap.Modal.getInstance(document.getElementById('manualInputModal')).hide();
@@ -880,8 +920,9 @@
         const pSel = document.getElementById('projectSelector');
         if(!pSel) return;
         const id = pSel.value;
+        if(!id || !mData[id]) return;
         
-        // 제목 및 회차 수 변경 사항 최종 점검 후 저장
+        // 2-3. 수정한 작품명, 회차 갯수 덮어쓰기
         mData[id].name = document.getElementById('updateProjectName').value || mData[id].name;
         const newEps = parseInt(document.getElementById('updateProjectEps').value) || 1;
         if(mData[id].eps !== newEps) {
@@ -904,8 +945,9 @@
 
         syncCheckboxesToArray(mData[id]);
 
-        populateSelectors(); // 이름이 바뀌었을 수 있으므로 셀렉터 갱신
-        document.getElementById('projectSelector').value = id;
+        populateSelectors(); // 이름 변경 갱신
+        document.getElementById('projectSelector').value = id; 
+
         renderProjectCards();
         alert('카드 영역에 실시간 반영되었습니다.');
         bootstrap.Modal.getInstance(document.getElementById('manualInputModal')).hide();
