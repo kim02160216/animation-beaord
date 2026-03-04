@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novelpia Animation - Master Integrated Dashboard</title>
+    <title>Novelpia - AI 애니메이션 통합 관리</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
@@ -18,10 +18,16 @@
         }
         body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
         .wrapper { display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background: var(--bg-color); border-right: 1px solid var(--border-color); padding: 24px; display: flex; flex-direction: column; flex-shrink: 0; }
+        
+        /* 사이드바 고도화 */
+        .sidebar { width: 260px; background: #0f172a; border-right: 1px solid var(--border-color); padding: 24px; display: flex; flex-direction: column; flex-shrink: 0; }
         .main-content { flex: 1; padding: 32px; overflow-y: auto; overflow-x: hidden; }
-        .brand-logo { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 40px; line-height: 1.2;}
+        .brand-logo { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 30px; line-height: 1.2;}
         .brand-logo span { color: var(--primary-accent); }
+        .nav-link { transition: 0.2s; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; padding: 12px 16px !important; border-radius: 8px;}
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #fff !important; }
+        .nav-link.active { background: rgba(59,130,246,0.15); color: #60a5fa !important; border: 1px solid rgba(59,130,246,0.3); }
+
         .glass-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; }
         .text-muted { color: var(--text-muted) !important; }
 
@@ -36,6 +42,11 @@
         .panel-date-picker { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; display: flex; align-items: center; padding: 0 8px; height: 36px;}
         .panel-date-picker input[type="date"] { font-size: 0.85rem; padding: 0.25rem; color-scheme: dark; background: transparent; border: none; color: white; outline: none; width: 130px; text-align: center; font-weight: 600;}
         
+        /* 마케팅 박스 */
+        .mkt-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 16px 12px; text-align: center; }
+        .mkt-title { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; }
+        .mkt-value { font-size: 1.5rem; font-weight: 700; color: #fff; }
+        
         /* 테이블 공통 */
         .looker-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         .looker-table th { background-color: rgba(255,255,255,0.02); color: #cbd5e1; padding: 12px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: 600; }
@@ -46,7 +57,7 @@
         .bar-blue { background-color: #3b82f6; height: 6px; border-radius: 3px; } .bar-orange { background-color: #f59e0b; height: 6px; border-radius: 3px; } .bar-purple { background-color: #8b5cf6; height: 6px; border-radius: 3px; }
         .retention-text { text-align: right; font-weight: 600; color: #94a3b8; }
 
-        /* 세부 작품 카드 (신규 디자인) */
+        /* 세부 작품 카드 */
         .proj-card { background: #1e2538; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 24px; }
         .proj-info-box { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; justify-content: center; }
         .proj-total-cost { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
@@ -56,13 +67,18 @@
         .kpi-badge.fail { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
         .kpi-badge.wait { background: rgba(255,255,255,0.1); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.2); }
 
+        /* 완료/진행중 분리 영역 (신규) */
+        .status-split-box { display: flex; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; margin-bottom: 12px; }
+        .status-split-item { flex: 1; padding: 12px 16px; display: flex; flex-direction: column; }
+        .status-split-item:first-child { border-right: 1px solid rgba(255,255,255,0.05); background: rgba(16, 185, 129, 0.05); }
+        .status-split-item:last-child { background: rgba(59, 130, 246, 0.05); }
+
         /* 4단계 공정 뱃지 */
-        .process-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+        .process-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
         .step-badge { text-align: center; padding: 8px 4px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.3); color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 4px;}
         .step-badge.done { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #10b981; }
         .step-badge.ing { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); color: #60a5fa; }
         
-        /* 바로보기 링크 버튼 */
         .link-btn { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: #93c5fd; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-right: 6px; margin-bottom: 6px; transition: 0.2s;}
         .link-btn:hover { background: rgba(59,130,246,0.2); color: #fff; }
 
@@ -73,8 +89,8 @@
         .form-control:focus, .form-select:focus { border-color: var(--primary-accent) !important; box-shadow: 0 0 0 0.25rem rgba(59,130,246,0.25) !important; }
         .modal-label { color: #cbd5e1 !important; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem; display: block; } 
         
-        .ep-row { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; transition: 0.2s; }
-        .ep-row.completed { border-left: 3px solid var(--secondary-accent); background: rgba(16,185,129,0.05); }
+        .ep-row { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 14px 20px; margin-bottom: 10px; transition: 0.2s; display: flex; align-items: center; }
+        .ep-row.completed { border-left: 4px solid var(--secondary-accent); background: rgba(16,185,129,0.05); }
 
         #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 17, 32, 0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .spinner-border { color: var(--primary-accent); margin-bottom: 1rem;}
@@ -91,15 +107,20 @@
 <div class="wrapper">
     <div class="sidebar d-none d-xl-flex">
         <div class="brand-logo">NOVELPIA<span>.</span><br><span style="font-size: 0.9rem; font-weight: 500; color: #94a3b8;">Studio Control</span></div>
-        <ul class="nav flex-column gap-2">
-            <li class="nav-item"><a class="nav-link text-white bg-primary bg-opacity-10 rounded px-3 py-2 border border-primary border-opacity-25" href="#"><i class="fas fa-chart-line me-2 text-primary"></i> 통합 대시보드</a></li>
+        <ul class="nav flex-column gap-2 mt-2">
+            <li class="nav-item"><a class="nav-link active" href="#"><i class="fas fa-chart-line me-3"></i> 통합 대시보드</a></li>
+            <li class="nav-item"><a class="nav-link text-muted" href="#"><i class="fas fa-bullseye me-3"></i> 마케팅 성과 리포트</a></li>
+            <li class="nav-item"><a class="nav-link text-muted" href="#"><i class="fas fa-database me-3"></i> 플랫폼 지표 분석</a></li>
+            <li class="nav-item mt-4 mb-2"><span class="text-muted small fw-bold px-3">매니지먼트</span></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#" data-bs-toggle="modal" data-bs-target="#manualInputModal" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);"><i class="fas fa-tasks me-3 text-success"></i> 수동 공정/비용 관리</a></li>
+            <li class="nav-item"><a class="nav-link text-muted" href="#"><i class="fas fa-cog me-3"></i> 시스템 설정</a></li>
         </ul>
     </div>
 
     <div class="main-content">
         <header class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
             <div>
-                <h2 class="mb-1 fw-bold text-white">제작 진척도 및 성과 통합 뷰</h2>
+                <h2 class="mb-1 fw-bold text-white">AI 애니메이션 통합 관리</h2>
                 <div class="text-muted small">Google Sheets Real-time DB 연동 (Native API)</div>
             </div>
             
@@ -110,8 +131,8 @@
                     <span class="text-muted mx-1">~</span>
                     <input type="date" id="globalEnd" class="global-date">
                 </div>
-                <button class="btn btn-primary fw-bold px-3 shadow-sm" onclick="fetchAllSheetData()"><i class="fas fa-sync-alt me-2"></i>DB 새로고침</button>
-                <button class="btn btn-outline-light fw-bold px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#manualInputModal"><i class="fas fa-sliders-h me-2"></i>수동 관리 패널</button>
+                <button class="btn btn-primary fw-bold px-3 shadow-sm" onclick="fetchAllSheetData()"><i class="fas fa-sync-alt me-2"></i>DB 갱신</button>
+                <button class="btn btn-outline-light fw-bold px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#manualInputModal"><i class="fas fa-edit me-2"></i>수동 패널 열기</button>
             </div>
         </header>
 
@@ -158,16 +179,47 @@
             <div class="col-xl-7 col-xxl-8">
                 <div class="glass-card h-100 d-flex flex-column">
                     <h5 class="mb-4 fw-bold text-white border-bottom pb-3" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-chart-area me-2 text-primary"></i>제작 성과 트렌드</h5>
-                    <div style="height: 340px; width: 100%;"><canvas id="performanceChart"></canvas></div>
+                    <div style="height: 380px; width: 100%;"><canvas id="performanceChart"></canvas></div>
                 </div>
             </div>
+            
             <div class="col-xl-5 col-xxl-4">
-                <div class="glass-card h-100 d-flex flex-column">
-                    <h5 class="mb-4 fw-bold text-white border-bottom pb-3" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-bullseye me-2 text-warning"></i>작품별 광고 볼륨 비중</h5>
-                    <div class="flex-grow-1 d-flex justify-content-center align-items-center">
-                        <div style="position: relative; width: 100%; height: 260px;"><canvas id="pieChartProject"></canvas></div>
+                <div class="glass-card h-100 d-flex flex-column p-0 overflow-hidden">
+                    <div class="p-4 pb-3 border-bottom d-flex justify-content-between align-items-center" style="border-color: rgba(255,255,255,0.05) !important; background: rgba(0,0,0,0.1);">
+                        <h5 class="mb-0 fw-bold text-white"><i class="fas fa-bullhorn me-2 text-warning"></i>Animation Marketing</h5>
+                    </div>
+                    <div class="p-4 flex-grow-1 d-flex flex-column">
+                        <div class="row g-3 mb-4">
+                            <div class="col-6"><div class="mkt-box"><div class="mkt-title">광고비 합계</div><div class="mkt-value text-white" id="valAds">0</div></div></div>
+                            <div class="col-6"><div class="mkt-box"><div class="mkt-title">클릭수 합계</div><div class="mkt-value text-info" id="valClicks">0</div></div></div>
+                            <div class="col-6"><div class="mkt-box"><div class="mkt-title">가입수 합계</div><div class="mkt-value text-success" id="valSignups">0</div></div></div>
+                            <div class="col-6"><div class="mkt-box"><div class="mkt-title">결제수 합계</div><div class="mkt-value text-danger" id="valPayments">0</div></div></div>
+                        </div>
+                        <div class="flex-grow-1 d-flex flex-column justify-content-center">
+                            <h6 class="text-white fw-bold mb-3 text-center border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;">작품별 광고 볼륨 비중</h6>
+                            <div class="pie-container" style="position: relative; width: 100%; height: 180px;"><canvas id="pieChartProject"></canvas></div>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="glass-card mb-5 border-top-0" style="border-top: 4px solid #4285F4 !important;">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 border-bottom pb-3 gap-2" style="border-color: rgba(255,255,255,0.1) !important;">
+                <h5 class="mb-0 fw-bold text-white"><i class="fas fa-database me-2" style="color:#4285F4;"></i>Animation Platform Data</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="looker-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 35%;">소설 명</th>
+                            <th style="width: 20%;">회원 조회수</th>
+                            <th style="width: 20%;">비회원 조회수</th>
+                            <th style="width: 25%;">총 조회수 (Total)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="platformDataTbody"></tbody>
+                </table>
             </div>
         </div>
 
@@ -268,10 +320,16 @@
 
                             <div class="col-12 mt-5">
                                 <div class="d-flex justify-content-between align-items-end border-bottom pb-2 mb-3" style="border-color: rgba(255,255,255,0.05) !important;">
-                                    <h6 class="fw-bold text-white mb-0"><i class="fas fa-list-ul me-2 text-success"></i>회차별 세부 공정 (4단계)</h6>
-                                    <div class="bg-success bg-opacity-10 border border-success px-3 py-1 rounded"><span class="text-white small me-2">자동 합산 진행률:</span><strong class="text-success fs-5" id="totalProgressBar">0%</strong></div>
+                                    <h6 class="fw-bold text-white mb-0"><i class="fas fa-list-ul me-2 text-success"></i>회차별 세부 공정 설정 (4단계)</h6>
+                                    <div class="bg-success bg-opacity-10 border border-success px-3 py-1 rounded">
+                                        <span class="text-white small me-2">자동 합산 진행률:</span><strong class="text-success fs-5" id="totalProgressBar">0%</strong>
+                                    </div>
                                 </div>
-                                <div id="episodeListContainer" style="max-height: 400px; overflow-y: auto; padding-right: 10px;"></div>
+                                <div class="p-3 bg-dark bg-opacity-25 border rounded mb-3" style="border-color: rgba(255,255,255,0.05) !important;">
+                                    <p class="mb-0 text-muted small"><i class="fas fa-info-circle me-1"></i> 토글 스위치를 클릭하여 회차별 완료된 공정을 체크하세요. 저장 시 메인 카드의 진행률과 뱃지에 즉각 반영됩니다.</p>
+                                </div>
+                                <div id="episodeListContainer" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                                    </div>
                             </div>
                         </div>
                     </div>
@@ -312,7 +370,7 @@
             
             <div class="modal-footer bg-dark bg-opacity-25 d-flex justify-content-between">
                 <button type="button" class="btn btn-secondary fw-medium me-2" data-bs-dismiss="modal">닫기</button>
-                <button type="button" class="btn btn-primary px-4 fw-bold" onclick="saveManualData()"><i class="fas fa-save me-2"></i>화면에 즉시 반영</button>
+                <button type="button" class="btn btn-primary px-4 fw-bold" onclick="saveManualData()"><i class="fas fa-save me-2"></i>수동 데이터 저장 및 화면 반영</button>
             </div>
         </div>
     </div>
@@ -339,12 +397,11 @@
     let perfChart, projectPieChart;
 
     document.addEventListener('DOMContentLoaded', () => {
-        // --- 전역 설정 날짜 초기화 (이번 달 1일 ~ 오늘) ---
+        // 전역 설정 날짜 초기화 (이번 달 1일 ~ 오늘)
         const today = new Date();
         const y = today.getFullYear();
         const m = String(today.getMonth() + 1).padStart(2, '0');
         const d = String(today.getDate()).padStart(2, '0');
-        
         document.getElementById('globalStart').value = `${y}-${m}-01`;
         document.getElementById('globalEnd').value = `${y}-${m}-${d}`;
 
@@ -369,7 +426,7 @@
     });
 
     // ============================================================================
-    // 2. 구글 시트 연동 (Chart.js 및 성과 계산)
+    // 2. 구글 시트 연동 및 마케팅/플랫폼 데이터 계산
     // ============================================================================
     async function fetchAllSheetData() {
         document.getElementById('loadingOverlay').style.display = 'flex';
@@ -398,10 +455,10 @@
             let dObj = new Date(row.date);
             if(isNaN(dObj.getTime())) return;
             let name = row.novel_name || '기타';
-            let rAds = sFloat(row.ad_cost), rSign = sFloat(row.signups);
+            let rAds = sFloat(row.ad_cost), rClick = sFloat(row.clicks), rSign = sFloat(row.signups), rPay = sFloat(row.payments);
             
             if(dObj >= gs && dObj <= ge) {
-                ads+=rAds; sign+=rSign; tmkt+=rAds;
+                ads += rAds; click += rClick; sign += rSign; pay += rPay; tmkt += rAds;
                 if(pMap[name]) pMap[name]+=rAds; else pMap[name]=rAds;
                 
                 if(!dbProjectStats[name]) dbProjectStats[name] = { ads: 0, signups: 0, views: 0 };
@@ -426,6 +483,11 @@
             }
         });
 
+        document.getElementById('valAds').innerText = ads.toLocaleString();
+        document.getElementById('valClicks').innerText = click.toLocaleString();
+        document.getElementById('valSignups').innerText = sign.toLocaleString();
+        document.getElementById('valPayments').innerText = pay.toLocaleString();
+
         const globalCpa = sign > 0 ? (ads / sign) : 0;
         document.getElementById('topMktCost').innerText = `₩ ${tmkt.toLocaleString()}`;
         document.getElementById('topAvgCpa').innerText = `₩ ${Math.round(globalCpa).toLocaleString()}`;
@@ -444,7 +506,7 @@
     }
 
     // ============================================================================
-    // 3. UI 렌더링 및 모달 컨트롤 (고도화 버전)
+    // 3. UI 렌더링 (세부 작품별 현황 카드)
     // ============================================================================
     function populateSelectors() {
         const pSel = document.getElementById('projectSelector');
@@ -475,20 +537,53 @@
             const totalCost = laborCost + data.api + data.out;
             globalTotalCost += totalCost;
 
+            // 전체 공정률 계산 및 회차 상태(완료/진행중) 분리
             let totalChecks = 0;
-            let recentEpIdx = 0;
+            let completedEps = [];
+            let inProgressEp = -1;
+            let inProgressStatus = 0;
+
             for(let i=0; i<data.eps; i++) {
-                totalChecks += data.progress[i];
-                if(data.progress[i] > 0) recentEpIdx = i;
+                let p = data.progress[i];
+                totalChecks += p;
+                
+                if(p === 4) {
+                    completedEps.push(i + 1);
+                } else if (p > 0 && inProgressEp === -1) {
+                    inProgressEp = i + 1;
+                    inProgressStatus = p;
+                } else if (p === 0 && inProgressEp === -1) {
+                    inProgressEp = i + 1;
+                    inProgressStatus = 0;
+                }
             }
+            
             const progressPct = ((totalChecks / (data.eps * 4)) * 100).toFixed(1);
             totalProgSum += parseFloat(progressPct);
-            const rProg = data.progress[recentEpIdx] || 0;
             
-            const s1 = rProg >= 1 ? 'done' : 'wait', i1 = rProg >= 1 ? 'fa-check-circle' : 'far fa-circle', t1 = '콘티 완료';
-            const s2 = rProg >= 2 ? 'done' : (rProg==1 ? 'ing':'wait'), i2 = rProg >= 2 ? 'fa-check-circle' : (rProg==1?'fa-spinner fa-spin':'far fa-circle'), t2 = '이미지 완료';
-            const s3 = rProg >= 3 ? 'done' : (rProg==2 ? 'ing':'wait'), i3 = rProg >= 3 ? 'fa-check-circle' : (rProg==2?'fa-spinner fa-spin':'far fa-circle'), t3 = '영상 편집중';
-            const s4 = rProg >= 4 ? 'done' : (rProg==3 ? 'ing':'wait'), i4 = rProg >= 4 ? 'fa-check-circle' : (rProg==3?'fa-spinner fa-spin':'far fa-circle'), t4 = '업로드 대기';
+            // 완료/진행중 텍스트 렌더링 로직
+            let compText = completedEps.length > 0 ? `1~${completedEps.length}화 완료` : '완료된 회차 없음';
+            if (completedEps.length === data.eps) compText = '전체 회차 완료';
+
+            let ingText = '';
+            let s1='wait', i1='far fa-circle', t1='콘티 대기';
+            let s2='wait', i2='far fa-circle', t2='이미지 대기';
+            let s3='wait', i3='far fa-circle', t3='영상 대기';
+            let s4='wait', i4='far fa-circle', t4='업로드 대기';
+
+            if (completedEps.length === data.eps) {
+                ingText = '진행중인 회차 없음 (모두 완료)';
+                s1='done'; i1='fa-check-circle'; t1='콘티 완료';
+                s2='done'; i2='fa-check-circle'; t2='이미지 완료';
+                s3='done'; i3='fa-check-circle'; t3='영상 완료';
+                s4='done'; i4='fa-check-circle'; t4='업로드 완료';
+            } else {
+                ingText = `<span class="text-primary">${inProgressEp}화</span> 진행 중`;
+                s1 = inProgressStatus >= 1 ? 'done' : 'wait'; i1 = inProgressStatus >= 1 ? 'fa-check-circle' : 'far fa-circle'; t1 = inProgressStatus >= 1 ? '콘티 완료' : '콘티 진행';
+                s2 = inProgressStatus >= 2 ? 'done' : (inProgressStatus==1 ? 'ing':'wait'); i2 = inProgressStatus >= 2 ? 'fa-check-circle' : (inProgressStatus==1?'fa-spinner fa-spin':'far fa-circle'); t2 = inProgressStatus >= 2 ? '이미지 완료' : '이미지 진행';
+                s3 = inProgressStatus >= 3 ? 'done' : (inProgressStatus==2 ? 'ing':'wait'); i3 = inProgressStatus >= 3 ? 'fa-check-circle' : (inProgressStatus==2?'fa-spinner fa-spin':'far fa-circle'); t3 = inProgressStatus >= 3 ? '영상 완료' : '영상 진행';
+                s4 = inProgressStatus >= 4 ? 'done' : (inProgressStatus==3 ? 'ing':'wait'); i4 = inProgressStatus >= 4 ? 'fa-check-circle' : (inProgressStatus==3?'fa-spinner fa-spin':'far fa-circle'); t4 = inProgressStatus >= 4 ? '업로드 완료' : '업로드 대기';
+            }
 
             const addBadge = data.useApi ? `<span class="badge bg-secondary ms-1" style="font-size:0.65rem;">API</span>` : (data.useOut ? `<span class="badge bg-secondary ms-1" style="font-size:0.65rem;">외주</span>` : '');
             
@@ -543,7 +638,17 @@
                         <div class="col-6"><div class="proj-info-box py-2"><span class="text-muted small mb-1">목표 조회수 (${data.targetViews.toLocaleString()})</span><div class="text-white fw-bold">현재: ${actualViews.toLocaleString()} <span class="kpi-badge ${viewSuccess === 'success' ? 'success' : 'wait'}">${viewText}</span></div></div></div>
                     </div>
 
-                    <div class="text-white small fw-bold mb-2">최근 진행 회차 (${recentEpIdx+1}화) 공정 현황</div>
+                    <div class="status-split-box">
+                        <div class="status-split-item">
+                            <span class="text-success small fw-bold mb-1"><i class="fas fa-check-double me-1"></i>완료된 회차</span>
+                            <strong class="text-white">${compText}</strong>
+                        </div>
+                        <div class="status-split-item">
+                            <span class="text-primary small fw-bold mb-1"><i class="fas fa-spinner fa-spin me-1"></i>현재 공정 타겟</span>
+                            <strong class="text-white">${ingText}</strong>
+                        </div>
+                    </div>
+
                     <div class="process-grid mb-4">
                         <div class="step-badge ${s1}"><i class="fas ${i1}"></i> ${t1}</div>
                         <div class="step-badge ${s2}"><i class="fas ${i2}"></i> ${t2}</div>
@@ -572,7 +677,7 @@
     }
 
     // ============================================================================
-    // 4. 수동 관리 패널 로직
+    // 4. 수동 관리 패널 로직 (세부 공정 세팅)
     // ============================================================================
     function loadProjectData() {
         const id = document.getElementById('projectSelector').value;
@@ -596,20 +701,22 @@
         
         calcUpdateTotalCost();
         
+        // 회차별 세부 공정 리스트 렌더링
         const container = document.getElementById('episodeListContainer');
         container.innerHTML = ''; 
         for (let i = 0; i < d.eps; i++) {
             const p = d.progress[i] || 0;
             const comp = p === 4 ? 'completed' : ''; 
             const chk1 = p >= 1 ? 'checked' : ''; const chk2 = p >= 2 ? 'checked' : ''; const chk3 = p >= 3 ? 'checked' : ''; const chk4 = p === 4 ? 'checked' : '';
+            
             const html = `
-            <div class="ep-row d-flex flex-wrap justify-content-between align-items-center ${comp}">
-                <div class="fw-bold text-white mb-2 mb-md-0" style="width: 70px;">제 ${i+1}화</div>
-                <div class="d-flex gap-3 flex-wrap flex-grow-1 justify-content-end">
-                    <div class="form-check form-switch"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk1}><label class="form-check-label text-light small ms-1">콘티</label></div>
-                    <div class="form-check form-switch"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk2}><label class="form-check-label text-light small ms-1">이미지</label></div>
-                    <div class="form-check form-switch"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk3}><label class="form-check-label text-light small ms-1">영상</label></div>
-                    <div class="form-check form-switch"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk4}><label class="form-check-label text-warning fw-bold small ms-1">업로드</label></div>
+            <div class="ep-row ${comp}">
+                <div class="fw-bold text-white mb-2 mb-md-0" style="width: 80px;">제 ${i+1}화</div>
+                <div class="d-flex gap-4 flex-wrap flex-grow-1 justify-content-end align-items-center">
+                    <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk1} style="transform: scale(1.1);"><label class="form-check-label text-light small fw-bold ms-2 mt-1">콘티</label></div>
+                    <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk2} style="transform: scale(1.1);"><label class="form-check-label text-light small fw-bold ms-2 mt-1">이미지</label></div>
+                    <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk3} style="transform: scale(1.1);"><label class="form-check-label text-light small fw-bold ms-2 mt-1">영상</label></div>
+                    <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk4} style="transform: scale(1.1);"><label class="form-check-label text-warning small fw-bold ms-2 mt-1">업로드</label></div>
                 </div>
             </div>`;
             container.insertAdjacentHTML('beforeend', html);
