@@ -12,255 +12,171 @@
     
     <style>
         :root {
-            --bg-color: #0f172a; --surface-color: #1e293b; --primary-accent: #6366f1; --secondary-accent: #10b981;
-            --text-main: #f8fafc; --text-muted: #cbd5e1; --border-color: rgba(255, 255, 255, 0.12);
+            --bg-color: #0b1120; --surface-color: #1e293b; --card-bg: #151e2f; 
+            --primary-accent: #3b82f6; --secondary-accent: #10b981;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --border-color: rgba(255, 255, 255, 0.08);
         }
         body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
         .wrapper { display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background: var(--surface-color); border-right: 1px solid var(--border-color); padding: 24px; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar { width: 260px; background: var(--bg-color); border-right: 1px solid var(--border-color); padding: 24px; display: flex; flex-direction: column; flex-shrink: 0; }
         .main-content { flex: 1; padding: 32px; overflow-y: auto; overflow-x: hidden; }
         .brand-logo { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 40px; line-height: 1.2;}
         .brand-logo span { color: var(--primary-accent); }
-        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; transition: 0.2s ease; }
+        .glass-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; }
         .text-muted { color: var(--text-muted) !important; }
 
-        /* 세부 공정 체크리스트 및 뱃지 */
-        .process-steps { display: flex; gap: 6px; margin-top: 12px; margin-bottom: 16px; }
-        .step-badge { flex: 1; text-align: center; padding: 6px 0; border-radius: 6px; font-size: 0.7rem; font-weight: 600; border: 1px solid var(--border-color); background: rgba(0,0,0,0.3); color: #e2e8f0; }
-        .step-badge.done { background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #34d399; }
-        .step-badge.ing { background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.4); color: #818cf8; }
+        /* 상단 KPI 카드 스타일 */
+        .kpi-card { background: linear-gradient(145deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.9) 100%); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px; transition: 0.2s; position: relative; overflow: hidden; }
+        .kpi-card::before { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px; border-radius: 4px 0 0 4px; }
+        .kpi-card.blue::before { background-color: #3b82f6; } .kpi-card.yellow::before { background-color: #eab308; } .kpi-card.green::before { background-color: #10b981; } .kpi-card.purple::before { background-color: #8b5cf6; }
+        .kpi-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+        .kpi-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; } .kpi-icon.yellow { background: rgba(234,179,8,0.15); color: #fde047; } .kpi-icon.green { background: rgba(16,185,129,0.15); color: #34d399; } .kpi-icon.purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
         
-        /* 정보 그리드 */
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; font-size: 0.85rem; }
-        .info-item { background: rgba(0,0,0,0.25); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); }
-        .info-item.full-width { grid-column: span 2; background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.3); }
-        .info-label { color: #e2e8f0; display: block; margin-bottom: 6px; font-size: 0.8rem; font-weight: 500; } 
-        .info-value { color: #ffffff; font-weight: 600; font-size: 1rem; }
-        .info-value.cost { color: #fca5a5; }
-        .info-value.total { color: #818cf8; font-size: 1.15rem; }
-
-        /* 모달 및 폼 스타일 */
-        .modal-content { background-color: var(--surface-color); border: 1px solid rgba(255,255,255,0.2); color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-        .modal-header { border-bottom: 1px solid var(--border-color); padding: 20px 24px;}
-        .modal-footer { border-top: 1px solid var(--border-color); padding: 16px 24px;}
-        .form-control, .form-select { background-color: rgba(255,255,255,0.05) !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.2) !important; }
-        .form-control:focus, .form-select:focus { border-color: var(--primary-accent) !important; box-shadow: 0 0 0 0.25rem rgba(99,102,241,0.25) !important; background-color: rgba(0,0,0,0.5) !important;}
-        .form-control::placeholder { color: #94a3b8; opacity: 0.8; }
-        .modal-label { color: #f8fafc !important; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; display: block; } 
-        
-        .custom-nav-pills .nav-link { color: #cbd5e1; border: 1px solid transparent; margin-right: 8px; font-weight: 500;}
-        .custom-nav-pills .nav-link.active { background-color: rgba(99,102,241,0.2); color: #fff; border-color: var(--primary-accent); }
-
-        .ep-row { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; transition: 0.2s; }
-        .ep-row.completed { border-left: 4px solid var(--secondary-accent); background: rgba(16, 185, 129, 0.05); }
-        .total-cost-panel { background: linear-gradient(90deg, rgba(99,102,241,0.2) 0%, rgba(99,102,241,0.05) 100%); border: 1px solid var(--primary-accent); border-radius: 8px; padding: 16px 20px; }
-
-        .btn-play-link { display: inline-block; background: rgba(99,102,241,0.2); color: #818cf8; border: 1px solid rgba(99,102,241,0.5); padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-decoration: none; margin-right: 6px; margin-bottom: 6px; transition: 0.2s;}
-        .btn-play-link:hover { background: rgba(99,102,241,0.4); color: #fff; }
-
-        /* 네이티브 마케팅 데이터 UI 스타일 */
-        .mkt-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px 16px; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center;}
-        .mkt-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;}
-        .mkt-value { font-size: 1.8rem; font-weight: 800; color: #fff; line-height: 1.2;}
-        .pie-container { position: relative; width: 100%; height: 260px; display: flex; justify-content: center; align-items: center;}
-        
-        .panel-date-picker { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; display: flex; align-items: center; padding: 0 6px; height: 36px;}
+        /* 날짜 픽커 UI */
+        .panel-date-picker { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; display: flex; align-items: center; padding: 0 8px; height: 36px;}
         .panel-date-picker input[type="date"] { font-size: 0.85rem; padding: 0.25rem; color-scheme: dark; background: transparent; border: none; color: white; outline: none; width: 130px; text-align: center; font-weight: 600;}
-
-        /* 커스텀 데이터 테이블 */
-        .data-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: right;}
-        .data-table th { background-color: rgba(0,0,0,0.4); color: #f8fafc; padding: 12px; border-bottom: 2px solid rgba(255,255,255,0.1); font-weight: 600; white-space: nowrap;}
-        .data-table th:first-child, .data-table td:first-child { text-align: left; }
-        .data-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; color: #e2e8f0; }
-        .data-table tr:hover td { background-color: rgba(255,255,255,0.02); }
+        
+        /* 테이블 공통 */
+        .looker-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .looker-table th { background-color: rgba(255,255,255,0.02); color: #cbd5e1; padding: 12px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: 600; }
+        .looker-table th:nth-child(1) { text-align: left; }
+        .looker-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; color: #e2e8f0; }
         .view-bar-container { display: flex; align-items: center; justify-content: flex-end; width: 100%; }
         .view-text { margin-right: 8px; font-weight: 600; color: #fff;}
-        .bar-blue { background-color: #4285F4; height: 6px; border-radius: 3px; }
-        .bar-orange { background-color: #F4B400; height: 6px; border-radius: 3px; }
-        .bar-purple { background-color: #A142F4; height: 6px; border-radius: 3px; }
+        .bar-blue { background-color: #3b82f6; height: 6px; border-radius: 3px; } .bar-orange { background-color: #f59e0b; height: 6px; border-radius: 3px; } .bar-purple { background-color: #8b5cf6; height: 6px; border-radius: 3px; }
+        .retention-text { text-align: right; font-weight: 600; color: #94a3b8; }
 
-        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .spinner-border { width: 3rem; height: 3rem; color: var(--primary-accent); margin-bottom: 1rem;}
+        /* 세부 작품 카드 (신규 디자인) */
+        .proj-card { background: #1e2538; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 24px; }
+        .proj-info-box { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; justify-content: center; }
+        .proj-total-cost { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .kpi-badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; font-weight: 700; margin-left: 8px; }
+        .kpi-badge.success { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+        .kpi-badge.fail { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+        .kpi-badge.wait { background: rgba(255,255,255,0.1); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.2); }
+
+        /* 4단계 공정 뱃지 */
+        .process-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+        .step-badge { text-align: center; padding: 8px 4px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.3); color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 4px;}
+        .step-badge.done { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #10b981; }
+        .step-badge.ing { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); color: #60a5fa; }
+        
+        /* 바로보기 링크 버튼 */
+        .link-btn { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: #93c5fd; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-right: 6px; margin-bottom: 6px; transition: 0.2s;}
+        .link-btn:hover { background: rgba(59,130,246,0.2); color: #fff; }
+
+        /* 모달 폼 스타일 */
+        .modal-content { background-color: var(--surface-color); border: 1px solid rgba(255,255,255,0.1); color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .modal-header, .modal-footer { border-color: rgba(255,255,255,0.05); }
+        .form-control, .form-select { background-color: rgba(0,0,0,0.2) !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary-accent) !important; box-shadow: 0 0 0 0.25rem rgba(59,130,246,0.25) !important; }
+        .modal-label { color: #cbd5e1 !important; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem; display: block; } 
+        
+        .ep-row { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; transition: 0.2s; }
+        .ep-row.completed { border-left: 3px solid var(--secondary-accent); background: rgba(16,185,129,0.05); }
+
+        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 17, 32, 0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .spinner-border { color: var(--primary-accent); margin-bottom: 1rem;}
     </style>
 </head>
 <body>
 
 <div id="loadingOverlay">
     <div class="spinner-border" role="status"></div>
-    <h5 class="text-white fw-bold">구글 시트 실시간 연동 중...</h5>
+    <h5 class="text-white fw-bold">DB 실시간 연동 중...</h5>
     <p class="text-muted small">Marketing, Platform, Episode Data 병합 중</p>
 </div>
 
 <div class="wrapper">
     <div class="sidebar d-none d-xl-flex">
-        <div class="brand-logo">NOVELPIA<span>.</span><br><span style="font-size: 0.9rem; font-weight: 500; color: #cbd5e1;">Studio Control</span></div>
+        <div class="brand-logo">NOVELPIA<span>.</span><br><span style="font-size: 0.9rem; font-weight: 500; color: #94a3b8;">Studio Control</span></div>
         <ul class="nav flex-column gap-2">
-            <li class="nav-item">
-                <a class="nav-link text-white bg-primary rounded px-3 py-2" id="nav-dashboard" href="#" onclick="switchView('dashboard')">
-                    <i class="fas fa-tasks me-2"></i> 제작/공정 대시보드
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-light opacity-75 px-3 py-2" id="nav-marketing" href="#" onclick="switchView('marketing')">
-                    <i class="fas fa-chart-pie me-2"></i> 마케팅/플랫폼 Data
-                </a>
-            </li>
-            <li class="nav-item mt-4">
-                <div class="text-muted small fw-bold px-3 mb-2">관리자 제어</div>
-                <a class="nav-link text-light opacity-75 px-3 py-2" data-bs-toggle="modal" data-bs-target="#manualInputModal" href="#" style="cursor:pointer;">
-                    <i class="fas fa-edit me-2"></i> 수동 데이터 패널
-                </a>
-            </li>
+            <li class="nav-item"><a class="nav-link text-white bg-primary bg-opacity-10 rounded px-3 py-2 border border-primary border-opacity-25" href="#"><i class="fas fa-chart-line me-2 text-primary"></i> 통합 대시보드</a></li>
         </ul>
     </div>
 
     <div class="main-content">
-        
         <header class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
             <div>
-                <h2 class="mb-1 fw-bold text-white">제작 진척도 및 마케팅 통합 뷰</h2>
-                <div class="text-light opacity-75 small">Google Sheets Real-time DB 연동 (Native API)</div>
+                <h2 class="mb-1 fw-bold text-white">제작 진척도 및 성과 통합 뷰</h2>
+                <div class="text-muted small">Google Sheets Real-time DB 연동 (Native API)</div>
             </div>
             
             <div class="d-flex flex-wrap align-items-center gap-3">
-                <div class="panel-date-picker shadow-sm px-2 border-primary" style="border: 1px solid var(--primary-accent);">
-                    <span class="text-primary fw-bold me-2" style="font-size:0.8rem;">전역 설정</span>
+                <div class="panel-date-picker shadow-sm">
+                    <span class="text-primary fw-bold me-2" style="font-size:0.75rem;">전역 설정</span>
                     <input type="date" id="globalStart" class="global-date" value="2026-02-01">
-                    <span class="text-white mx-1">~</span>
+                    <span class="text-muted mx-1">~</span>
                     <input type="date" id="globalEnd" class="global-date" value="2026-02-28">
                 </div>
-                <button class="btn btn-primary fw-bold px-4 shadow-sm" onclick="fetchAllSheetData()">
-                    <i class="fas fa-sync-alt me-2"></i>DB 데이터 동기화
-                </button>
+                <button class="btn btn-primary fw-bold px-3 shadow-sm" onclick="fetchAllSheetData()"><i class="fas fa-sync-alt me-2"></i>DB 새로고침</button>
+                <button class="btn btn-outline-light fw-bold px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#manualInputModal"><i class="fas fa-sliders-h me-2"></i>수동 관리 패널</button>
             </div>
         </header>
 
-        <div id="view-dashboard">
-            <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <div class="glass-card d-flex align-items-center py-3 h-100" style="border-left: 4px solid var(--primary-accent); background: rgba(99,102,241,0.05);">
-                        <div class="bg-primary bg-opacity-25 p-3 rounded-circle me-3 text-primary"><i class="fas fa-wallet fs-4"></i></div>
-                        <div>
-                            <h6 class="text-light mb-1 fw-bold" style="font-size: 0.8rem;">현재 진행 총 제작 투입비 (수동)</h6>
-                            <h4 class="fw-bold text-white mb-0" id="globalProductionCost">₩ 0</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="glass-card d-flex align-items-center py-3 h-100" style="border-left: 4px solid var(--warning-color); background: rgba(245,158,11,0.05);">
-                        <div class="bg-warning bg-opacity-25 p-3 rounded-circle me-3 text-warning"><i class="fas fa-bullhorn fs-4"></i></div>
-                        <div>
-                            <h6 class="text-light mb-1 fw-bold" style="font-size: 0.8rem;">누적 애니메이션 총 마케팅비 (DB)</h6>
-                            <h4 class="fw-bold text-white mb-0" id="topMktCost">₩ 0</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="glass-card d-flex align-items-center py-3 h-100" style="border-left: 4px solid var(--secondary-accent); background: rgba(16,185,129,0.05);">
-                        <div class="bg-success bg-opacity-25 p-3 rounded-circle me-3 text-success"><i class="fas fa-user-plus fs-4"></i></div>
-                        <div>
-                            <h6 class="text-light mb-1 fw-bold" style="font-size: 0.8rem;">애니메이션 평균 가입 CPA (DB)</h6>
-                            <h4 class="fw-bold text-white mb-0" id="topMktCPA">₩ 0</h4>
-                        </div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-6 col-xl-3">
+                <div class="kpi-card blue">
+                    <div class="kpi-icon blue"><i class="fas fa-wallet"></i></div>
+                    <div>
+                        <div class="text-muted small fw-bold mb-1">현재 진행 총 제작 투입비 (수동)</div>
+                        <h4 class="fw-bold text-white mb-0" id="topTotalCost">₩ 0</h4>
                     </div>
                 </div>
             </div>
-
-            <div class="glass-card mb-4 pb-2">
-                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;">
-                    <h5 class="mb-0 fw-bold text-white"><i class="fas fa-chart-area me-2 text-primary"></i>플랫폼 제작 성과 트렌드 (조회수/구독전환)</h5>
+            <div class="col-md-6 col-xl-3">
+                <div class="kpi-card yellow">
+                    <div class="kpi-icon yellow"><i class="fas fa-bullhorn"></i></div>
+                    <div>
+                        <div class="text-muted small fw-bold mb-1">누적 애니메이션 총 마케팅비 (DB)</div>
+                        <h4 class="fw-bold text-white mb-0" id="topMktCost">₩ 0</h4>
+                    </div>
                 </div>
-                <div style="height: 300px; width: 100%;"><canvas id="performanceChart"></canvas></div>
             </div>
-
-            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 mt-5">
-                <h5 class="fw-bold text-white mb-0"><i class="fas fa-film me-2 text-primary"></i>세부 작품별 공정 현황 카드</h5>
-                <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#manualInputModal"><i class="fas fa-plus me-1"></i>카드 데이터 제어</button>
+            <div class="col-md-6 col-xl-3">
+                <div class="kpi-card green">
+                    <div class="kpi-icon green"><i class="fas fa-user-plus"></i></div>
+                    <div>
+                        <div class="text-muted small fw-bold mb-1">애니메이션 평균 가입 CPA (DB)</div>
+                        <h4 class="fw-bold text-white mb-0" id="topAvgCpa">₩ 0</h4>
+                    </div>
+                </div>
             </div>
-            
-            <div class="row g-4 mb-4" id="projectCardsContainer"></div>
+            <div class="col-md-6 col-xl-3">
+                <div class="kpi-card purple">
+                    <div class="kpi-icon purple"><i class="fas fa-photo-video"></i></div>
+                    <div>
+                        <div class="text-muted small fw-bold mb-1">진행 중 작품 수 & 전체 공정률</div>
+                        <h4 class="fw-bold text-white mb-0" id="topProjectStatus">0개 / 0%</h4>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div id="view-marketing" class="d-none">
-            
-            <div class="glass-card mb-4" style="border-top: 4px solid var(--warning-color) !important;">
-                <h5 class="mb-3 fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;">
-                    <i class="fas fa-bullhorn me-2 text-warning"></i>Animation Marketing Data
-                </h5>
-                
-                <div class="row g-3 mb-4">
-                    <div class="col-6 col-md-3"><div class="mkt-box"><div class="mkt-title">총 광고비 집행액</div><div class="mkt-value text-white" id="mBoxAds">0</div></div></div>
-                    <div class="col-6 col-md-3"><div class="mkt-box"><div class="mkt-title">유입 클릭수 합계</div><div class="mkt-value text-info" id="mBoxClicks">0</div></div></div>
-                    <div class="col-6 col-md-3"><div class="mkt-box"><div class="mkt-title">신규 가입수 합계</div><div class="mkt-value text-success" id="mBoxSignups">0</div></div></div>
-                    <div class="col-6 col-md-3"><div class="mkt-box"><div class="mkt-title">가입 CPA (단가)</div><div class="mkt-value text-danger" id="mBoxCPA">0</div></div></div>
+        <div class="row g-4 mb-4">
+            <div class="col-xl-7 col-xxl-8">
+                <div class="glass-card h-100 d-flex flex-column">
+                    <h5 class="mb-4 fw-bold text-white border-bottom pb-3" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-chart-area me-2 text-primary"></i>제작 성과 트렌드</h5>
+                    <div style="height: 340px; width: 100%;"><canvas id="performanceChart"></canvas></div>
                 </div>
-
-                <div class="row g-4">
-                    <div class="col-lg-4">
-                        <div class="bg-dark bg-opacity-50 rounded p-3 h-100 border" style="border-color: rgba(255,255,255,0.05) !important;">
-                            <h6 class="text-white fw-bold mb-3 text-center">작품별 광고 볼륨 비중</h6>
-                            <div class="pie-container"><canvas id="pieChartMkt"></canvas></div>
-                        </div>
-                    </div>
-                    <div class="col-lg-8">
-                        <div class="bg-dark bg-opacity-50 rounded p-3 h-100 border overflow-auto" style="border-color: rgba(255,255,255,0.05) !important; max-height: 330px;">
-                            <h6 class="text-white fw-bold mb-3">작품별 마케팅 효율 상세 Data</h6>
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>작품명</th>
-                                        <th>광고비 (₩)</th>
-                                        <th>클릭수</th>
-                                        <th>CPC (₩)</th>
-                                        <th>가입수</th>
-                                        <th>가입 CPA (₩)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="mktDataTbody"></tbody>
-                            </table>
-                        </div>
+            </div>
+            <div class="col-xl-5 col-xxl-4">
+                <div class="glass-card h-100 d-flex flex-column">
+                    <h5 class="mb-4 fw-bold text-white border-bottom pb-3" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-bullseye me-2 text-warning"></i>작품별 광고 볼륨 비중</h5>
+                    <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+                        <div style="position: relative; width: 100%; height: 260px;"><canvas id="pieChartProject"></canvas></div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="glass-card mb-4" style="border-top: 4px solid #4285F4 !important;">
-                <h5 class="mb-3 fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;">
-                    <i class="fas fa-database me-2" style="color:#4285F4;"></i>Animation Platform Data
-                </h5>
-                
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4"><div class="mkt-box" style="background: rgba(66, 133, 244, 0.1); border-color: rgba(66, 133, 244, 0.3);"><div class="mkt-title">선택기간 총 조회수</div><div class="mkt-value text-white" id="pBoxTotal">0</div></div></div>
-                    <div class="col-md-4"><div class="mkt-box"><div class="mkt-title">회원 조회수 합계</div><div class="mkt-value" style="color: #4285F4;" id="pBoxMem">0</div></div></div>
-                    <div class="col-md-4"><div class="mkt-box"><div class="mkt-title">비회원 조회수 합계</div><div class="mkt-value" style="color: #F4B400;" id="pBoxNon">0</div></div></div>
-                </div>
-
-                <div class="row g-4">
-                    <div class="col-lg-4">
-                        <div class="bg-dark bg-opacity-50 rounded p-3 h-100 border" style="border-color: rgba(255,255,255,0.05) !important;">
-                            <h6 class="text-white fw-bold mb-3 text-center">작품별 총 조회수 비중</h6>
-                            <div class="pie-container"><canvas id="pieChartPlat"></canvas></div>
-                        </div>
-                    </div>
-                    <div class="col-lg-8">
-                        <div class="bg-dark bg-opacity-50 rounded p-3 h-100 border overflow-auto" style="border-color: rgba(255,255,255,0.05) !important; max-height: 330px;">
-                            <h6 class="text-white fw-bold mb-3">작품별 조회수 상세 Data</h6>
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 30%;">작품명</th>
-                                        <th style="width: 20%;">회원 조회</th>
-                                        <th style="width: 20%;">비회원 조회</th>
-                                        <th style="width: 30%;">총 조회수 (Total)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="platDataTbody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div> </div>
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 mt-5">
+            <h5 class="fw-bold text-white mb-0"><i class="fas fa-film me-2 text-primary"></i>세부 작품별 공정 현황 카드</h5>
+        </div>
+        
+        <div class="row g-4 mb-4" id="projectCardsContainer"></div>
+    </div>
 </div>
 
 <div class="modal fade" id="episodeDataModal" tabindex="-1">
@@ -271,19 +187,14 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0">
-                <div class="bg-dark px-4 py-2 border-bottom" style="border-color: rgba(255,255,255,0.05) !important;">
-                    <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem;">
-                        <span>※ 구글 시트 Episode_Data 연동</span>
-                    </div>
-                </div>
                 <div class="table-responsive" style="max-height: 60vh;">
-                    <table class="data-table" style="text-align: right;">
+                    <table class="looker-table">
                         <thead style="position: sticky; top: 0; background: #1e293b; z-index: 10;">
                             <tr>
-                                <th style="width: 35%; text-align: left;">작품명 (novel_name)</th>
-                                <th style="width: 15%; text-align: left;">회차</th>
-                                <th style="width: 35%;">총 조회수 (Total View)</th>
-                                <th style="width: 15%;">리텐션 (%)</th>
+                                <th style="width: 35%;">novel_name</th>
+                                <th style="width: 15%; text-align: left;">epi_num</th>
+                                <th style="width: 35%; text-align: right;">total_view</th>
+                                <th style="width: 15%; text-align: right;">Retention</th>
                             </tr>
                         </thead>
                         <tbody id="episodeDataTbody"></tbody>
@@ -298,18 +209,14 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-dark bg-opacity-50">
-                <h5 class="modal-title fw-bold text-white mb-0"><i class="fas fa-sliders-h me-2 text-primary"></i>대시보드 통합 관리 (프로젝트 & 비용)</h5>
+                <h5 class="modal-title fw-bold text-white mb-0"><i class="fas fa-sliders-h me-2 text-primary"></i>대시보드 통합 관리 패널</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             
             <div class="modal-body p-4 p-md-5" style="max-height: 75vh; overflow-y: auto;">
-                <ul class="nav nav-pills custom-nav-pills mb-4 pb-3 border-bottom" style="border-color: rgba(255,255,255,0.1) !important;" role="tablist">
-                    <li class="nav-item">
-                        <button class="nav-link active px-4 py-2" data-bs-toggle="pill" data-bs-target="#tab-update" type="button"><i class="fas fa-edit me-2"></i>기존 작품 업데이트</button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link px-4 py-2" data-bs-toggle="pill" data-bs-target="#tab-new" type="button"><i class="fas fa-plus-square me-2"></i>신규 작품 등록</button>
-                    </li>
+                <ul class="nav nav-pills custom-nav-pills mb-4 pb-3 border-bottom" style="border-color: rgba(255,255,255,0.05) !important;" role="tablist">
+                    <li class="nav-item"><button class="nav-link active px-4 py-2" data-bs-toggle="pill" data-bs-target="#tab-update" type="button"><i class="fas fa-edit me-2"></i>기존 작품 업데이트</button></li>
+                    <li class="nav-item"><button class="nav-link px-4 py-2" data-bs-toggle="pill" data-bs-target="#tab-new" type="button"><i class="fas fa-plus-square me-2"></i>신규 작품 등록</button></li>
                 </ul>
 
                 <div class="tab-content">
@@ -317,154 +224,86 @@
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <label class="modal-label text-warning">업데이트 할 작품 선택</label>
-                                <select class="form-select fw-bold fs-5 py-2 text-white" id="projectSelector" onchange="loadProjectData()"></select>
+                                <select class="form-select fw-bold fs-5 py-2" id="projectSelector" onchange="loadProjectData()"></select>
                             </div>
                             <div class="col-md-6">
-                                <label class="modal-label">담당 팀 및 PD</label>
-                                <input type="text" class="form-control fw-bold fs-5 text-white" id="updateTeamPD">
-                            </div>
-
-                            <div class="col-md-12 mt-4">
-                                <label class="modal-label"><i class="fas fa-image me-1"></i>썸네일 변경 (URL 입력 또는 파일 직접 업로드)</label>
-                                <div class="input-group">
-                                    <input type="text" id="updateProjectImgUrl" class="form-control text-white" placeholder="기존 썸네일 유지 (변경 시 새 URL 입력)">
-                                    <input type="file" id="updateProjectImgFile" class="form-control text-white" accept="image/*" style="max-width: 250px;">
-                                </div>
-                            </div>
-
-                            <div class="col-md-12 mt-4">
-                                <label class="modal-label text-info"><i class="fas fa-calculator me-1"></i>통합 인건비 산출 (인원 × 투입비율 × 기준단가)</label>
-                                <div class="p-3 rounded border" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1) !important;">
-                                    <div class="row g-2 align-items-center mb-2">
-                                        <div class="col-md-4"><span class="text-white small fw-bold">국내 AI 아트사업팀</span> <span class="text-muted" style="font-size:0.7rem;">(₩2,500,000)</span></div>
-                                        <div class="col-md-2"><input type="number" id="upDomMem" class="form-control form-control-sm text-white bg-dark border-secondary" placeholder="인원(명)" oninput="calcUpdateTotalCost()"></div>
-                                        <div class="col-md-2"><input type="number" id="upDomRat" class="form-control form-control-sm text-white bg-dark border-secondary" step="0.1" placeholder="비율(1.0)" oninput="calcUpdateTotalCost()"></div>
-                                        <div class="col-md-4 text-end"><span class="text-light fw-bold" id="upDomSub">₩ 0</span></div>
-                                    </div>
-                                    <div class="row g-2 align-items-center mb-2">
-                                        <div class="col-md-4"><span class="text-white small fw-bold">필리핀 스튜디오</span> <span class="text-muted" style="font-size:0.7rem;">(₩600,000)</span></div>
-                                        <div class="col-md-2"><input type="number" id="upPhMem" class="form-control form-control-sm text-white bg-dark border-secondary" placeholder="인원(명)" oninput="calcUpdateTotalCost()"></div>
-                                        <div class="col-md-2"><input type="number" id="upPhRat" class="form-control form-control-sm text-white bg-dark border-secondary" step="0.1" placeholder="비율(1.0)" oninput="calcUpdateTotalCost()"></div>
-                                        <div class="col-md-4 text-end"><span class="text-light fw-bold" id="upPhSub">₩ 0</span></div>
-                                    </div>
-                                    <div class="row g-2 align-items-center border-top pt-2 mt-2" style="border-color: rgba(255,255,255,0.05) !important;">
-                                        <div class="col-md-4 d-flex align-items-center gap-2">
-                                            <span class="text-white small fw-bold text-nowrap">외부/기타</span>
-                                            <input type="number" id="upExtBase" class="form-control form-control-sm text-white bg-dark border-secondary" placeholder="기준단가 입력" oninput="calcUpdateTotalCost()">
-                                        </div>
-                                        <div class="col-md-2"><input type="number" id="upExtMem" class="form-control form-control-sm text-white bg-dark border-secondary" placeholder="인원" oninput="calcUpdateTotalCost()"></div>
-                                        <div class="col-md-2"><input type="number" id="upExtRat" class="form-control form-control-sm text-white bg-dark border-secondary" step="0.1" placeholder="비율" oninput="calcUpdateTotalCost()"></div>
-                                        <div class="col-md-4 text-end"><span class="text-light fw-bold" id="upExtSub">₩ 0</span></div>
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-2 px-3 py-2 rounded" style="background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3);">
-                                    <span class="text-white fw-bold">기본 인건비 총합</span>
-                                    <input type="hidden" id="updateLaborCost" value="0">
-                                    <span class="text-info fw-bold fs-5" id="updateLaborTotal">₩ 0</span>
-                                </div>
+                                <label class="modal-label">제작 스튜디오 재할당</label>
+                                <select class="form-select fw-medium py-2" id="updateStudio" onchange="calcUpdateTotalCost()"></select>
                             </div>
                             
-                            <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;"><i class="fas fa-money-check-alt me-2 text-danger"></i>부대 비용 관리 (누적액)</h6></div>
-                            <div class="col-md-6 mt-3">
-                                <div class="border rounded p-3" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1) !important;">
+                            <div class="col-md-3 mt-4"><label class="modal-label">담당 팀 및 PD</label><input type="text" class="form-control fw-bold" id="updateTeamPD"></div>
+                            <div class="col-md-3 mt-4"><label class="modal-label">투입 인원 (명)</label><input type="number" id="updateMembers" class="form-control fw-bold" oninput="calcUpdateTotalCost()"></div>
+                            <div class="col-md-2 mt-4"><label class="modal-label">투입 비율</label><input type="number" id="updateRatio" step="0.1" class="form-control fw-bold" oninput="calcUpdateTotalCost()"></div>
+                            <div class="col-md-4 mt-4"><label class="modal-label text-muted">산출 인건비 (읽기 전용)</label><input type="text" id="updateLaborResult" class="form-control fw-bold text-muted" readonly></div>
+                            
+                            <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-flag-checkered me-2 text-info"></i>성과 KPI 목표치 설정</h6></div>
+                            <div class="col-md-6 mt-2">
+                                <label class="modal-label">목표 가입 CPA (₩)</label>
+                                <div class="input-group"><span class="input-group-text bg-dark border-secondary text-muted">₩</span><input type="number" id="updateTargetCpa" class="form-control fw-bold text-white" placeholder="예: 2500"></div>
+                            </div>
+                            <div class="col-md-6 mt-2">
+                                <label class="modal-label">목표 총 조회수 (뷰)</label>
+                                <div class="input-group"><input type="number" id="updateTargetViews" class="form-control fw-bold text-white" placeholder="예: 500000"><span class="input-group-text bg-dark border-secondary text-muted">회</span></div>
+                            </div>
+
+                            <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-money-check-alt me-2 text-danger"></i>부대 비용 관리 (누적액)</h6></div>
+                            <div class="col-md-6 mt-2">
+                                <div class="border rounded p-3" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.05) !important;">
                                     <div class="form-check form-switch d-flex align-items-center mb-2">
                                         <input class="form-check-input" type="checkbox" id="toggleApi" onchange="calcUpdateTotalCost()" style="transform: scale(1.2); margin-top:0;">
                                         <label class="form-check-label text-white fw-bold ms-3">API 비용 발생</label>
                                     </div>
-                                    <div id="wrapApiCost" class="input-group mt-2" style="display: none;">
-                                        <span class="input-group-text bg-dark text-muted border-secondary">₩</span>
-                                        <input type="number" id="apiCostInput" class="form-control fw-bold text-white" oninput="calcUpdateTotalCost()">
-                                    </div>
+                                    <div id="wrapApiCost" class="input-group mt-2" style="display: none;"><span class="input-group-text bg-dark border-secondary">₩</span><input type="number" id="apiCostInput" class="form-control fw-bold text-white" oninput="calcUpdateTotalCost()"></div>
                                 </div>
                             </div>
-                            <div class="col-md-6 mt-3">
-                                <div class="border rounded p-3" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1) !important;">
+                            <div class="col-md-6 mt-2">
+                                <div class="border rounded p-3" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.05) !important;">
                                     <div class="form-check form-switch d-flex align-items-center mb-2">
                                         <input class="form-check-input" type="checkbox" id="toggleOutsource" onchange="calcUpdateTotalCost()" style="transform: scale(1.2); margin-top:0;">
                                         <label class="form-check-label text-white fw-bold ms-3">외주 비용 발생</label>
                                     </div>
-                                    <div id="wrapOutsourceCost" class="input-group mt-2" style="display: none;">
-                                        <span class="input-group-text bg-dark text-muted border-secondary">₩</span>
-                                        <input type="number" id="outsourceCostInput" class="form-control fw-bold text-white" oninput="calcUpdateTotalCost()">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-12 mt-4">
-                                <div class="total-cost-panel d-flex justify-content-between align-items-center">
-                                    <span class="text-white fw-bold fs-5"><i class="fas fa-calculator me-2"></i>총 투입 합산 비용</span>
-                                    <span class="text-white fw-bold fs-3" id="updateTotalCostResult">₩ 0</span>
+                                    <div id="wrapOutsourceCost" class="input-group mt-2" style="display: none;"><span class="input-group-text bg-dark border-secondary">₩</span><input type="number" id="outsourceCostInput" class="form-control fw-bold text-white" oninput="calcUpdateTotalCost()"></div>
                                 </div>
                             </div>
 
                             <div class="col-12 mt-5">
-                                <div class="d-flex justify-content-between align-items-end border-bottom pb-2 mb-3" style="border-color: rgba(255,255,255,0.1) !important;">
-                                    <h6 class="fw-bold text-white mb-0"><i class="fas fa-list-ul me-2 text-success"></i>회차별 세부 공정 (4단계) 및 동영상 링크</h6>
-                                    <div class="bg-success bg-opacity-25 border border-success px-3 py-1 rounded">
-                                        <span class="text-white small me-2">전체 달성률:</span>
-                                        <strong class="text-success fs-5" id="totalProgressBar">0%</strong>
-                                    </div>
+                                <div class="d-flex justify-content-between align-items-end border-bottom pb-2 mb-3" style="border-color: rgba(255,255,255,0.05) !important;">
+                                    <h6 class="fw-bold text-white mb-0"><i class="fas fa-list-ul me-2 text-success"></i>회차별 세부 공정 (4단계)</h6>
+                                    <div class="bg-success bg-opacity-10 border border-success px-3 py-1 rounded"><span class="text-white small me-2">자동 합산 진행률:</span><strong class="text-success fs-5" id="totalProgressBar">0%</strong></div>
                                 </div>
-                                <div id="episodeListContainer" style="max-height: 450px; overflow-y: auto; padding-right: 10px;"></div>
+                                <div id="episodeListContainer" style="max-height: 400px; overflow-y: auto; padding-right: 10px;"></div>
                             </div>
                         </div>
                     </div>
 
                     <div class="tab-pane fade" id="tab-new">
                         <div class="row g-4">
-                            <div class="col-12"><h6 class="fw-bold text-white mb-0 border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;">작품 기본 정보</h6></div>
-                            <div class="col-md-6"><label class="modal-label">작품 ID (고유 영문/숫자. 예: nv3)</label><input type="text" id="newProjectId" class="form-control fw-medium"></div>
+                            <div class="col-md-6"><label class="modal-label">작품 ID (영/숫자)</label><input type="text" id="newProjectId" class="form-control fw-medium" placeholder="예: nv3"></div>
                             <div class="col-md-6"><label class="modal-label">신규 작품명</label><input type="text" id="newProjectName" class="form-control fw-medium"></div>
-                            <div class="col-md-6"><label class="modal-label">메인 담당 스튜디오명</label><input type="text" id="newProjectStudio" class="form-control fw-medium" placeholder="예: 국내+필리핀 혼합 스튜디오"></div>
+                            <div class="col-md-6"><label class="modal-label">썸네일 이미지 URL</label><input type="text" id="newProjectImg" class="form-control fw-medium" placeholder="https://..."></div>
                             <div class="col-md-6"><label class="modal-label">담당 팀 및 PD</label><input type="text" id="newProjectPD" class="form-control fw-medium"></div>
 
-                            <div class="col-md-12 mt-4">
-                                <label class="modal-label"><i class="fas fa-image me-1"></i>썸네일 등록 (URL 입력 또는 파일 직접 업로드)</label>
-                                <div class="input-group">
-                                    <input type="text" id="newProjectImgUrl" class="form-control text-white" placeholder="이미지 URL 입력 (파일 업로드 시 무시됨)">
-                                    <input type="file" id="newProjectImgFile" class="form-control text-white" accept="image/*" style="max-width: 250px;">
+                            <div class="col-md-6 mt-4">
+                                <label class="modal-label">제작 스튜디오 할당</label>
+                                <select class="form-select fw-medium" id="newStudio" onchange="handleNewStudioChange()"></select>
+                            </div>
+                            <div class="col-md-6 mt-4" id="customStudioDiv" style="display: none;">
+                                <div class="d-flex gap-2">
+                                    <div class="flex-grow-1"><label class="modal-label">신규 스튜디오 명</label><input type="text" id="customStudioName" class="form-control fw-bold text-white"></div>
+                                    <div class="flex-grow-1"><label class="modal-label">1인 기준 인건비 (₩)</label><input type="number" id="customStudioCost" class="form-control fw-bold text-white" value="2000000"></div>
                                 </div>
                             </div>
 
-                            <div class="col-12 mt-4"><h6 class="fw-bold text-white mb-0 border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;">제작 파이프라인 및 초기 비용 설계</h6></div>
-                            <div class="col-md-3">
-                                <label class="modal-label">총 기획 회차</label>
-                                <div class="input-group"><input type="number" id="newProjectEps" class="form-control fw-bold text-white" value="12"><span class="input-group-text bg-dark text-muted border-secondary">화</span></div>
-                            </div>
-                            <div class="col-md-9">
-                                <label class="modal-label text-info"><i class="fas fa-calculator me-1"></i>통합 인건비 산출</label>
-                                <div class="p-3 rounded border" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1) !important;">
-                                    <div class="row g-2 align-items-center mb-2">
-                                        <div class="col-md-4"><span class="text-white small fw-bold">국내 AI 아트사업팀</span> <span class="text-muted" style="font-size:0.7rem;">(₩2,500,000)</span></div>
-                                        <div class="col-md-2"><input type="number" id="newDomMem" class="form-control form-control-sm text-white bg-dark border-secondary" placeholder="인원" oninput="calcNewLabor()"></div>
-                                        <div class="col-md-2"><input type="number" id="newDomRat" class="form-control form-control-sm text-white bg-dark border-secondary" step="0.1" placeholder="비율" oninput="calcNewLabor()"></div>
-                                        <div class="col-md-4 text-end"><span class="text-light fw-bold" id="newDomSub">₩ 0</span></div>
-                                    </div>
-                                    <div class="row g-2 align-items-center mb-2">
-                                        <div class="col-md-4"><span class="text-white small fw-bold">필리핀 스튜디오</span> <span class="text-muted" style="font-size:0.7rem;">(₩600,000)</span></div>
-                                        <div class="col-md-2"><input type="number" id="newPhMem" class="form-control form-control-sm text-white bg-dark border-secondary" placeholder="인원" oninput="calcNewLabor()"></div>
-                                        <div class="col-md-2"><input type="number" id="newPhRat" class="form-control form-control-sm text-white bg-dark border-secondary" step="0.1" placeholder="비율" oninput="calcNewLabor()"></div>
-                                        <div class="col-md-4 text-end"><span class="text-light fw-bold" id="newPhSub">₩ 0</span></div>
-                                    </div>
-                                    <div class="row g-2 align-items-center border-top pt-2 mt-2" style="border-color: rgba(255,255,255,0.05) !important;">
-                                        <div class="col-md-4 d-flex align-items-center gap-2">
-                                            <span class="text-white small fw-bold text-nowrap">외부/기타</span>
-                                            <input type="number" id="newExtBase" class="form-control form-control-sm text-white bg-dark border-secondary" placeholder="기준단가 입력" oninput="calcNewLabor()">
-                                        </div>
-                                        <div class="col-md-2"><input type="number" id="newExtMem" class="form-control form-control-sm text-white bg-dark border-secondary" placeholder="인원" oninput="calcNewLabor()"></div>
-                                        <div class="col-md-2"><input type="number" id="newExtRat" class="form-control form-control-sm text-white bg-dark border-secondary" step="0.1" placeholder="비율" oninput="calcNewLabor()"></div>
-                                        <div class="col-md-4 text-end"><span class="text-light fw-bold" id="newExtSub">₩ 0</span></div>
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-2 px-3 py-2 rounded" style="background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3);">
-                                    <span class="text-white fw-bold">초기 통합 인건비 합계</span>
-                                    <input type="hidden" id="newLaborCost" value="0">
-                                    <span class="text-info fw-bold fs-5" id="newLaborTotal">₩ 0</span>
-                                </div>
-                            </div>
+                            <div class="col-md-3 mt-3"><label class="modal-label">총 기획 회차</label><input type="number" id="newProjectEps" class="form-control fw-bold text-white" value="12"></div>
+                            <div class="col-md-3 mt-3"><label class="modal-label">투입 인원 (명)</label><input type="number" id="newMembers" class="form-control fw-bold" value="1" oninput="calcNewLabor()"></div>
+                            <div class="col-md-2 mt-3"><label class="modal-label">투입 비율</label><input type="number" id="newRatio" class="form-control fw-bold" step="0.1" value="1.0" oninput="calcNewLabor()"></div>
+                            <div class="col-md-4 mt-3"><label class="modal-label text-danger">기본 인건비 산출액</label><input type="text" id="newLaborResult" class="form-control text-danger fw-bold" readonly style="background: rgba(239, 68, 68, 0.1) !important;"></div>
                             
+                            <div class="col-md-6 mt-4"><label class="modal-label">초기 목표 가입 CPA (₩)</label><input type="number" id="newTargetCpa" class="form-control fw-bold text-white" value="3000"></div>
+                            <div class="col-md-6 mt-4"><label class="modal-label">초기 목표 조회수 (뷰)</label><input type="number" id="newTargetViews" class="form-control fw-bold text-white" value="100000"></div>
+
                             <div class="col-12 mt-4 text-end">
-                                <button type="button" class="btn btn-success px-4 fw-bold" onclick="addNewProject()"><i class="fas fa-plus me-2"></i>새 프로젝트 생성하기</button>
+                                <button type="button" class="btn btn-success px-4 fw-bold" onclick="addNewProject()"><i class="fas fa-plus me-2"></i>새 프로젝트 생성</button>
                             </div>
                         </div>
                     </div>
@@ -473,7 +312,7 @@
             
             <div class="modal-footer bg-dark bg-opacity-25 d-flex justify-content-between">
                 <button type="button" class="btn btn-secondary fw-medium me-2" data-bs-dismiss="modal">닫기</button>
-                <button type="button" id="btnSaveUpdate" class="btn btn-primary px-4 fw-bold" onclick="saveManualData()"><i class="fas fa-save me-2"></i>화면에 즉시 반영</button>
+                <button type="button" class="btn btn-primary px-4 fw-bold" onclick="saveManualData()"><i class="fas fa-save me-2"></i>화면에 즉시 반영</button>
             </div>
         </div>
     </div>
@@ -481,97 +320,48 @@
 
 <script>
     // ============================================================================
-    // 1. SPA 메뉴 전환 로직
-    // ============================================================================
-    function switchView(viewName) {
-        const dashboardView = document.getElementById('view-dashboard');
-        const marketingView = document.getElementById('view-marketing');
-        const navDashboard = document.getElementById('nav-dashboard');
-        const navMarketing = document.getElementById('nav-marketing');
-
-        if (viewName === 'dashboard') {
-            dashboardView.classList.remove('d-none');
-            marketingView.classList.add('d-none');
-            navDashboard.classList.add('bg-primary', 'text-white');
-            navDashboard.classList.remove('text-light', 'opacity-75');
-            navMarketing.classList.remove('bg-primary', 'text-white');
-            navMarketing.classList.add('text-light', 'opacity-75');
-        } else if (viewName === 'marketing') {
-            marketingView.classList.remove('d-none');
-            dashboardView.classList.add('d-none');
-            navMarketing.classList.add('bg-primary', 'text-white');
-            navMarketing.classList.remove('text-light', 'opacity-75');
-            navDashboard.classList.remove('bg-primary', 'text-white');
-            navDashboard.classList.add('text-light', 'opacity-75');
-            // 차트 리사이즈 이슈 방지
-            if(pieChartMkt) pieChartMkt.resize();
-            if(pieChartPlat) pieChartPlat.resize();
-        }
-    }
-
-    // ============================================================================
-    // 2. 연동 API 및 전역 상태 관리
+    // 1. 연동 API 및 전역 상태 관리
     // ============================================================================
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6DX4XNhxa7ORDJbZd32Hv6fx3PQbiJWOuCwBsBEFVj-mitSCkq6Hq54nWCkZtNOG0/exec';
     
-    // 로컬 하이브리드 프로젝트 데이터 (공정 4단계, URL/제목, 혼합 인건비)
+    let studios = {
+        '국내 AI 아트사업팀': 2500000,
+        '글로벌 필리핀 스튜디오': 600000
+    };
+
+    // 로컬 하이브리드 프로젝트 데이터 (targetCpa, targetViews, 4단계 progress 적용)
     let mData = {
-        'nv1': { 
-            name: '아카데미 플레이어를...', studio: '국내 AI 아트사업팀', pd: '성현승 PD', 
-            labor: 7500000, 
-            laborInfo: { dM: 3, dR: 1.0, pM: 0, pR: 0, eB: 0, eM: 0, eR: 0 },
-            useApi: true, api: 450000, useOut: false, out: 0, 
-            eps: 12, 
-            progress: [4,4,4,3,2,0,0,0,0,0,0,0], 
-            epTitles: ['프롤로그: 입학', '1화: 각성', '2화: 위기', '3화: 반격', '', '', '', '', '', '', '', ''],
-            epUrls: ['https://novelpia.com', 'https://novelpia.com', 'https://novelpia.com', '', '', '', '', '', '', '', '', ''],
-            img: 'https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&q=80&w=100' 
-        },
-        'nv2': { 
-            name: '빌런은 살고 싶다', studio: '글로벌 필리핀 스튜디오', pd: 'Jose Manager', 
-            labor: 600000, 
-            laborInfo: { dM: 0, dR: 0, pM: 1, pR: 1.0, eB: 0, eM: 0, eR: 0 },
-            useApi: false, api: 0, useOut: true, out: 800000, 
-            eps: 15, 
-            progress: [2,1,0,0,0,0,0,0,0,0,0,0,0,0,0], 
-            epTitles: [], epUrls: [],
-            img: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&q=80&w=100' 
-        }
+        'nv1': { name: '아카데미 플레이어를...', studio: '국내 AI 아트사업팀', pd: '성현승 PD', members: 3, ratio: 1.0, useApi: true, api: 450000, useOut: false, out: 0, eps: 12, progress: [4,4,4,4,4,2,0,0,0,0,0,0], targetCpa: 2500, targetViews: 500000, img: 'https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&q=80&w=100' },
+        'nv2': { name: '빌런은 살고 싶다', studio: '글로벌 필리핀 스튜디오', pd: 'Jose Manager', members: 1, ratio: 1.0, useApi: false, api: 0, useOut: true, out: 800000, eps: 15, progress: [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0], targetCpa: 3000, targetViews: 100000, img: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&q=80&w=100' }
     };
 
     let dbData = { marketing: [], platform: [], episode: [] };
-    let perfChart, pieChartMkt, pieChartPlat;
+    let dbProjectStats = {}; // DB에서 가져온 실제 성과 저장소
+    let perfChart, projectPieChart;
 
     document.addEventListener('DOMContentLoaded', () => {
-        Chart.defaults.color = '#ffffff'; 
+        Chart.defaults.color = '#cbd5e1'; 
         Chart.defaults.font.family = 'Pretendard';
         
         perfChart = new Chart(document.getElementById('performanceChart').getContext('2d'), {
             type: 'line', data: { labels: [], datasets: [] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#fff', font: { weight: 'bold' } } } }, scales: { x: { ticks: { color: '#e2e8f0' } }, y: { ticks: { color: '#e2e8f0' } }, y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#34d399', font: { weight: 'bold' } } } } }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#fff' } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' } }, y1: { position: 'right', grid: { drawOnChartArea: false } } } }
         });
 
-        pieChartMkt = new Chart(document.getElementById('pieChartMkt'), { 
+        projectPieChart = new Chart(document.getElementById('pieChartProject'), { 
             type: 'pie', data: { labels: [], datasets: [] }, 
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', padding: 20 } } } } 
-        });
-
-        pieChartPlat = new Chart(document.getElementById('pieChartPlat'), { 
-            type: 'pie', data: { labels: [], datasets: [] }, 
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', padding: 20 } } } } 
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#cbd5e1' } } } } 
         });
 
         document.querySelectorAll('.global-date').forEach(el => el.addEventListener('change', renderData));
         
         populateSelectors();
-        renderProjectCards();
         fetchAllSheetData(); 
-        
         document.getElementById('manualInputModal').addEventListener('shown.bs.modal', loadProjectData);
     });
 
     // ============================================================================
-    // 3. 구글 시트 연동 및 대시보드 렌더링
+    // 2. 구글 시트 연동 (Chart.js 및 성과 계산)
     // ============================================================================
     async function fetchAllSheetData() {
         document.getElementById('loadingOverlay').style.display = 'flex';
@@ -583,7 +373,6 @@
         } catch (error) {
             console.error(error);
             document.getElementById('loadingOverlay').style.display = 'none';
-            alert('데이터 동기화 실패. 콘솔을 확인해주세요.');
         }
     }
 
@@ -593,217 +382,182 @@
         if(!dbData || !dbData.marketing) return;
         const gs = new Date(document.getElementById('globalStart').value); 
         const ge = new Date(document.getElementById('globalEnd').value + 'T23:59:59');
-        
-        // 마케팅 변수
-        let mktByProject = {};
-        let totalAds=0, totalClicks=0, totalSignups=0, totalPayments=0;
-        
-        // 플랫폼 변수
-        let platByProject = {};
-        let tMap = {}; // 트렌드용
-        let totalViews=0, totalMemViews=0, totalNonViews=0;
+        let tmkt=0, ads=0, click=0, sign=0, pay=0;
+        let tMap = {}, pMap = {};
+        dbProjectStats = {}; // 초기화
 
-        // 1. 마케팅 데이터 파싱
         (dbData.marketing || []).forEach(row => {
             let dObj = new Date(row.date);
             if(isNaN(dObj.getTime())) return;
             let name = row.novel_name || '기타';
-            let rAds = sFloat(row.ad_cost), rClick = sFloat(row.clicks), rSign = sFloat(row.signups), rPay = sFloat(row.payments);
+            let rAds = sFloat(row.ad_cost), rSign = sFloat(row.signups);
             
             if(dObj >= gs && dObj <= ge) {
-                totalAds+=rAds; totalClicks+=rClick; totalSignups+=rSign; totalPayments+=rPay;
-                if(!mktByProject[name]) mktByProject[name] = { ads:0, clicks:0, signups:0, payments:0 };
-                mktByProject[name].ads += rAds;
-                mktByProject[name].clicks += rClick;
-                mktByProject[name].signups += rSign;
-                mktByProject[name].payments += rPay;
+                ads+=rAds; sign+=rSign; tmkt+=rAds;
+                if(pMap[name]) pMap[name]+=rAds; else pMap[name]=rAds;
+                
+                if(!dbProjectStats[name]) dbProjectStats[name] = { ads: 0, signups: 0, views: 0 };
+                dbProjectStats[name].ads += rAds;
+                dbProjectStats[name].signups += rSign;
             }
         });
 
-        // 2. 플랫폼 데이터 파싱
         (dbData.platform || []).forEach(row => {
             let dObj = new Date(row.date);
             if(isNaN(dObj.getTime())) return;
             let name = row.novel_name || '기타';
-            let rMem = sFloat(row.member_views), rNon = sFloat(row.non_member_views), rTot = sFloat(row.total_views), rSub = sFloat(row.sub_conversions);
+            let rTot = sFloat(row.total_views), rSub = sFloat(row.sub_conversions);
             
             if(dObj >= gs && dObj <= ge) {
-                totalViews+=rTot; totalMemViews+=rMem; totalNonViews+=rNon;
-
                 let k = dObj.toISOString().split('T')[0];
                 if(!tMap[k]) tMap[k] = {v:0, s:0};
                 tMap[k].v += rTot; tMap[k].s += rSub;
                 
-                if(!platByProject[name]) platByProject[name] = {m:0, nm:0, tot:0};
-                platByProject[name].m += rMem; platByProject[name].nm += rNon; platByProject[name].tot += rTot;
+                if(!dbProjectStats[name]) dbProjectStats[name] = { ads: 0, signups: 0, views: 0 };
+                dbProjectStats[name].views += rTot;
             }
         });
 
-        // 글로벌 지표 계산
-        let globalCPA = totalSignups > 0 ? (totalAds / totalSignups) : 0;
+        // 상단 카드 업데이트
+        const globalCpa = sign > 0 ? (ads / sign) : 0;
+        document.getElementById('topMktCost').innerText = `₩ ${tmkt.toLocaleString()}`;
+        document.getElementById('topAvgCpa').innerText = `₩ ${Math.round(globalCpa).toLocaleString()}`;
 
-        // 대시보드 상단 업데이트
-        document.getElementById('topMktCost').innerText = `₩ ${totalAds.toLocaleString()}`;
-        document.getElementById('topMktCPA').innerText = `₩ ${Math.round(globalCPA).toLocaleString()}`;
-        
-        // 마케팅 탭 썸네일 업데이트
-        document.getElementById('mBoxAds').innerText = `₩ ${totalAds.toLocaleString()}`;
-        document.getElementById('mBoxClicks').innerText = totalClicks.toLocaleString();
-        document.getElementById('mBoxSignups').innerText = totalSignups.toLocaleString();
-        document.getElementById('mBoxCPA').innerText = `₩ ${Math.round(globalCPA).toLocaleString()}`;
-        
-        // 플랫폼 탭 썸네일 업데이트
-        document.getElementById('pBoxTotal').innerText = totalViews.toLocaleString();
-        document.getElementById('pBoxMem').innerText = totalMemViews.toLocaleString();
-        document.getElementById('pBoxNon').innerText = totalNonViews.toLocaleString();
+        // 차트 업데이트
+        projectPieChart.data.labels = Object.keys(pMap);
+        projectPieChart.data.datasets = [{ data: Object.values(pMap), backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444', '#10b981', '#8b5cf6'], borderWidth: 0 }];
+        projectPieChart.update();
 
-        // 파이 차트 업데이트 (마케팅 & 플랫폼)
-        let mktChartLabels = [], mktChartData = [];
-        for (const [pName, pData] of Object.entries(mktByProject)) { mktChartLabels.push(pName); mktChartData.push(pData.ads); }
-        pieChartMkt.data.labels = mktChartLabels;
-        pieChartMkt.data.datasets = [{ data: mktChartData, backgroundColor: ['#4285F4', '#FBBC05', '#EA4335', '#34A853', '#A142F4', '#0F9D58'], borderWidth: 0 }];
-        pieChartMkt.update();
-
-        let platChartLabels = [], platChartData = [];
-        for (const [pName, pData] of Object.entries(platByProject)) { platChartLabels.push(pName); platChartData.push(pData.tot); }
-        pieChartPlat.data.labels = platChartLabels;
-        pieChartPlat.data.datasets = [{ data: platChartData, backgroundColor: ['#4285F4', '#FBBC05', '#EA4335', '#34A853', '#A142F4', '#0F9D58'], borderWidth: 0 }];
-        pieChartPlat.update();
-
-        // 트렌드 차트 업데이트
         let dates = Object.keys(tMap).sort();
         perfChart.data.labels = dates;
-        perfChart.data.datasets[0] = { label: '총 조회수', data: dates.map(d=>tMap[d].v), borderColor: '#818cf8', backgroundColor: 'rgba(129,140,248,0.2)', borderWidth: 3, tension: 0.4, fill: true, yAxisID: 'y' };
+        perfChart.data.datasets[0] = { label: '총 조회수', data: dates.map(d=>tMap[d].v), borderColor: '#818cf8', backgroundColor: 'rgba(129,140,248,0.1)', borderWidth: 3, tension: 0.4, fill: true, yAxisID: 'y' };
         perfChart.data.datasets[1] = { label: '구독 전환', data: dates.map(d=>tMap[d].s), borderColor: '#34d399', borderWidth: 3, borderDash: [5,5], tension: 0.4, yAxisID: 'y1' };
         perfChart.update();
 
-        // 마케팅 데이터 테이블 렌더링
-        const mktTbody = document.getElementById('mktDataTbody');
-        mktTbody.innerHTML = '';
-        let mArr = Object.keys(mktByProject).map(k => ({name:k, ...mktByProject[k]}));
-        mArr.sort((a,b) => b.ads - a.ads);
-        mArr.forEach(d => {
-            let cpc = d.clicks > 0 ? Math.round(d.ads / d.clicks) : 0;
-            let cpa = d.signups > 0 ? Math.round(d.ads / d.signups) : 0;
-            mktTbody.insertAdjacentHTML('beforeend', `<tr><td class="fw-bold">${d.name}</td><td>₩${d.ads.toLocaleString()}</td><td>${d.clicks.toLocaleString()}</td><td>₩${cpc.toLocaleString()}</td><td class="text-success">${d.signups.toLocaleString()}</td><td class="text-danger">₩${cpa.toLocaleString()}</td></tr>`);
-        });
-
-        // 플랫폼 데이터 테이블 렌더링
-        const platTbody = document.getElementById('platDataTbody');
-        platTbody.innerHTML = '';
-        let pArr = Object.keys(platByProject).map(k => ({name:k, ...platByProject[k]}));
-        pArr.sort((a,b) => b.tot - a.tot);
-        let mTot = Math.max(...pArr.map(d=>d.tot), 1);
-        pArr.forEach(d => {
-            let mPct=(d.m/mTot)*100, nmPct=(d.nm/mTot)*100, tPct=(d.tot/mTot)*100;
-            platTbody.insertAdjacentHTML('beforeend', `<tr><td class="fw-bold">${d.name}</td><td><div class="view-bar-container"><span class="view-text">${d.m.toLocaleString()}</span><div class="bar-blue" style="width:${mPct}%;"></div></div></td><td><div class="view-bar-container"><span class="view-text">${d.nm.toLocaleString()}</span><div class="bar-orange" style="width:${nmPct}%;"></div></div></td><td><div class="view-bar-container"><span class="view-text text-info">${d.tot.toLocaleString()}</span><div class="bar-purple" style="width:${tPct}%;"></div></div></td></tr>`);
-        });
+        renderProjectCards(); // 카드 렌더링 호출
     }
 
     // ============================================================================
-    // 4. 수동 관리 패널 및 카드 렌더링 로직
+    // 3. UI 렌더링 및 모달 컨트롤 (고도화 버전)
     // ============================================================================
-    
-    async function getThumbnailValue(urlInputId, fileInputId, defaultVal) {
-        const fileInput = document.getElementById(fileInputId);
-        const urlInput = document.getElementById(urlInputId);
-        if (fileInput && fileInput.files && fileInput.files[0]) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result); 
-                reader.readAsDataURL(fileInput.files[0]);
-            });
-        } else if (urlInput && urlInput.value.trim() !== '') {
-            return urlInput.value.trim();
-        }
-        return defaultVal;
-    }
-
     function populateSelectors() {
         const pSel = document.getElementById('projectSelector');
         pSel.innerHTML = '';
-        for (const [key, val] of Object.entries(mData)) {
-            pSel.insertAdjacentHTML('beforeend', `<option value="${key}">${val.name} (${key})</option>`);
+        for (const [key, val] of Object.entries(mData)) { pSel.insertAdjacentHTML('beforeend', `<option value="${key}">${val.name} (${key})</option>`); }
+        
+        const updateStudioSel = document.getElementById('updateStudio');
+        const newStudioSel = document.getElementById('newStudio');
+        updateStudioSel.innerHTML = ''; newStudioSel.innerHTML = '';
+        for (const [sName, sCost] of Object.entries(studios)) {
+            const opt = `<option value="${sName}">${sName}</option>`;
+            updateStudioSel.insertAdjacentHTML('beforeend', opt); newStudioSel.insertAdjacentHTML('beforeend', opt);
         }
+        newStudioSel.insertAdjacentHTML('beforeend', `<option value="custom" class="text-warning fw-bold">+ 스튜디오 직접 추가</option>`);
     }
 
+    // [핵심] 세부 작품별 공정 현황 카드 렌더링
     function renderProjectCards() {
         const container = document.getElementById('projectCardsContainer');
         container.innerHTML = '';
-        let globalTotal = 0;
+        let globalTotalCost = 0;
+        let projCount = 0;
+        let totalProgSum = 0;
 
         for (const [id, data] of Object.entries(mData)) {
-            const totalCost = data.labor + data.api + data.out;
-            globalTotal += totalCost;
+            projCount++;
+            const baseCost = studios[data.studio] || 0;
+            const laborCost = data.members * data.ratio * baseCost;
+            const totalCost = laborCost + data.api + data.out;
+            globalTotalCost += totalCost;
 
+            // 4단계 공정률 계산 (eps * 4)
             let totalChecks = 0;
             let recentEpIdx = 0;
-            let playableLinksHtml = '';
-
             for(let i=0; i<data.eps; i++) {
                 totalChecks += data.progress[i];
                 if(data.progress[i] > 0) recentEpIdx = i;
-                
-                if(data.progress[i] === 4 && data.epUrls[i]) {
-                    const epTitle = data.epTitles[i] ? data.epTitles[i] : `${i+1}화`;
-                    playableLinksHtml += `<a href="${data.epUrls[i]}" target="_blank" class="btn-play-link"><i class="fas fa-play me-1"></i>${epTitle}</a>`;
-                }
             }
-            
             const progressPct = ((totalChecks / (data.eps * 4)) * 100).toFixed(1);
+            totalProgSum += parseFloat(progressPct);
             const rProg = data.progress[recentEpIdx] || 0;
             
-            const s1 = rProg >= 1 ? 'done' : 'ing', i1 = rProg >= 1 ? 'fa-check-circle' : 'fa-spinner fa-spin', t1 = rProg >= 1 ? '콘티 완료' : '콘티 대기';
-            const s2 = rProg >= 2 ? 'done' : (rProg == 1 ? 'ing' : ''), i2 = rProg >= 2 ? 'fa-check-circle' : (rProg == 1 ? 'fa-spinner fa-spin' : 'far fa-circle'), t2 = rProg >= 2 ? '이미지 완료' : (rProg == 1 ? '이미지 작업' : '이미지 대기');
-            const s3 = rProg >= 3 ? 'done' : (rProg == 2 ? 'ing' : ''), i3 = rProg >= 3 ? 'fa-check-circle' : (rProg == 2 ? 'fa-spinner fa-spin' : 'far fa-circle'), t3 = rProg >= 3 ? '영상 완료' : (rProg == 2 ? '영상 편집중' : '영상 대기');
-            const s4 = rProg >= 4 ? 'done' : (rProg == 3 ? 'ing' : ''), i4 = rProg >= 4 ? 'fa-check-circle' : (rProg == 3 ? 'fa-spinner fa-spin' : 'far fa-circle'), t4 = rProg >= 4 ? '업로드 완료' : (rProg == 3 ? '업로드 진행' : '업로드 대기');
+            // 4단계 뱃지 상태
+            const s1 = rProg >= 1 ? 'done' : 'wait', i1 = rProg >= 1 ? 'fa-check-circle' : 'far fa-circle', t1 = '콘티 완료';
+            const s2 = rProg >= 2 ? 'done' : (rProg==1 ? 'ing':'wait'), i2 = rProg >= 2 ? 'fa-check-circle' : (rProg==1?'fa-spinner fa-spin':'far fa-circle'), t2 = '이미지 완료';
+            const s3 = rProg >= 3 ? 'done' : (rProg==2 ? 'ing':'wait'), i3 = rProg >= 3 ? 'fa-check-circle' : (rProg==2?'fa-spinner fa-spin':'far fa-circle'), t3 = '영상 편집중';
+            const s4 = rProg >= 4 ? 'done' : (rProg==3 ? 'ing':'wait'), i4 = rProg >= 4 ? 'fa-check-circle' : (rProg==3?'fa-spinner fa-spin':'far fa-circle'), t4 = '업로드 대기';
 
             const addBadge = data.useApi ? `<span class="badge bg-secondary ms-1" style="font-size:0.65rem;">API</span>` : (data.useOut ? `<span class="badge bg-secondary ms-1" style="font-size:0.65rem;">외주</span>` : '');
             
-            const linksSection = playableLinksHtml ? `
-                <div class="mt-3 border-top pt-2" style="border-color: rgba(255,255,255,0.05) !important;">
-                    <div class="text-light small mb-2 fw-bold"><i class="fas fa-link me-1"></i>바로보기 링크 (업로드 완료)</div>
-                    <div>${playableLinksHtml}</div>
-                </div>` : '';
+            // DB 실적 가져오기
+            const stats = dbProjectStats[data.name] || { ads: 0, signups: 0, views: 0 };
+            const actualCpa = stats.signups > 0 ? Math.round(stats.ads / stats.signups) : 0;
+            const actualViews = stats.views;
+
+            // 성과 평가 로직
+            const cpaSuccess = (actualCpa > 0 && actualCpa <= data.targetCpa) ? 'success' : (actualCpa == 0 ? 'wait' : 'fail');
+            const cpaText = cpaSuccess === 'success' ? '달성' : (cpaSuccess === 'fail' ? '미달' : '대기');
+            const viewSuccess = actualViews >= data.targetViews ? 'success' : 'ing';
+            const viewText = viewSuccess === 'success' ? '달성' : '진행중';
+
+            // 동적 링크 버튼 생성 (progress == 4 인 에피소드만)
+            let linksHtml = '';
+            for(let i=0; i<data.eps; i++) {
+                if(data.progress[i] === 4) {
+                    const epTitle = i === 0 ? '프롤로그: 시작' : `${i}화: 에피소드${i}`;
+                    linksHtml += `<div class="link-btn"><i class="fas fa-play"></i> ${epTitle}</div>`;
+                }
+            }
+            if(linksHtml === '') linksHtml = '<span class="text-muted small">업로드된 회차가 없습니다.</span>';
 
             const html = `
             <div class="col-xl-6">
-                <div class="glass-card h-100 d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3" style="border-color: rgba(255,255,255,0.1) !important;">
+                <div class="proj-card h-100 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
                         <div class="d-flex gap-3 align-items-center">
-                            <img src="${data.img}" class="rounded border" style="width: 80px; height: 80px; object-fit: cover;">
+                            <img src="${data.img}" class="rounded" style="width: 80px; height: 80px; object-fit: cover;">
                             <div>
                                 <h4 class="mb-1 text-white fw-bold">${data.name}</h4>
-                                <span class="text-light opacity-75 small">총 ${data.eps}화 기획</span>
-                                <div class="mt-2 text-${progressPct >= 100 ? 'success' : 'warning'}" style="font-size: 0.85rem; font-weight: 700;"><i class="fas fa-chart-pie me-1"></i>전체 진행률: ${progressPct}%</div>
+                                <div class="text-muted small mb-1">총 ${data.eps}화 기획</div>
+                                <div class="text-warning" style="font-size: 0.85rem; font-weight: 700;"><i class="fas fa-chart-pie me-1"></i>전체 진행률: ${progressPct}%</div>
                             </div>
                         </div>
                         <div class="text-end">
                             <div class="text-info fw-bold">${data.studio}</div>
-                            <div class="text-light opacity-75 small mt-1">${data.pd}</div>
+                            <div class="text-muted small mt-1">${data.pd}</div>
                         </div>
                     </div>
-                    <div class="info-grid mb-2">
-                        <div class="info-item"><span class="info-label">기본 통합 인건비</span><span class="info-value cost">₩${data.labor.toLocaleString()}</span></div>
-                        <div class="info-item"><span class="info-label">추가 발생 비용</span><span class="info-value cost">₩${(data.api+data.out).toLocaleString()} ${addBadge}</span></div>
-                        <div class="info-item full-width d-flex justify-content-between align-items-center">
-                            <span class="info-label text-white mb-0 fw-bold"><i class="fas fa-wallet me-2"></i>총 제작 투입 비용</span>
-                            <span class="info-value total fw-bold">₩ ${totalCost.toLocaleString()}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="text-white small mb-2 mt-2 fw-medium">최근 진행 회차 (${recentEpIdx+1}화) 공정 현황</div>
-                    <div class="process-steps mb-0">
-                        <div class="step-badge ${s1}"><i class="fas ${i1} me-1"></i>${t1}</div>
-                        <div class="step-badge ${s2}"><i class="fas ${i2} me-1"></i>${t2}</div>
-                        <div class="step-badge ${s3}"><i class="fas ${i3} me-1"></i>${t3}</div>
-                        <div class="step-badge ${s4}"><i class="fas ${i4} me-1"></i>${t4}</div>
-                    </div>
-                    
-                    ${linksSection}
 
-                    <div class="mt-auto pt-3 border-top mt-3 text-end" style="border-color: rgba(255,255,255,0.05) !important;">
-                        <button class="btn btn-sm btn-outline-info fw-bold border-secondary text-info bg-dark bg-opacity-25" onclick="openEpisodeDataModal('${data.name}')">
+                    <div class="row g-2 mb-3">
+                        <div class="col-6"><div class="proj-info-box"><span class="text-muted small fw-bold mb-1">기본 통합 인건비</span><span class="text-danger fw-bold fs-5">₩${laborCost.toLocaleString()}</span></div></div>
+                        <div class="col-6"><div class="proj-info-box"><span class="text-muted small fw-bold mb-1">추가 발생 비용</span><span class="text-danger fw-bold fs-5">₩${(data.api+data.out).toLocaleString()} ${addBadge}</span></div></div>
+                    </div>
+
+                    <div class="proj-total-cost mb-4">
+                        <span class="text-white fw-bold"><i class="fas fa-wallet me-2"></i>총 제작 투입 비용</span>
+                        <span class="text-primary fw-bold fs-5">₩ ${totalCost.toLocaleString()}</span>
+                    </div>
+
+                    <div class="row g-2 mb-4">
+                        <div class="col-6"><div class="proj-info-box py-2"><span class="text-muted small mb-1">목표 CPA (₩${data.targetCpa.toLocaleString()})</span><div class="text-white fw-bold">현재: ₩${actualCpa.toLocaleString()} <span class="kpi-badge ${cpaSuccess}">${cpaText}</span></div></div></div>
+                        <div class="col-6"><div class="proj-info-box py-2"><span class="text-muted small mb-1">목표 조회수 (${data.targetViews.toLocaleString()})</span><div class="text-white fw-bold">현재: ${actualViews.toLocaleString()} <span class="kpi-badge ${viewSuccess === 'success' ? 'success' : 'wait'}">${viewText}</span></div></div></div>
+                    </div>
+
+                    <div class="text-white small fw-bold mb-2">최근 진행 회차 (${recentEpIdx+1}화) 공정 현황</div>
+                    <div class="process-grid mb-4">
+                        <div class="step-badge ${s1}"><i class="fas ${i1}"></i> ${t1}</div>
+                        <div class="step-badge ${s2}"><i class="fas ${i2}"></i> ${t2}</div>
+                        <div class="step-badge ${s3}"><i class="fas ${i3}"></i> ${t3}</div>
+                        <div class="step-badge ${s4}"><i class="fas ${i4}"></i> ${t4}</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="text-white small fw-bold mb-2"><i class="fas fa-link me-1"></i> 바로보기 링크 (업로드 완료)</div>
+                        <div class="d-flex flex-wrap">${linksHtml}</div>
+                    </div>
+
+                    <div class="mt-auto text-end border-top pt-3" style="border-color: rgba(255,255,255,0.05) !important;">
+                        <button class="btn btn-outline-info btn-sm fw-bold border-secondary text-info bg-dark bg-opacity-50 px-3" onclick="openEpisodeDataModal('${data.name}')">
                             <i class="fas fa-list-ol me-2"></i>에피소드별 리텐션 DB
                         </button>
                     </div>
@@ -811,21 +565,66 @@
             </div>`;
             container.insertAdjacentHTML('beforeend', html);
         }
-        document.getElementById('globalProductionCost').innerText = "₩ " + globalTotal.toLocaleString();
+        
+        // 상단 카드 업데이트
+        document.getElementById('topTotalCost').innerText = "₩ " + globalTotalCost.toLocaleString();
+        const avgProgress = projCount > 0 ? (totalProgSum / projCount).toFixed(1) : 0;
+        document.getElementById('topProjectStatus').innerText = `${projCount}개 / ${avgProgress}%`;
+    }
+
+    // ============================================================================
+    // 4. 수동 관리 패널 로직 (4단계 대응)
+    // ============================================================================
+    function loadProjectData() {
+        const id = document.getElementById('projectSelector').value;
+        const d = mData[id];
+        if(!d) return;
+
+        document.getElementById('updateStudio').value = d.studio;
+        document.getElementById('updateTeamPD').value = d.pd;
+        document.getElementById('updateMembers').value = d.members;
+        document.getElementById('updateRatio').value = d.ratio;
+        
+        document.getElementById('toggleApi').checked = d.useApi;
+        document.getElementById('toggleOutsource').checked = d.useOut;
+        document.getElementById('apiCostInput').value = d.api || '';
+        document.getElementById('outsourceCostInput').value = d.out || '';
+        document.getElementById('wrapApiCost').style.display = d.useApi ? 'flex' : 'none';
+        document.getElementById('wrapOutsourceCost').style.display = d.useOut ? 'flex' : 'none';
+
+        document.getElementById('updateTargetCpa').value = d.targetCpa || '';
+        document.getElementById('updateTargetViews').value = d.targetViews || '';
+        
+        calcUpdateTotalCost();
+        
+        const container = document.getElementById('episodeListContainer');
+        container.innerHTML = ''; 
+        for (let i = 0; i < d.eps; i++) {
+            const p = d.progress[i] || 0;
+            const comp = p === 4 ? 'completed' : ''; 
+            const chk1 = p >= 1 ? 'checked' : ''; const chk2 = p >= 2 ? 'checked' : ''; const chk3 = p >= 3 ? 'checked' : ''; const chk4 = p === 4 ? 'checked' : '';
+            const html = `
+            <div class="ep-row d-flex flex-wrap justify-content-between align-items-center ${comp}">
+                <div class="fw-bold text-white mb-2 mb-md-0" style="width: 70px;">제 ${i+1}화</div>
+                <div class="d-flex gap-3 flex-wrap flex-grow-1 justify-content-end">
+                    <div class="form-check form-switch"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk1}><label class="form-check-label text-light small ms-1">콘티</label></div>
+                    <div class="form-check form-switch"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk2}><label class="form-check-label text-light small ms-1">이미지</label></div>
+                    <div class="form-check form-switch"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk3}><label class="form-check-label text-light small ms-1">영상</label></div>
+                    <div class="form-check form-switch"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk4}><label class="form-check-label text-warning fw-bold small ms-1">업로드</label></div>
+                </div>
+            </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+        calcTotalProgress();
     }
 
     function calcUpdateTotalCost() {
-        const domSub = (parseFloat(document.getElementById('upDomMem').value)||0) * (parseFloat(document.getElementById('upDomRat').value)||0) * 2500000;
-        const phSub = (parseFloat(document.getElementById('upPhMem').value)||0) * (parseFloat(document.getElementById('upPhRat').value)||0) * 600000;
-        const extSub = (parseFloat(document.getElementById('upExtMem').value)||0) * (parseFloat(document.getElementById('upExtRat').value)||0) * (parseFloat(document.getElementById('upExtBase').value)||0);
-        
-        document.getElementById('upDomSub').innerText = '₩ ' + domSub.toLocaleString();
-        document.getElementById('upPhSub').innerText = '₩ ' + phSub.toLocaleString();
-        document.getElementById('upExtSub').innerText = '₩ ' + extSub.toLocaleString();
-        
-        const laborCost = domSub + phSub + extSub;
-        document.getElementById('updateLaborCost').value = laborCost;
-        document.getElementById('updateLaborTotal').innerText = laborCost > 0 ? "₩ " + laborCost.toLocaleString() : "₩ 0";
+        const studio = document.getElementById('updateStudio').value;
+        const baseCost = studios[studio] || 0;
+        const m = parseFloat(document.getElementById('updateMembers').value) || 0;
+        const r = parseFloat(document.getElementById('updateRatio').value) || 0;
+        const laborCost = m * r * baseCost;
+        document.getElementById('updateLaborResult').value = laborCost > 0 ? "₩ " + laborCost.toLocaleString() : "₩ 0";
 
         const useApi = document.getElementById('toggleApi').checked;
         const useOut = document.getElementById('toggleOutsource').checked;
@@ -834,234 +633,115 @@
 
         const apiCost = useApi ? (parseFloat(document.getElementById('apiCostInput').value) || 0) : 0;
         const outCost = useOut ? (parseFloat(document.getElementById('outsourceCostInput').value) || 0) : 0;
-        
-        const totalCost = laborCost + apiCost + outCost;
-        document.getElementById('updateTotalCostResult').innerText = totalCost > 0 ? "₩ " + totalCost.toLocaleString() : "₩ 0";
-    }
-
-    function calcNewLabor() {
-        const domSub = (parseFloat(document.getElementById('newDomMem').value)||0) * (parseFloat(document.getElementById('newDomRat').value)||0) * 2500000;
-        const phSub = (parseFloat(document.getElementById('newPhMem').value)||0) * (parseFloat(document.getElementById('newPhRat').value)||0) * 600000;
-        const extSub = (parseFloat(document.getElementById('newExtMem').value)||0) * (parseFloat(document.getElementById('newExtRat').value)||0) * (parseFloat(document.getElementById('newExtBase').value)||0);
-        
-        document.getElementById('newDomSub').innerText = '₩ ' + domSub.toLocaleString();
-        document.getElementById('newPhSub').innerText = '₩ ' + phSub.toLocaleString();
-        document.getElementById('newExtSub').innerText = '₩ ' + extSub.toLocaleString();
-        
-        const laborCost = domSub + phSub + extSub;
-        document.getElementById('newLaborCost').value = laborCost;
-        document.getElementById('newLaborTotal').innerText = laborCost > 0 ? "₩ " + laborCost.toLocaleString() : "₩ 0";
-    }
-
-    function loadProjectData() {
-        const id = document.getElementById('projectSelector').value;
-        const d = mData[id];
-        if(!d) return;
-
-        document.getElementById('updateTeamPD').value = d.pd;
-        
-        document.getElementById('upDomMem').value = d.laborInfo.dM || '';
-        document.getElementById('upDomRat').value = d.laborInfo.dR || '';
-        document.getElementById('upPhMem').value = d.laborInfo.pM || '';
-        document.getElementById('upPhRat').value = d.laborInfo.pR || '';
-        document.getElementById('upExtBase').value = d.laborInfo.eB || '';
-        document.getElementById('upExtMem').value = d.laborInfo.eM || '';
-        document.getElementById('upExtRat').value = d.laborInfo.eR || '';
-        
-        document.getElementById('updateProjectImgUrl').value = '';
-        document.getElementById('updateProjectImgFile').value = '';
-
-        document.getElementById('toggleApi').checked = d.useApi;
-        document.getElementById('toggleOutsource').checked = d.useOut;
-        document.getElementById('apiCostInput').value = d.api || '';
-        document.getElementById('outsourceCostInput').value = d.out || '';
-        
-        calcUpdateTotalCost();
-        
-        const container = document.getElementById('episodeListContainer');
-        container.innerHTML = ''; 
-        for (let i = 0; i < d.eps; i++) {
-            const epTitle = d.epTitles[i] || '';
-            const epUrl = d.epUrls[i] || '';
-            const p = d.progress[i] || 0;
-            const comp = p === 4 ? 'completed' : ''; 
-            const chk1 = p >= 1 ? 'checked' : ''; const chk2 = p >= 2 ? 'checked' : ''; 
-            const chk3 = p >= 3 ? 'checked' : ''; const chk4 = p === 4 ? 'checked' : '';
-            
-            const html = `
-            <div class="ep-row ${comp}" data-idx="${i}">
-                <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
-                    <div class="fw-bold text-white fs-6" style="width: 55px;">${i+1} 화</div>
-                    <div class="flex-grow-1" style="min-width: 150px;">
-                        <input type="text" class="form-control form-control-sm text-white ep-title bg-dark border-secondary" placeholder="영상 제목 (예: 프롤로그)" value="${epTitle}">
-                    </div>
-                    <div class="flex-grow-1" style="min-width: 200px;">
-                        <input type="text" class="form-control form-control-sm text-info ep-url bg-dark border-secondary" placeholder="동영상 URL (업로드 시 링크 생성)" value="${epUrl}">
-                    </div>
-                </div>
-                <div class="d-flex gap-3 flex-wrap bg-dark bg-opacity-50 p-2 rounded">
-                    <div class="form-check form-switch"><input class="form-check-input ep-check" data-step="1" type="checkbox" onchange="calcTotalProgress()" ${chk1}><label class="text-light small ms-1">콘티</label></div>
-                    <div class="form-check form-switch"><input class="form-check-input ep-check" data-step="2" type="checkbox" onchange="calcTotalProgress()" ${chk2}><label class="text-light small ms-1">이미지</label></div>
-                    <div class="form-check form-switch"><input class="form-check-input ep-check" data-step="3" type="checkbox" onchange="calcTotalProgress()" ${chk3}><label class="text-light small ms-1">영상완료</label></div>
-                    <div class="form-check form-switch"><input class="form-check-input ep-check" data-step="4" type="checkbox" onchange="calcTotalProgress()" ${chk4}><label class="text-success fw-bold small ms-1">업로드완료</label></div>
-                </div>
-            </div>`;
-            container.insertAdjacentHTML('beforeend', html);
-        }
-        calcTotalProgress();
+        document.getElementById('updateTotalCostResult').innerText = "₩ " + (laborCost + apiCost + outCost).toLocaleString();
     }
 
     function calcTotalProgress() {
-        let totalPoints = 0;
-        let maxPoints = 0;
+        const checkboxes = document.querySelectorAll('.ep-check');
+        if(checkboxes.length === 0) return;
+        let checkedCount = 0;
+        checkboxes.forEach(cb => { if(cb.checked) checkedCount++; });
+        const percentage = (checkedCount / checkboxes.length) * 100;
+        document.getElementById('totalProgressBar').innerText = percentage.toFixed(1) + '%';
         
         document.querySelectorAll('.ep-row').forEach(row => {
-            maxPoints += 4; 
-            const checks = row.querySelectorAll('.ep-check');
-            let rowScore = 0;
-            if(checks[0].checked) rowScore = 1;
-            if(checks[1].checked) rowScore = 2;
-            if(checks[2].checked) rowScore = 3;
-            if(checks[3].checked) rowScore = 4;
-            
-            totalPoints += rowScore;
-            if(rowScore === 4) row.classList.add('completed');
+            const checks = row.querySelectorAll('.ep-check:checked');
+            if(checks.length === 4) row.classList.add('completed');
             else row.classList.remove('completed');
         });
-        
-        const percentage = maxPoints > 0 ? (totalPoints / maxPoints) * 100 : 0;
-        document.getElementById('totalProgressBar').innerText = percentage.toFixed(1) + '%';
     }
 
-    window.saveManualData = async function() {
-        const btn = document.getElementById('btnSaveUpdate');
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>반영 중...';
-        btn.disabled = true;
+    window.saveManualData = function() {
+        const id = document.getElementById('projectSelector').value;
+        mData[id].studio = document.getElementById('updateStudio').value;
+        mData[id].pd = document.getElementById('updateTeamPD').value;
+        mData[id].members = parseFloat(document.getElementById('updateMembers').value) || 0;
+        mData[id].ratio = parseFloat(document.getElementById('updateRatio').value) || 0;
+        mData[id].useApi = document.getElementById('toggleApi').checked;
+        mData[id].useOut = document.getElementById('toggleOutsource').checked;
+        mData[id].api = mData[id].useApi ? (parseFloat(document.getElementById('apiCostInput').value) || 0) : 0;
+        mData[id].out = mData[id].useOut ? (parseFloat(document.getElementById('outsourceCostInput').value) || 0) : 0;
+        mData[id].targetCpa = parseFloat(document.getElementById('updateTargetCpa').value) || 0;
+        mData[id].targetViews = parseFloat(document.getElementById('updateTargetViews').value) || 0;
 
-        try {
-            const id = document.getElementById('projectSelector').value;
-            
-            mData[id].pd = document.getElementById('updateTeamPD').value;
-            
-            mData[id].laborInfo = {
-                dM: parseFloat(document.getElementById('upDomMem').value)||0,
-                dR: parseFloat(document.getElementById('upDomRat').value)||0,
-                pM: parseFloat(document.getElementById('upPhMem').value)||0,
-                pR: parseFloat(document.getElementById('upPhRat').value)||0,
-                eB: parseFloat(document.getElementById('upExtBase').value)||0,
-                eM: parseFloat(document.getElementById('upExtMem').value)||0,
-                eR: parseFloat(document.getElementById('upExtRat').value)||0
-            };
-            mData[id].labor = parseFloat(document.getElementById('updateLaborCost').value) || 0;
-            
-            mData[id].useApi = document.getElementById('toggleApi').checked;
-            mData[id].useOut = document.getElementById('toggleOutsource').checked;
-            mData[id].api = mData[id].useApi ? (parseFloat(document.getElementById('apiCostInput').value) || 0) : 0;
-            mData[id].out = mData[id].useOut ? (parseFloat(document.getElementById('outsourceCostInput').value) || 0) : 0;
+        let newProgress = [];
+        document.querySelectorAll('.ep-row').forEach(row => {
+            const checks = row.querySelectorAll('.ep-check');
+            let val = 0;
+            if(checks[0].checked) val=1;
+            if(checks[1].checked) val=2;
+            if(checks[2].checked) val=3;
+            if(checks[3].checked) val=4;
+            newProgress.push(val);
+        });
+        mData[id].progress = newProgress;
 
-            const newImg = await getThumbnailValue('updateProjectImgUrl', 'updateProjectImgFile', mData[id].img);
-            mData[id].img = newImg;
-
-            let newProgress = [];
-            let newTitles = [];
-            let newUrls = [];
-
-            document.querySelectorAll('.ep-row').forEach(row => {
-                const checks = row.querySelectorAll('.ep-check');
-                let val = 0;
-                if(checks[0].checked) val=1;
-                if(checks[1].checked) val=2;
-                if(checks[2].checked) val=3;
-                if(checks[3].checked) val=4;
-                newProgress.push(val);
-
-                newTitles.push(row.querySelector('.ep-title').value.trim());
-                newUrls.push(row.querySelector('.ep-url').value.trim());
-            });
-            
-            mData[id].progress = newProgress;
-            mData[id].epTitles = newTitles;
-            mData[id].epUrls = newUrls;
-
-            renderProjectCards();
-            alert('업데이트가 성공적으로 반영되었습니다.');
-            bootstrap.Modal.getInstance(document.getElementById('manualInputModal')).hide();
-        } catch (e) {
-            console.error(e);
-            alert("저장 중 오류가 발생했습니다.");
-        } finally {
-            btn.innerHTML = '<i class="fas fa-save me-2"></i>화면에 즉시 반영';
-            btn.disabled = false;
-        }
+        renderProjectCards();
+        alert('카드 영역에 실시간 반영되었습니다.');
+        bootstrap.Modal.getInstance(document.getElementById('manualInputModal')).hide();
     }
 
-    window.addNewProject = async function() {
+    function handleNewStudioChange() {
+        document.getElementById('customStudioDiv').style.display = document.getElementById('newStudio').value === 'custom' ? 'block' : 'none';
+        calcNewLabor();
+    }
+
+    function calcNewLabor() {
+        const val = document.getElementById('newStudio').value;
+        let baseCost = val === 'custom' ? (parseFloat(document.getElementById('customStudioCost').value) || 0) : (studios[val] || 0);
+        const m = parseFloat(document.getElementById('newMembers').value) || 0;
+        const r = parseFloat(document.getElementById('newRatio').value) || 0;
+        const cost = m * r * baseCost;
+        document.getElementById('newLaborResult').value = cost > 0 ? "₩ " + cost.toLocaleString() : "₩ 0";
+    }
+
+    window.addNewProject = function() {
         const id = document.getElementById('newProjectId').value.trim().toLowerCase();
         const name = document.getElementById('newProjectName').value.trim();
-        const studio = document.getElementById('newProjectStudio').value.trim() || '혼합 스튜디오';
         const pd = document.getElementById('newProjectPD').value.trim();
         const eps = parseInt(document.getElementById('newProjectEps').value) || 12;
-        const labor = parseFloat(document.getElementById('newLaborCost').value) || 0;
+        const img = document.getElementById('newProjectImg').value.trim() || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=100'; 
+        
+        let studioVal = document.getElementById('newStudio').value;
+        if(studioVal === 'custom') {
+            const cName = document.getElementById('customStudioName').value.trim();
+            const cCost = parseFloat(document.getElementById('customStudioCost').value) || 0;
+            if(!cName) { alert("신규 스튜디오 명을 입력해주세요."); return; }
+            studios[cName] = cCost; 
+            studioVal = cName;
+            populateSelectors();
+        }
 
         if(!id || !name || !pd) { alert("필수 항목(ID, 작품명, 담당자)을 모두 입력해주세요."); return; }
         if(mData[id]) { alert("이미 존재하는 작품 ID입니다."); return; }
 
-        const img = await getThumbnailValue('newProjectImgUrl', 'newProjectImgFile', 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=100');
-
         mData[id] = { 
-            name: name, studio: studio, pd: pd, 
-            labor: labor, 
-            laborInfo: {
-                dM: parseFloat(document.getElementById('newDomMem').value)||0,
-                dR: parseFloat(document.getElementById('newDomRat').value)||0,
-                pM: parseFloat(document.getElementById('newPhMem').value)||0,
-                pR: parseFloat(document.getElementById('newPhRat').value)||0,
-                eB: parseFloat(document.getElementById('newExtBase').value)||0,
-                eM: parseFloat(document.getElementById('newExtMem').value)||0,
-                eR: parseFloat(document.getElementById('newExtRat').value)||0
-            },
+            name: name, studio: studioVal, pd: pd, 
+            members: parseFloat(document.getElementById('newMembers').value)||1, ratio: parseFloat(document.getElementById('newRatio').value)||1.0, 
             useApi: false, api: 0, useOut: false, out: 0, 
-            eps: eps, 
-            progress: Array(eps).fill(0), 
-            epTitles: Array(eps).fill(''),
-            epUrls: Array(eps).fill(''),
-            img: img 
+            eps: eps, progress: Array(eps).fill(0), img: img,
+            targetCpa: parseFloat(document.getElementById('newTargetCpa').value) || 0,
+            targetViews: parseFloat(document.getElementById('newTargetViews').value) || 0
         };
 
-        populateSelectors();
-        renderProjectCards();
-        alert("신규 작품이 성공적으로 생성되었습니다!");
-
-        document.getElementById('newProjectId').value = '';
-        document.getElementById('newProjectName').value = '';
-        document.getElementById('newProjectStudio').value = '';
-        document.getElementById('newProjectPD').value = '';
-        document.getElementById('newDomMem').value = '';
-        document.getElementById('newDomRat').value = '';
-        document.getElementById('newPhMem').value = '';
-        document.getElementById('newPhRat').value = '';
-        document.getElementById('newExtBase').value = '';
-        document.getElementById('newExtMem').value = '';
-        document.getElementById('newExtRat').value = '';
-        document.getElementById('newProjectImgUrl').value = '';
-        document.getElementById('newProjectImgFile').value = '';
-        calcNewLabor();
+        populateSelectors(); renderProjectCards();
+        alert("신규 작품 카드가 대시보드 하단에 생성되었습니다!");
         
+        document.getElementById('newProjectId').value = ''; document.getElementById('newProjectName').value = ''; document.getElementById('newProjectPD').value = ''; document.getElementById('newProjectImg').value = '';
         document.querySelector('[data-bs-target="#tab-update"]').click();
         document.getElementById('projectSelector').value = id;
         loadProjectData();
     }
 
     // ============================================================================
-    // 5. 에피소드 상세 데이터 모달 연동 (구글 시트)
+    // 5. 모달 (에피소드) 연동
     // ============================================================================
     window.openEpisodeDataModal = function(searchName) {
         const tbody = document.getElementById('episodeDataTbody');
         tbody.innerHTML = ''; 
         const list = (dbData.episode || []).filter(d => d.novel_name && d.novel_name.includes(searchName));
-        
         if(list.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">해당 작품의 플랫폼 연동 조회수 데이터가 없습니다.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">해당 작품의 에피소드 데이터가 DB에 없습니다.</td></tr>';
         } else {
             let maxV = Math.max(...list.map(d=>sFloat(d.total_views)), 1);
             list.forEach((d, i) => {
@@ -1069,10 +749,9 @@
                 const ret = retStr === '' ? '-' : retStr + '%';
                 const v = sFloat(d.total_views);
                 const title = i === 0 ? `<div class="fw-bold text-white">${d.novel_name}</div>` : '';
-                tbody.insertAdjacentHTML('beforeend', `<tr><td>${title}</td><td class="text-muted text-start">${d.episode_num} 화</td><td><div class="view-bar-container"><span class="view-text">${v.toLocaleString()}</span><div class="bar-blue" style="width:${(v/maxV)*100}%;"></div></div></td><td class="retention-text">${ret}</td></tr>`);
+                tbody.insertAdjacentHTML('beforeend', `<tr><td>${title}</td><td class="text-muted text-start">${d.episode_num} 화</td><td><div class="view-bar-container" style="justify-content:flex-start;"><span class="view-text text-start" style="width:45px;">${v.toLocaleString()}</span><div class="bar-blue" style="width:${(v/maxV)*100}%;"></div></div></td><td class="retention-text">${ret}</td></tr>`);
             });
         }
-        document.getElementById('modalDateLabel').innerText = `Data Synced: ${document.getElementById('globalEnd').value.replace(/-/g, '. ')}`;
         new bootstrap.Modal(document.getElementById('episodeDataModal')).show();
     }
 </script>
