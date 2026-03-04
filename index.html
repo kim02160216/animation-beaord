@@ -92,7 +92,7 @@
 
 <div id="loadingOverlay">
     <div class="spinner-border" role="status"></div>
-    <h5 class="text-white fw-bold">DB 실시간 연동 중...</h5>
+    <h5 class="text-white fw-bold" id="loadingText">DB 실시간 연동 중...</h5>
     <p class="text-muted small">데이터를 불러오고 구성합니다.</p>
 </div>
 
@@ -177,7 +177,9 @@
                 </div>
             </div>
 
-            <div class="row g-4" id="projectCardsContainer"></div>
+            <div class="row g-4" id="projectCardsContainer">
+                <div class="col-12 text-center text-muted py-5"><i class="fas fa-spinner fa-spin me-2"></i>데이터를 불러오는 중입니다...</div>
+            </div>
         </div>
 
         <div id="section-marketing" class="pt-5 mb-5 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
@@ -368,6 +370,9 @@
                                         <span class="text-white small me-2">자동 합산 진행률:</span><strong class="text-success fs-5" id="totalProgressBar">0%</strong>
                                     </div>
                                 </div>
+                                <div class="p-3 bg-dark bg-opacity-25 border rounded mb-3" style="border-color: rgba(255,255,255,0.05) !important;">
+                                    <p class="mb-0 text-muted small"><i class="fas fa-info-circle me-1"></i> 토글 스위치를 클릭하여 회차별 완료된 공정을 체크하세요. 메인 카드의 [완료/진행 회차] 영역에 즉각 분리 반영됩니다.</p>
+                                </div>
                                 <div id="episodeListContainer" style="max-height: 400px; overflow-y: auto; padding-right: 10px;"></div>
                             </div>
                         </div>
@@ -435,7 +440,7 @@
 </div>
 
 <script>
-    // ★★★ [주의] 방금 배포하신 '새 버전'의 웹 앱 URL을 반드시 여기에 붙여넣으세요! ★★★
+    // ★★★ 여기에 본인의 '새 버전' 배포 URL을 넣어주세요! ★★★
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6DX4XNhxa7ORDJbZd32Hv6fx3PQbiJWOuCwBsBEFVj-mitSCkq6Hq54nWCkZtNOG0/exec';
     
     let mData = {};
@@ -514,6 +519,7 @@
                     }
                 });
             }
+            // 🚨 임시 가짜 데이터(fallback) 코드를 완전히 삭제했습니다!
 
             populateSelectors();
             renderData();
@@ -635,8 +641,14 @@
         let globalTotalCost = 0, costDom = 0, costPh = 0, costOther = 0;
         let projCount = 0, totalProgSum = 0;
 
+        // 🚨 아무 작품도 없을 때 대시보드를 비우고 숫자를 0으로 리셋합니다.
         if (Object.keys(mData).length === 0) {
-            container.innerHTML = '<div class="col-12 text-center py-5 text-muted">등록된 프로젝트가 없습니다.</div>';
+            container.innerHTML = '<div class="col-12 text-center py-5 text-muted">등록된 프로젝트가 없습니다. 수동 패널에서 신규 작품을 등록해주세요.</div>';
+            if (document.getElementById('topTotalCost')) document.getElementById('topTotalCost').innerText = "₩ 0";
+            if (document.getElementById('topCostDom')) document.getElementById('topCostDom').innerText = "₩ 0";
+            if (document.getElementById('topCostPh')) document.getElementById('topCostPh').innerText = "₩ 0";
+            if (document.getElementById('topCostOther')) document.getElementById('topCostOther').innerText = "₩ 0";
+            if (document.getElementById('topProjectStatus')) document.getElementById('topProjectStatus').innerText = `0개 / 0%`;
             return;
         }
 
@@ -666,7 +678,7 @@
             let totalChecks = 0, completedEps = [], inProgressEp = -1, inProgressStatus = 0;
 
             for(let i=0; i<data.eps; i++) {
-                let p = data.progress[i] || 0;
+                let p = data.progress[i];
                 totalChecks += p;
                 if(p === 4) { completedEps.push(i + 1); } 
                 else if (p > 0 && inProgressEp === -1) { inProgressEp = i + 1; inProgressStatus = p; } 
@@ -790,6 +802,10 @@
         if (document.getElementById('topProjectStatus')) document.getElementById('topProjectStatus').innerText = `${projCount}개 / ${avgProgress}%`;
     }
 
+    // ============================================================================
+    // 4. 수동 관리 패널 로직 (이미지 초고속 압축 기능 추가)
+    // ============================================================================
+    
     function previewImage(input, previewId) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();
@@ -801,7 +817,7 @@
         }
     }
 
-    // ★ 파일 크기를 강제로 줄이는 압축 로직 (서버 튕김 방지)
+    // 🌟 이미지 용량을 획기적으로 줄여서 서버 오류를 차단하는 압축 함수
     function resizeImage(file, maxSize, callback) {
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -815,7 +831,8 @@
                 canvas.width = width; canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
-                callback(canvas.toDataURL('image/jpeg', 0.7)); // 70% 압축
+                // 60% 퀄리티로 초강력 압축 (썸네일이므로 화질 문제 없음)
+                callback(canvas.toDataURL('image/jpeg', 0.6)); 
             };
             img.src = e.target.result;
         };
@@ -828,11 +845,12 @@
 
         const file = fileInput.files[0];
         return new Promise((resolve, reject) => {
-            resizeImage(file, 400, async function(base64Data) {
+            // 이미지 크기를 300px로 제한하여 압축
+            resizeImage(file, 300, async function(base64Data) {
                 try {
                     const response = await fetch(SCRIPT_URL, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'text/plain' },
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({ action: 'uploadImage', data: base64Data, filename: file.name })
                     });
                     const result = await response.json();
@@ -867,8 +885,12 @@
         if(!d) return;
         
         syncCheckboxesToArray(d); 
-        if(newEps > d.eps) { for(let i=0; i < newEps - d.eps; i++) d.progress.push(0); } 
-        else if (newEps < d.eps) { d.progress = d.progress.slice(0, newEps); }
+        
+        if(newEps > d.eps) {
+            for(let i=0; i < newEps - d.eps; i++) d.progress.push(0); 
+        } else if (newEps < d.eps) {
+            d.progress = d.progress.slice(0, newEps); 
+        }
         d.eps = newEps;
         renderEpisodeChecklist(d); 
     }
@@ -939,6 +961,7 @@
         const domR = parseFloat(document.getElementById('updateDomRatio').value) || 0;
         const phM = parseFloat(document.getElementById('updatePhMembers').value) || 0;
         const phR = parseFloat(document.getElementById('updatePhRatio').value) || 0;
+        
         const laborCost = (domM * domR * 2500000) + (phM * phR * 600000);
         if(document.getElementById('updateLaborResult')) document.getElementById('updateLaborResult').value = laborCost > 0 ? "₩ " + laborCost.toLocaleString() : "₩ 0";
 
@@ -967,28 +990,25 @@
         });
     }
 
-    // ★ POST 요청 및 에러메시지 팝업 강제 노출
     async function sendPostRequest(action, payloadObj) {
         try {
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'text/plain' },
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({ action: action, payload: payloadObj })
             });
             const result = await response.json();
             if(result.status !== 'success') {
-                alert("서버 에러 발생:\n" + result.message + "\n\n※ 구글 앱스 스크립트에서 '새 버전'으로 재배포했는지 꼭 확인해주세요.");
+                alert("서버 오류:\n" + result.message);
                 return false;
             }
             return true;
         } catch (error) {
-            console.error("DB 기록 실패:", error);
-            alert("DB 통신에 실패했습니다.\n\n※ 구글 앱스 스크립트 '웹 앱 URL'이 정확한지 코드를 확인해주세요.");
+            alert("서버 연결 실패.\n구글 Apps Script URL과 새 버전 배포를 확인하세요.");
             return false;
         }
     }
 
-    // 삭제 로직
     window.deleteProject = async function() {
         const pSel = document.getElementById('projectSelector');
         if(!pSel) return;
@@ -996,7 +1016,7 @@
         if(!id || !mData[id]) return;
         const projName = mData[id].name;
         
-        if(confirm(`정말 [${projName}] 작품을 DB에서 완전히 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
+        if(confirm(`정말 [${projName}] 작품을 DB에서 영구 삭제하시겠습니까?`)) {
             const btn = document.querySelector('.btn-outline-danger');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>삭제 중...';
@@ -1010,12 +1030,19 @@
             if(success) {
                 delete mData[id]; 
                 populateSelectors(); 
+                
+                // 🚨 삭제 후 화면 완벽 초기화 
                 const newId = document.getElementById('projectSelector').value;
-                if(newId) { loadProjectData(); } 
-                else {
+                if(newId && mData[newId]) { 
+                    loadProjectData(); 
+                } else {
                     document.getElementById('updateProjectName').value = '';
+                    if(document.getElementById('updateProjectImgFile')) document.getElementById('updateProjectImgFile').value = '';
+                    if(document.getElementById('updateImgPreview')) document.getElementById('updateImgPreview').style.display = 'none';
+                    if(document.getElementById('updateTeamPD')) document.getElementById('updateTeamPD').value = '';
                     document.getElementById('episodeListContainer').innerHTML = '';
-                    document.getElementById('updateTotalCostResult').innerText = "₩ 0";
+                    if(document.getElementById('updateTotalCostResult')) document.getElementById('updateTotalCostResult').innerText = "₩ 0";
+                    if(document.getElementById('updateLaborResult')) document.getElementById('updateLaborResult').value = "₩ 0";
                 }
                 renderProjectCards(); 
                 alert('DB에서 성공적으로 삭제되었습니다.');
@@ -1036,7 +1063,13 @@
         btn.disabled = true;
 
         try {
-            let uploadedUrl = await uploadImageToDrive('updateProjectImgFile');
+            // 🌟 에러 방지: 이미지 업로드가 실패해도 데이터는 무조건 저장되도록 try-catch 분리
+            let uploadedUrl = null;
+            try {
+                uploadedUrl = await uploadImageToDrive('updateProjectImgFile');
+            } catch(imgErr) {
+                console.warn("이미지 업로드 스킵:", imgErr);
+            }
             if (uploadedUrl) mData[id].img = uploadedUrl;
 
             mData[id].id = id;
@@ -1070,11 +1103,11 @@
                 populateSelectors(); 
                 document.getElementById('projectSelector').value = id; 
                 renderData(); 
-                alert('구글 시트 DB에 성공적으로 저장되었습니다.');
+                alert('구글 시트 DB에 저장되고 화면에 반영되었습니다.');
                 bootstrap.Modal.getInstance(document.getElementById('manualInputModal')).hide();
             }
         } catch(e) {
-            alert("서버 전송 중 오류가 발생했습니다.");
+            alert("전송 중 알 수 없는 오류가 발생했습니다.");
         } finally {
             btn.innerHTML = originalText;
             btn.disabled = false;
@@ -1105,8 +1138,12 @@
         btn.disabled = true;
 
         try {
-            let uploadedUrl = await uploadImageToDrive('newProjectImgFile');
-            const imgUrl = uploadedUrl || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=100'; 
+            // 🌟 에러 방지: 이미지 업로드가 실패해도 기본 이미지로 등록 진행
+            let imgUrl = 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=100'; 
+            try {
+                let uploadedUrl = await uploadImageToDrive('newProjectImgFile');
+                if (uploadedUrl) imgUrl = uploadedUrl;
+            } catch(imgE) { console.warn("이미지 업로드 스킵"); }
 
             const newProjectData = { 
                 id: id, name: name, pd: pd, 
@@ -1142,6 +1179,9 @@
         }
     }
 
+    // ============================================================================
+    // 5. 모달 (에피소드) 연동
+    // ============================================================================
     window.openEpisodeDataModal = function(searchName) {
         const tbody = document.getElementById('episodeDataTbody');
         if(!tbody) return;
@@ -1161,6 +1201,6 @@
         }
         new bootstrap.Modal(document.getElementById('episodeDataModal')).show();
     }
-</script>
+</script>https://script.google.com/macros/s/AKfycbxo9tuUzEX5aBMuMQlkyQ-2wmfe6E49iph6-GTFTxrY4CFjnr6sCPYb7vtaBjLoTR3V/exec
 </body>
 </html>
