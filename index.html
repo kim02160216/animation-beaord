@@ -19,7 +19,7 @@
         body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
         .wrapper { display: flex; min-height: 100vh; }
         
-        /* 사이드바 고도화 */
+        /* 사이드바 UI 복구 */
         .sidebar { width: 260px; background: #0f172a; border-right: 1px solid var(--border-color); padding: 24px; display: flex; flex-direction: column; flex-shrink: 0; }
         .main-content { flex: 1; padding: 32px; overflow-y: auto; overflow-x: hidden; }
         .brand-logo { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 30px; line-height: 1.2;}
@@ -42,7 +42,7 @@
         .panel-date-picker { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; display: flex; align-items: center; padding: 0 8px; height: 36px;}
         .panel-date-picker input[type="date"] { font-size: 0.85rem; padding: 0.25rem; color-scheme: dark; background: transparent; border: none; color: white; outline: none; width: 130px; text-align: center; font-weight: 600;}
         
-        /* 마케팅 박스 */
+        /* 우측 마케팅 박스 UI 복구 */
         .mkt-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 16px 12px; text-align: center; }
         .mkt-title { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; }
         .mkt-value { font-size: 1.5rem; font-weight: 700; color: #fff; }
@@ -67,9 +67,9 @@
         .kpi-badge.fail { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
         .kpi-badge.wait { background: rgba(255,255,255,0.1); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.2); }
 
-        /* 완료/진행중 분리 영역 (신규) */
+        /* 완료/진행중 분리 영역 (신규 기능) */
         .status-split-box { display: flex; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; margin-bottom: 12px; }
-        .status-split-item { flex: 1; padding: 12px 16px; display: flex; flex-direction: column; }
+        .status-split-item { flex: 1; padding: 12px 16px; display: flex; flex-direction: column; justify-content: center; }
         .status-split-item:first-child { border-right: 1px solid rgba(255,255,255,0.05); background: rgba(16, 185, 129, 0.05); }
         .status-split-item:last-child { background: rgba(59, 130, 246, 0.05); }
 
@@ -101,7 +101,7 @@
 <div id="loadingOverlay">
     <div class="spinner-border" role="status"></div>
     <h5 class="text-white fw-bold">DB 실시간 연동 중...</h5>
-    <p class="text-muted small">Marketing, Platform, Episode Data 병합 중</p>
+    <p class="text-muted small">데이터를 불러오고 구성합니다.</p>
 </div>
 
 <div class="wrapper">
@@ -326,7 +326,7 @@
                                     </div>
                                 </div>
                                 <div class="p-3 bg-dark bg-opacity-25 border rounded mb-3" style="border-color: rgba(255,255,255,0.05) !important;">
-                                    <p class="mb-0 text-muted small"><i class="fas fa-info-circle me-1"></i> 토글 스위치를 클릭하여 회차별 완료된 공정을 체크하세요. 저장 시 메인 카드의 진행률과 뱃지에 즉각 반영됩니다.</p>
+                                    <p class="mb-0 text-muted small"><i class="fas fa-info-circle me-1"></i> 토글 스위치를 클릭하여 회차별 완료된 공정을 체크하세요. 화면 하단 카드의 [완료/진행 회차] 현황에 즉각 분리 반영됩니다.</p>
                                 </div>
                                 <div id="episodeListContainer" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
                                     </div>
@@ -370,7 +370,7 @@
             
             <div class="modal-footer bg-dark bg-opacity-25 d-flex justify-content-between">
                 <button type="button" class="btn btn-secondary fw-medium me-2" data-bs-dismiss="modal">닫기</button>
-                <button type="button" class="btn btn-primary px-4 fw-bold" onclick="saveManualData()"><i class="fas fa-save me-2"></i>수동 데이터 저장 및 화면 반영</button>
+                <button type="button" class="btn btn-primary px-4 fw-bold" onclick="saveManualData()"><i class="fas fa-save me-2"></i>화면에 즉시 반영</button>
             </div>
         </div>
     </div>
@@ -408,36 +408,46 @@
         Chart.defaults.color = '#cbd5e1'; 
         Chart.defaults.font.family = 'Pretendard';
         
-        perfChart = new Chart(document.getElementById('performanceChart').getContext('2d'), {
-            type: 'line', data: { labels: [], datasets: [] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#fff' } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' } }, y1: { position: 'right', grid: { drawOnChartArea: false } } } }
-        });
+        // 차트 초기화 (Null 체크 방어코드 추가)
+        const perfCtx = document.getElementById('performanceChart');
+        if (perfCtx) {
+            perfChart = new Chart(perfCtx.getContext('2d'), {
+                type: 'line', data: { labels: [], datasets: [] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#fff' } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' } }, y1: { position: 'right', grid: { drawOnChartArea: false } } } }
+            });
+        }
 
-        projectPieChart = new Chart(document.getElementById('pieChartProject'), { 
-            type: 'pie', data: { labels: [], datasets: [] }, 
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#cbd5e1' } } } } 
-        });
+        const pieCtx = document.getElementById('pieChartProject');
+        if (pieCtx) {
+            projectPieChart = new Chart(pieCtx, { 
+                type: 'pie', data: { labels: [], datasets: [] }, 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#cbd5e1' } } } } 
+            });
+        }
 
         document.querySelectorAll('.global-date').forEach(el => el.addEventListener('change', renderData));
         
         populateSelectors();
         fetchAllSheetData(); 
+        
+        // 모달 열릴 때 회차 설정 강제 로드
         document.getElementById('manualInputModal').addEventListener('shown.bs.modal', loadProjectData);
     });
 
     // ============================================================================
-    // 2. 구글 시트 연동 및 마케팅/플랫폼 데이터 계산
+    // 2. 구글 시트 연동 및 마케팅/플랫폼 데이터 계산 (충돌 방지 처리)
     // ============================================================================
     async function fetchAllSheetData() {
-        document.getElementById('loadingOverlay').style.display = 'flex';
+        const overlay = document.getElementById('loadingOverlay');
+        if(overlay) overlay.style.display = 'flex';
         try {
             const response = await fetch(SCRIPT_URL);
             dbData = await response.json();
-            document.getElementById('loadingOverlay').style.display = 'none';
+            if(overlay) overlay.style.display = 'none';
             renderData();
         } catch (error) {
             console.error(error);
-            document.getElementById('loadingOverlay').style.display = 'none';
+            if(overlay) overlay.style.display = 'none';
         }
     }
 
@@ -483,48 +493,57 @@
             }
         });
 
-        document.getElementById('valAds').innerText = ads.toLocaleString();
-        document.getElementById('valClicks').innerText = click.toLocaleString();
-        document.getElementById('valSignups').innerText = sign.toLocaleString();
-        document.getElementById('valPayments').innerText = pay.toLocaleString();
+        // 💥 방어코드: HTML이 Iframe 등으로 교체되어 요소가 없을 경우 에러 무시
+        if (document.getElementById('valAds')) document.getElementById('valAds').innerText = ads.toLocaleString();
+        if (document.getElementById('valClicks')) document.getElementById('valClicks').innerText = click.toLocaleString();
+        if (document.getElementById('valSignups')) document.getElementById('valSignups').innerText = sign.toLocaleString();
+        if (document.getElementById('valPayments')) document.getElementById('valPayments').innerText = pay.toLocaleString();
 
         const globalCpa = sign > 0 ? (ads / sign) : 0;
-        document.getElementById('topMktCost').innerText = `₩ ${tmkt.toLocaleString()}`;
-        document.getElementById('topAvgCpa').innerText = `₩ ${Math.round(globalCpa).toLocaleString()}`;
+        if (document.getElementById('topMktCost')) document.getElementById('topMktCost').innerText = `₩ ${tmkt.toLocaleString()}`;
+        if (document.getElementById('topAvgCpa')) document.getElementById('topAvgCpa').innerText = `₩ ${Math.round(globalCpa).toLocaleString()}`;
 
-        projectPieChart.data.labels = Object.keys(pMap);
-        projectPieChart.data.datasets = [{ data: Object.values(pMap), backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444', '#10b981', '#8b5cf6'], borderWidth: 0 }];
-        projectPieChart.update();
+        if (projectPieChart && document.getElementById('pieChartProject')) {
+            projectPieChart.data.labels = Object.keys(pMap);
+            projectPieChart.data.datasets = [{ data: Object.values(pMap), backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444', '#10b981', '#8b5cf6'], borderWidth: 0 }];
+            projectPieChart.update();
+        }
 
-        let dates = Object.keys(tMap).sort();
-        perfChart.data.labels = dates;
-        perfChart.data.datasets[0] = { label: '총 조회수', data: dates.map(d=>tMap[d].v), borderColor: '#818cf8', backgroundColor: 'rgba(129,140,248,0.1)', borderWidth: 3, tension: 0.4, fill: true, yAxisID: 'y' };
-        perfChart.data.datasets[1] = { label: '구독 전환', data: dates.map(d=>tMap[d].s), borderColor: '#34d399', borderWidth: 3, borderDash: [5,5], tension: 0.4, yAxisID: 'y1' };
-        perfChart.update();
+        if (perfChart && document.getElementById('performanceChart')) {
+            let dates = Object.keys(tMap).sort();
+            perfChart.data.labels = dates;
+            perfChart.data.datasets[0] = { label: '총 조회수', data: dates.map(d=>tMap[d].v), borderColor: '#818cf8', backgroundColor: 'rgba(129,140,248,0.1)', borderWidth: 3, tension: 0.4, fill: true, yAxisID: 'y' };
+            perfChart.data.datasets[1] = { label: '구독 전환', data: dates.map(d=>tMap[d].s), borderColor: '#34d399', borderWidth: 3, borderDash: [5,5], tension: 0.4, yAxisID: 'y1' };
+            perfChart.update();
+        }
 
         renderProjectCards(); 
     }
 
     // ============================================================================
-    // 3. UI 렌더링 (세부 작품별 현황 카드)
+    // 3. UI 렌더링 (세부 작품별 현황 카드 & 완료/진행 분리)
     // ============================================================================
     function populateSelectors() {
         const pSel = document.getElementById('projectSelector');
+        if(!pSel) return;
         pSel.innerHTML = '';
         for (const [key, val] of Object.entries(mData)) { pSel.insertAdjacentHTML('beforeend', `<option value="${key}">${val.name} (${key})</option>`); }
         
         const updateStudioSel = document.getElementById('updateStudio');
         const newStudioSel = document.getElementById('newStudio');
-        updateStudioSel.innerHTML = ''; newStudioSel.innerHTML = '';
+        if(updateStudioSel) updateStudioSel.innerHTML = ''; 
+        if(newStudioSel) newStudioSel.innerHTML = '';
         for (const [sName, sCost] of Object.entries(studios)) {
             const opt = `<option value="${sName}">${sName}</option>`;
-            updateStudioSel.insertAdjacentHTML('beforeend', opt); newStudioSel.insertAdjacentHTML('beforeend', opt);
+            if(updateStudioSel) updateStudioSel.insertAdjacentHTML('beforeend', opt); 
+            if(newStudioSel) newStudioSel.insertAdjacentHTML('beforeend', opt);
         }
-        newStudioSel.insertAdjacentHTML('beforeend', `<option value="custom" class="text-warning fw-bold">+ 스튜디오 직접 추가</option>`);
+        if(newStudioSel) newStudioSel.insertAdjacentHTML('beforeend', `<option value="custom" class="text-warning fw-bold">+ 스튜디오 직접 추가</option>`);
     }
 
     function renderProjectCards() {
         const container = document.getElementById('projectCardsContainer');
+        if(!container) return;
         container.innerHTML = '';
         let globalTotalCost = 0;
         let projCount = 0;
@@ -537,7 +556,7 @@
             const totalCost = laborCost + data.api + data.out;
             globalTotalCost += totalCost;
 
-            // 전체 공정률 계산 및 회차 상태(완료/진행중) 분리
+            // 전체 공정률 연산 및 [완료/진행] 회차 분리 로직
             let totalChecks = 0;
             let completedEps = [];
             let inProgressEp = -1;
@@ -561,7 +580,7 @@
             const progressPct = ((totalChecks / (data.eps * 4)) * 100).toFixed(1);
             totalProgSum += parseFloat(progressPct);
             
-            // 완료/진행중 텍스트 렌더링 로직
+            // 완료 / 진행중 UI 텍스트 포맷팅
             let compText = completedEps.length > 0 ? `1~${completedEps.length}화 완료` : '완료된 회차 없음';
             if (completedEps.length === data.eps) compText = '전체 회차 완료';
 
@@ -572,13 +591,13 @@
             let s4='wait', i4='far fa-circle', t4='업로드 대기';
 
             if (completedEps.length === data.eps) {
-                ingText = '진행중인 회차 없음 (모두 완료)';
+                ingText = '진행중인 회차 없음 (완료됨)';
                 s1='done'; i1='fa-check-circle'; t1='콘티 완료';
                 s2='done'; i2='fa-check-circle'; t2='이미지 완료';
                 s3='done'; i3='fa-check-circle'; t3='영상 완료';
                 s4='done'; i4='fa-check-circle'; t4='업로드 완료';
             } else {
-                ingText = `<span class="text-primary">${inProgressEp}화</span> 진행 중`;
+                ingText = `<span class="text-primary">${inProgressEp}화</span> 공정 진행 중`;
                 s1 = inProgressStatus >= 1 ? 'done' : 'wait'; i1 = inProgressStatus >= 1 ? 'fa-check-circle' : 'far fa-circle'; t1 = inProgressStatus >= 1 ? '콘티 완료' : '콘티 진행';
                 s2 = inProgressStatus >= 2 ? 'done' : (inProgressStatus==1 ? 'ing':'wait'); i2 = inProgressStatus >= 2 ? 'fa-check-circle' : (inProgressStatus==1?'fa-spinner fa-spin':'far fa-circle'); t2 = inProgressStatus >= 2 ? '이미지 완료' : '이미지 진행';
                 s3 = inProgressStatus >= 3 ? 'done' : (inProgressStatus==2 ? 'ing':'wait'); i3 = inProgressStatus >= 3 ? 'fa-check-circle' : (inProgressStatus==2?'fa-spinner fa-spin':'far fa-circle'); t3 = inProgressStatus >= 3 ? '영상 완료' : '영상 진행';
@@ -640,11 +659,11 @@
 
                     <div class="status-split-box">
                         <div class="status-split-item">
-                            <span class="text-success small fw-bold mb-1"><i class="fas fa-check-double me-1"></i>완료된 회차</span>
+                            <span class="text-success small fw-bold mb-1"><i class="fas fa-check-double me-1"></i>완료된 회차 누적</span>
                             <strong class="text-white">${compText}</strong>
                         </div>
                         <div class="status-split-item">
-                            <span class="text-primary small fw-bold mb-1"><i class="fas fa-spinner fa-spin me-1"></i>현재 공정 타겟</span>
+                            <span class="text-primary small fw-bold mb-1"><i class="fas fa-spinner fa-spin me-1"></i>현재 작업 타겟</span>
                             <strong class="text-white">${ingText}</strong>
                         </div>
                     </div>
@@ -671,16 +690,18 @@
             container.insertAdjacentHTML('beforeend', html);
         }
         
-        document.getElementById('topTotalCost').innerText = "₩ " + globalTotalCost.toLocaleString();
+        if (document.getElementById('topTotalCost')) document.getElementById('topTotalCost').innerText = "₩ " + globalTotalCost.toLocaleString();
         const avgProgress = projCount > 0 ? (totalProgSum / projCount).toFixed(1) : 0;
-        document.getElementById('topProjectStatus').innerText = `${projCount}개 / ${avgProgress}%`;
+        if (document.getElementById('topProjectStatus')) document.getElementById('topProjectStatus').innerText = `${projCount}개 / ${avgProgress}%`;
     }
 
     // ============================================================================
-    // 4. 수동 관리 패널 로직 (세부 공정 세팅)
+    // 4. 수동 관리 패널 로직 (세부 공정 세팅 완벽 복구)
     // ============================================================================
     function loadProjectData() {
-        const id = document.getElementById('projectSelector').value;
+        const pSel = document.getElementById('projectSelector');
+        if(!pSel) return;
+        const id = pSel.value;
         const d = mData[id];
         if(!d) return;
 
@@ -701,27 +722,29 @@
         
         calcUpdateTotalCost();
         
-        // 회차별 세부 공정 리스트 렌더링
+        // 💥 회차별 세부 공정 설정 리스트 렌더링 복구
         const container = document.getElementById('episodeListContainer');
-        container.innerHTML = ''; 
-        for (let i = 0; i < d.eps; i++) {
-            const p = d.progress[i] || 0;
-            const comp = p === 4 ? 'completed' : ''; 
-            const chk1 = p >= 1 ? 'checked' : ''; const chk2 = p >= 2 ? 'checked' : ''; const chk3 = p >= 3 ? 'checked' : ''; const chk4 = p === 4 ? 'checked' : '';
-            
-            const html = `
-            <div class="ep-row ${comp}">
-                <div class="fw-bold text-white mb-2 mb-md-0" style="width: 80px;">제 ${i+1}화</div>
-                <div class="d-flex gap-4 flex-wrap flex-grow-1 justify-content-end align-items-center">
-                    <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk1} style="transform: scale(1.1);"><label class="form-check-label text-light small fw-bold ms-2 mt-1">콘티</label></div>
-                    <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk2} style="transform: scale(1.1);"><label class="form-check-label text-light small fw-bold ms-2 mt-1">이미지</label></div>
-                    <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk3} style="transform: scale(1.1);"><label class="form-check-label text-light small fw-bold ms-2 mt-1">영상</label></div>
-                    <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk4} style="transform: scale(1.1);"><label class="form-check-label text-warning small fw-bold ms-2 mt-1">업로드</label></div>
-                </div>
-            </div>`;
-            container.insertAdjacentHTML('beforeend', html);
+        if (container) {
+            container.innerHTML = ''; 
+            for (let i = 0; i < d.eps; i++) {
+                const p = d.progress[i] || 0;
+                const comp = p === 4 ? 'completed' : ''; 
+                const chk1 = p >= 1 ? 'checked' : ''; const chk2 = p >= 2 ? 'checked' : ''; const chk3 = p >= 3 ? 'checked' : ''; const chk4 = p === 4 ? 'checked' : '';
+                
+                const html = `
+                <div class="ep-row ${comp}">
+                    <div class="fw-bold text-white mb-2 mb-md-0" style="width: 80px;">제 ${i+1}화</div>
+                    <div class="d-flex gap-4 flex-wrap flex-grow-1 justify-content-end align-items-center">
+                        <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk1} style="transform: scale(1.1);"><label class="form-check-label text-light small fw-bold ms-2 mt-1">콘티</label></div>
+                        <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk2} style="transform: scale(1.1);"><label class="form-check-label text-light small fw-bold ms-2 mt-1">이미지</label></div>
+                        <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk3} style="transform: scale(1.1);"><label class="form-check-label text-light small fw-bold ms-2 mt-1">영상</label></div>
+                        <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk4} style="transform: scale(1.1);"><label class="form-check-label text-warning small fw-bold ms-2 mt-1">업로드</label></div>
+                    </div>
+                </div>`;
+                container.insertAdjacentHTML('beforeend', html);
+            }
+            calcTotalProgress();
         }
-        calcTotalProgress();
     }
 
     function calcUpdateTotalCost() {
@@ -730,16 +753,16 @@
         const m = parseFloat(document.getElementById('updateMembers').value) || 0;
         const r = parseFloat(document.getElementById('updateRatio').value) || 0;
         const laborCost = m * r * baseCost;
-        document.getElementById('updateLaborResult').value = laborCost > 0 ? "₩ " + laborCost.toLocaleString() : "₩ 0";
+        if(document.getElementById('updateLaborResult')) document.getElementById('updateLaborResult').value = laborCost > 0 ? "₩ " + laborCost.toLocaleString() : "₩ 0";
 
         const useApi = document.getElementById('toggleApi').checked;
         const useOut = document.getElementById('toggleOutsource').checked;
-        document.getElementById('wrapApiCost').style.display = useApi ? 'flex' : 'none';
-        document.getElementById('wrapOutsourceCost').style.display = useOut ? 'flex' : 'none';
+        if(document.getElementById('wrapApiCost')) document.getElementById('wrapApiCost').style.display = useApi ? 'flex' : 'none';
+        if(document.getElementById('wrapOutsourceCost')) document.getElementById('wrapOutsourceCost').style.display = useOut ? 'flex' : 'none';
 
         const apiCost = useApi ? (parseFloat(document.getElementById('apiCostInput').value) || 0) : 0;
         const outCost = useOut ? (parseFloat(document.getElementById('outsourceCostInput').value) || 0) : 0;
-        document.getElementById('updateTotalCostResult').innerText = "₩ " + (laborCost + apiCost + outCost).toLocaleString();
+        if(document.getElementById('updateTotalCostResult')) document.getElementById('updateTotalCostResult').innerText = "₩ " + (laborCost + apiCost + outCost).toLocaleString();
     }
 
     function calcTotalProgress() {
@@ -748,7 +771,7 @@
         let checkedCount = 0;
         checkboxes.forEach(cb => { if(cb.checked) checkedCount++; });
         const percentage = (checkedCount / checkboxes.length) * 100;
-        document.getElementById('totalProgressBar').innerText = percentage.toFixed(1) + '%';
+        if(document.getElementById('totalProgressBar')) document.getElementById('totalProgressBar').innerText = percentage.toFixed(1) + '%';
         
         document.querySelectorAll('.ep-row').forEach(row => {
             const checks = row.querySelectorAll('.ep-check:checked');
@@ -758,7 +781,9 @@
     }
 
     window.saveManualData = function() {
-        const id = document.getElementById('projectSelector').value;
+        const pSel = document.getElementById('projectSelector');
+        if(!pSel) return;
+        const id = pSel.value;
         mData[id].studio = document.getElementById('updateStudio').value;
         mData[id].pd = document.getElementById('updateTeamPD').value;
         mData[id].members = parseFloat(document.getElementById('updateMembers').value) || 0;
@@ -798,7 +823,7 @@
         const m = parseFloat(document.getElementById('newMembers').value) || 0;
         const r = parseFloat(document.getElementById('newRatio').value) || 0;
         const cost = m * r * baseCost;
-        document.getElementById('newLaborResult').value = cost > 0 ? "₩ " + cost.toLocaleString() : "₩ 0";
+        if(document.getElementById('newLaborResult')) document.getElementById('newLaborResult').value = cost > 0 ? "₩ " + cost.toLocaleString() : "₩ 0";
     }
 
     window.addNewProject = function() {
@@ -844,6 +869,7 @@
     // ============================================================================
     window.openEpisodeDataModal = function(searchName) {
         const tbody = document.getElementById('episodeDataTbody');
+        if(!tbody) return;
         tbody.innerHTML = ''; 
         const list = (dbData.episode || []).filter(d => d.novel_name && d.novel_name.includes(searchName));
         if(list.length === 0) {
