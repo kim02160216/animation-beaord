@@ -299,7 +299,7 @@
                             
                             <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-info-circle me-2 text-secondary"></i>작품 기본 정보 수정</h6></div>
                             <div class="col-md-6 mt-2">
-                                <label class="modal-label">작품명 수정</label>
+                                <label class="modal-label">작품명 수정 (시트의 novel_name과 연동됨)</label>
                                 <input type="text" class="form-control fw-bold text-white" id="updateProjectName">
                             </div>
                             <div class="col-md-6 mt-2">
@@ -354,7 +354,11 @@
                                         <span class="text-white small me-2">자동 합산 진행률:</span><strong class="text-success fs-5" id="totalProgressBar">0%</strong>
                                     </div>
                                 </div>
-                                <div id="episodeListContainer" style="max-height: 400px; overflow-y: auto; padding-right: 10px;"></div>
+                                <div class="p-3 bg-dark bg-opacity-25 border rounded mb-3" style="border-color: rgba(255,255,255,0.05) !important;">
+                                    <p class="mb-0 text-muted small"><i class="fas fa-info-circle me-1"></i> 토글 스위치를 클릭하여 회차별 완료된 공정을 체크하세요. 메인 카드의 [완료/진행 회차] 영역에 즉각 분리 반영됩니다.</p>
+                                </div>
+                                <div id="episodeListContainer" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -471,7 +475,7 @@
     });
 
     // ============================================================================
-    // 2. 구글 시트 연동 및 마케팅/플랫폼 데이터 계산
+    // 2. 구글 시트 연동 및 마케팅/플랫폼 데이터 계산 (실제 성과 자동 매핑)
     // ============================================================================
     async function fetchAllSheetData() {
         const overlay = document.getElementById('loadingOverlay');
@@ -497,6 +501,7 @@
         let tMap = {}, pMap = {};
         dbProjectStats = {}; 
 
+        // 마케팅 데이터 처리 및 작품별 누적
         (dbData.marketing || []).forEach(row => {
             let dObj = new Date(row.date);
             if(isNaN(dObj.getTime())) return;
@@ -513,6 +518,7 @@
             }
         });
 
+        // 플랫폼 데이터 처리 및 작품별 누적
         (dbData.platform || []).forEach(row => {
             let dObj = new Date(row.date);
             if(isNaN(dObj.getTime())) return;
@@ -573,7 +579,7 @@
     function populateSelectors() {
         const pSel = document.getElementById('projectSelector');
         if(!pSel) return;
-        const currentVal = pSel.value; // 기존 선택 유지
+        const currentVal = pSel.value; 
         pSel.innerHTML = '';
         for (const [key, val] of Object.entries(mData)) { pSel.insertAdjacentHTML('beforeend', `<option value="${key}">${val.name} (${key})</option>`); }
         if(mData[currentVal]) pSel.value = currentVal;
@@ -666,11 +672,12 @@
 
             const addBadge = data.useApi ? `<span class="badge bg-secondary ms-1" style="font-size:0.65rem;">API</span>` : (data.useOut ? `<span class="badge bg-secondary ms-1" style="font-size:0.65rem;">외주</span>` : '');
             
+            // ★ 여기서 mData의 작품명과 dbData(구글시트)의 novel_name을 매칭시켜 실제 실적을 가져옵니다.
             const stats = dbProjectStats[data.name] || { ads: 0, signups: 0, views: 0 };
             const actualCpa = stats.signups > 0 ? Math.round(stats.ads / stats.signups) : 0;
             const actualViews = stats.views;
 
-            const cpaSuccess = (actualCpa > 0 && actualCpa <= data.targetCpa) ? 'success' : (actualCpa == 0 ? 'wait' : 'fail');
+            const cpaSuccess = (actualCpa > 0 && actualCpa <= data.targetCpa) ? 'success' : (actualCpa === 0 ? 'wait' : 'fail');
             const cpaText = cpaSuccess === 'success' ? '달성' : (cpaSuccess === 'fail' ? '미달' : '대기');
             const viewSuccess = actualViews >= data.targetViews ? 'success' : 'ing';
             const viewText = viewSuccess === 'success' ? '달성' : '진행중';
@@ -896,15 +903,13 @@
         const projName = mData[id].name;
         
         if(confirm(`정말 [${projName}] 작품을 완전히 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
-            delete mData[id]; // 객체에서 제거
-            populateSelectors(); // 셀렉트박스 갱신
+            delete mData[id]; 
+            populateSelectors(); 
             
-            // 삭제 후 다음 옵션으로 로드
             const newId = document.getElementById('projectSelector').value;
             if(newId) {
                 loadProjectData();
             } else {
-                // 모두 지워졌을 경우 UI 초기화
                 document.getElementById('updateProjectName').value = '';
                 document.getElementById('episodeListContainer').innerHTML = '';
                 document.getElementById('updateTotalCostResult').innerText = "₩ 0";
@@ -945,10 +950,11 @@
 
         syncCheckboxesToArray(mData[id]);
 
-        populateSelectors(); // 이름 변경 갱신
+        populateSelectors(); 
         document.getElementById('projectSelector').value = id; 
 
-        renderProjectCards();
+        // 데이터 갱신 시 실적 재계산을 위해 다시 렌더링
+        renderData(); 
         alert('카드 영역에 실시간 반영되었습니다.');
         bootstrap.Modal.getInstance(document.getElementById('manualInputModal')).hide();
     }
