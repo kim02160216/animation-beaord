@@ -1,1304 +1,373 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novelpia - AI 애니메이션 통합 관리</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <style>
-        :root {
-            --bg-color: #0b1120; --surface-color: #1e293b; --card-bg: #151e2f; 
-            --primary-accent: #3b82f6; --secondary-accent: #10b981; --danger-accent: #ef4444;
-            --text-main: #f8fafc; --text-muted: #94a3b8; --border-color: rgba(255, 255, 255, 0.08);
-        }
-        html { scroll-behavior: smooth; }
-        body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
-        .wrapper { display: flex; min-height: 100vh; }
-        
-        .sidebar { width: 260px; background: #0f172a; border-right: 1px solid var(--border-color); padding: 24px; display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;}
-        .main-content { flex: 1; padding: 32px; overflow-y: auto; overflow-x: hidden; }
-        .brand-logo { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 30px; line-height: 1.2;}
-        .brand-logo span { color: var(--primary-accent); }
-        .nav-link { transition: 0.2s; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; padding: 12px 16px !important; border-radius: 8px; color: #cbd5e1;}
-        .nav-link:hover { background: rgba(255,255,255,0.05); color: #fff !important; }
-        .nav-link.active { background: rgba(59,130,246,0.15); color: #60a5fa !important; border: 1px solid rgba(59,130,246,0.3); }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Model Asset Delivery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root {
+    --bg:#0c0f0e; --bg-grid:#10130f; --surface:#141817; --surface-2:#1a201e;
+    --border:#262d2a; --border-hi:#33403b; --text:#e9efeb; --muted:#8a948f;
+    --faint:#5c6560; --mint:#2fe0a6; --mint-deep:#14b88a; --mint-dim:rgba(47,224,166,.12);
+    --danger:#f26169; --danger-dim:rgba(242,97,105,.12); --amber:#f5c451; --amber-dim:rgba(245,196,81,.13); --radius:12px;
+    --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:var(--sans); background:var(--bg); color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased;
+    background-image:linear-gradient(var(--bg-grid) 1px,transparent 1px),linear-gradient(90deg,var(--bg-grid) 1px,transparent 1px);
+    background-size:44px 44px; background-position:-1px -1px; }
+  .wrap { max-width:1200px; margin:0 auto; padding:40px 28px 100px; }
 
-        .glass-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; }
-        .text-muted { color: var(--text-muted) !important; }
+  header { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap; padding-bottom:24px; border-bottom:1px solid var(--border); margin-bottom:28px; }
+  .brand { display:flex; align-items:center; gap:14px; }
+  .logo { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,var(--mint),var(--mint-deep)); display:grid; place-items:center; flex-shrink:0; box-shadow:0 0 24px var(--mint-dim); }
+  .logo svg { width:20px; height:20px; }
+  h1 { font-size:20px; font-weight:700; letter-spacing:-.02em; line-height:1.1; }
+  .sub { font-family:var(--mono); font-size:11px; color:var(--faint); margin-top:3px; letter-spacing:.02em; }
+  .hdr-right { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .conn-pill { display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11px; color:var(--muted); background:var(--surface); border:1px solid var(--border); padding:8px 12px; border-radius:999px; }
+  .dot { width:7px; height:7px; border-radius:50%; background:var(--faint); flex-shrink:0; }
+  .dot.on { background:var(--mint); box-shadow:0 0 8px var(--mint); }
 
-        .kpi-card { background: linear-gradient(145deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.9) 100%); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px; transition: 0.2s; position: relative; overflow: hidden; }
-        .kpi-card::before { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px; border-radius: 4px 0 0 4px; }
-        .kpi-card.blue::before { background-color: #3b82f6; } .kpi-card.yellow::before { background-color: #eab308; } .kpi-card.green::before { background-color: #10b981; } .kpi-card.purple::before { background-color: #8b5cf6; }
-        .kpi-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;}
-        .kpi-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; } .kpi-icon.yellow { background: rgba(234,179,8,0.15); color: #fde047; } .kpi-icon.green { background: rgba(16,185,129,0.15); color: #34d399; } .kpi-icon.purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
-        
-        .panel-date-picker { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; display: flex; align-items: center; padding: 0 8px; height: 36px;}
-        .panel-date-picker input[type="date"] { font-size: 0.85rem; padding: 0.25rem; color-scheme: dark; background: transparent; border: none; color: white; outline: none; width: 130px; text-align: center; font-weight: 600;}
-        
-        .mkt-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 16px 12px; text-align: center; }
-        .mkt-title { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; }
-        .mkt-value { font-size: 1.5rem; font-weight: 700; color: #fff; }
-        
-        .looker-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        .looker-table th { background-color: rgba(255,255,255,0.02); color: #cbd5e1; padding: 12px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: 600; }
-        .looker-table th:nth-child(1) { text-align: left; }
-        .looker-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; color: #e2e8f0; }
-        .view-bar-container { display: flex; align-items: center; justify-content: flex-end; width: 100%; }
-        .view-text { margin-right: 8px; font-weight: 600; color: #fff;}
-        .bar-blue { background-color: #3b82f6; height: 6px; border-radius: 3px; } .bar-orange { background-color: #f59e0b; height: 6px; border-radius: 3px; } .bar-purple { background-color: #8b5cf6; height: 6px; border-radius: 3px; }
-        .retention-text { text-align: right; font-weight: 600; color: #94a3b8; }
+  .setup-banner { background:var(--surface); border:1px solid var(--amber); border-radius:var(--radius); padding:18px 20px; margin-bottom:28px; }
+  .setup-banner h4 { font-size:14px; font-weight:600; color:var(--amber); margin-bottom:6px; }
+  .setup-banner p { font-size:13px; color:var(--muted); line-height:1.6; }
+  .setup-banner code { font-family:var(--mono); font-size:12px; color:var(--mint); background:var(--bg); padding:2px 6px; border-radius:5px; }
+  .setup-banner details { margin-top:12px; }
+  .setup-banner summary { cursor:pointer; font-size:12px; color:var(--muted); font-family:var(--mono); }
+  .setup-banner pre { margin-top:10px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:14px; overflow-x:auto; font-family:var(--mono); font-size:11.5px; line-height:1.6; color:#b7d8c9; }
+  .setup-banner pre .k { color:var(--mint); }
 
-        .proj-card { background: #1e2538; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 24px; position: relative;}
-        .proj-info-box { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; justify-content: center; }
-        .proj-total-cost { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
-        
-        .kpi-badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; font-weight: 700; margin-left: 8px; }
-        .kpi-badge.success { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
-        .kpi-badge.fail { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-        .kpi-badge.wait { background: rgba(255,255,255,0.1); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.2); }
+  /* upload panel */
+  .panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:14px; }
+  .panel-title { font-size:12px; font-family:var(--mono); text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:14px; }
+  .fields { display:grid; grid-template-columns:1.4fr 1fr 1.2fr; gap:12px; margin-bottom:14px; }
+  .fld label { display:block; font-family:var(--mono); font-size:10.5px; color:var(--faint); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+  .fld input, .fld select { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:9px; color:var(--text); font-family:var(--sans); font-size:13px; padding:11px 12px; transition:border-color .15s,box-shadow .15s; }
+  .fld input:focus, .fld select:focus { outline:none; border-color:var(--mint-deep); box-shadow:0 0 0 3px var(--mint-dim); }
+  .fld select { cursor:pointer; }
 
-        .status-split-box { display: flex; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; margin-bottom: 12px; }
-        .status-split-item { flex: 1; padding: 12px 16px; display: flex; flex-direction: column; justify-content: center; }
-        .status-split-item:first-child { border-right: 1px solid rgba(255,255,255,0.05); background: rgba(16, 185, 129, 0.05); }
-        .status-split-item:last-child { background: rgba(59, 130, 246, 0.05); }
+  .dropzone { border:1.5px dashed var(--border-hi); border-radius:10px; background:var(--bg); padding:26px 20px; text-align:center; cursor:pointer; transition:border-color .18s,background .18s; }
+  .dropzone:hover { border-color:var(--mint-deep); }
+  .dropzone.drag { border-color:var(--mint); background:var(--mint-dim); }
+  .dropzone.disabled { opacity:.45; pointer-events:none; }
+  .dz-title { font-size:14px; font-weight:600; margin-bottom:3px; }
+  .dz-sub { font-size:12px; color:var(--muted); }
+  .dz-sub b { color:var(--mint); }
+  .dropzone input[type=file] { display:none; }
 
-        .process-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .step-badge { text-align: center; padding: 8px 4px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.3); color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 4px;}
-        .step-badge.done { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #10b981; }
-        .step-badge.ing { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); color: #60a5fa; }
-        
-        .link-btn { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: #93c5fd; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-right: 6px; margin-bottom: 6px; transition: 0.2s;}
-        .link-btn:hover { background: rgba(59,130,246,0.2); color: #fff; }
+  /* toolbar */
+  .toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin:32px 0 18px; flex-wrap:wrap; }
+  .toolbar h3 { font-size:15px; font-weight:600; display:flex; align-items:center; gap:10px; }
+  .count { font-family:var(--mono); font-size:11px; color:var(--mint); background:var(--mint-dim); padding:3px 9px; border-radius:999px; }
+  .actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .btn { font-family:var(--sans); font-size:13px; font-weight:600; border-radius:9px; cursor:pointer; border:1px solid transparent; padding:9px 14px; transition:transform .1s,background .15s,border-color .15s,color .15s; display:inline-flex; align-items:center; gap:7px; }
+  .btn:active { transform:translateY(1px); }
+  .btn-primary { background:var(--mint); color:#04120c; }
+  .btn-primary:hover { background:#4cecba; }
+  .btn-ghost { background:var(--surface); border-color:var(--border); color:var(--muted); }
+  .btn-ghost:hover { color:var(--text); border-color:var(--border-hi); }
+  .btn svg { width:14px; height:14px; }
 
-        .modal-content { background-color: var(--surface-color); border: 1px solid rgba(255,255,255,0.1); color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-        .modal-header, .modal-footer { border-color: rgba(255,255,255,0.05); }
-        .form-control, .form-select { background-color: rgba(0,0,0,0.2) !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
-        .form-control:focus, .form-select:focus { border-color: var(--primary-accent) !important; box-shadow: 0 0 0 0.25rem rgba(59,130,246,0.25) !important; }
-        .modal-label { color: #cbd5e1 !important; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem; display: block; } 
-        
-        .ep-row { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 14px 20px; margin-bottom: 10px; transition: 0.2s; display: flex; align-items: center; }
-        .ep-row.completed { border-left: 4px solid var(--secondary-accent); background: rgba(16,185,129,0.05); }
+  /* model group */
+  .model { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; overflow:hidden; }
+  .model-head { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 18px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  .model-name { font-size:16px; font-weight:700; letter-spacing:-.01em; display:flex; align-items:center; gap:10px; }
+  .badge { font-family:var(--mono); font-size:10.5px; font-weight:500; padding:3px 8px; border-radius:6px; letter-spacing:.02em; }
+  .badge.real { color:#7fd3ff; background:rgba(127,211,255,.12); }
+  .badge.semi { color:#c9a6ff; background:rgba(201,166,255,.12); }
+  .badge.done { color:var(--mint); background:var(--mint-dim); }
+  .badge.partial { color:var(--amber); background:var(--amber-dim); }
+  .model-head .m-actions { display:flex; gap:8px; }
 
-        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 17, 32, 0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .spinner-border { color: var(--primary-accent); margin-bottom: 1rem;}
-    </style>
+  .slots { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:16px 18px; }
+  .slot { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--bg); display:flex; flex-direction:column; }
+  .slot-thumb { aspect-ratio:3/4; background:var(--bg-grid); display:grid; place-items:center; overflow:hidden; position:relative; }
+  .slot-thumb img { width:100%; height:100%; object-fit:cover; cursor:zoom-in; }
+  .slot-empty { color:var(--faint); font-size:11px; font-family:var(--mono); text-align:center; padding:12px; }
+  .slot-empty .plus { font-size:20px; display:block; margin-bottom:5px; opacity:.6; }
+  .slot-label { font-size:11.5px; font-weight:600; padding:9px 10px 4px; text-align:center; }
+  .slot-actions { display:flex; gap:5px; padding:4px 8px 9px; }
+  .s-btn { flex:1; background:var(--surface-2); border:1px solid var(--border); color:var(--text); border-radius:7px; font-size:11px; font-weight:500; padding:6px 4px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; transition:border-color .15s,color .15s,background .15s; }
+  .s-btn svg { width:12px; height:12px; }
+  .s-btn.dl:hover { border-color:var(--mint-deep); color:var(--mint); }
+  .s-btn.del { flex:0 0 auto; }
+  .s-btn.del:hover { border-color:var(--danger); color:var(--danger); background:var(--danger-dim); }
+  .slot.uploading .slot-thumb { background:var(--surface-2); }
+  .spinner { width:22px; height:22px; border:2.5px solid var(--border-hi); border-top-color:var(--mint); border-radius:50%; animation:spin .7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .empty { text-align:center; padding:70px 20px; color:var(--faint); border:1px dashed var(--border); border-radius:var(--radius); }
+  .empty .em-icon { width:40px; height:40px; margin:0 auto 14px; opacity:.5; }
+  .empty p { font-size:14px; }
+
+  .lightbox { position:fixed; inset:0; background:rgba(6,9,8,.88); backdrop-filter:blur(6px); z-index:60; display:grid; place-items:center; padding:40px; animation:fade .18s ease; }
+  @keyframes fade { from { opacity:0; } }
+  .lightbox img { max-width:100%; max-height:82vh; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.6); border:1px solid var(--border-hi); }
+  .lb-name { position:absolute; bottom:26px; left:50%; transform:translateX(-50%); font-family:var(--mono); font-size:12px; color:var(--muted); background:var(--surface); border:1px solid var(--border); padding:7px 14px; border-radius:999px; }
+  .lb-close { position:absolute; top:22px; right:24px; width:40px; height:40px; border-radius:10px; background:var(--surface); border:1px solid var(--border); color:var(--text); font-size:18px; cursor:pointer; display:grid; place-items:center; }
+  .lb-close:hover { border-color:var(--danger); color:var(--danger); }
+
+  .toasts { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; gap:8px; z-index:50; align-items:center; }
+  .toast { background:var(--surface-2); border:1px solid var(--border-hi); color:var(--text); font-size:13px; padding:11px 16px; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,.5); display:flex; align-items:center; gap:9px; animation:rise .2s ease; max-width:90vw; }
+  .toast.err { border-color:var(--danger); }
+  .toast .tdot { width:6px; height:6px; border-radius:50%; background:var(--mint); flex-shrink:0; }
+  .toast.err .tdot { background:var(--danger); }
+  @keyframes rise { from { opacity:0; transform:translateY(8px); } }
+
+  .hidden { display:none !important; }
+  @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; } }
+  @media (max-width:720px) { .fields { grid-template-columns:1fr; } .slots { grid-template-columns:repeat(2,1fr); } }
+</style>
 </head>
 <body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M4 16l5-5 4 4 3-3 4 4" stroke="#04120c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8.5" cy="8.5" r="1.6" fill="#04120c"/></svg></div>
+      <div><h1>Model Asset Delivery</h1><div class="sub">모델별 4컷 · 흰 스튜디오 배경 · 업로드 &amp; 다운로드</div></div>
+    </div>
+    <div class="hdr-right">
+      <div class="conn-pill"><span class="dot" id="dot"></span><span id="hostLabel">연결 안 됨</span></div>
+    </div>
+  </header>
 
-<div id="loadingOverlay">
-    <div class="spinner-border" role="status"></div>
-    <h5 class="text-white fw-bold" id="loadingText">DB 실시간 연동 중...</h5>
-    <p class="text-muted small">데이터를 불러오고 구성합니다.</p>
+  <div class="setup-banner hidden" id="setupBanner">
+    <h4>연결 정보를 설정하세요</h4>
+    <p>이 파일 상단 <code>&lt;script&gt;</code>의 <code>SUPABASE_URL</code>, <code>SUPABASE_ANON_KEY</code>를 채우고 다시 배포하면 이 URL에서 바로 동작합니다.</p>
+    <details>
+      <summary>＋ 테이블 준비 SQL</summary>
+      <pre><span class="k">create table if not exists</span> public.model_assets (
+  id uuid primary key default gen_random_uuid(),
+  model text not null,
+  category text,          <span class="k">-- 실사 / 반실사</span>
+  shot text not null,     <span class="k">-- 정면 얼굴 / 측면 얼굴 / 전신 샷 / 바스트 샷</span>
+  name text not null,
+  mime text not null,
+  size bigint,
+  data text not null,
+  created_at timestamptz default now()
+);
+alter table public.model_assets enable row level security;
+create policy "anon all" on public.model_assets
+  for all to anon using (true) with check (true);</pre>
+    </details>
+  </div>
+
+  <div class="panel" id="uploadPanel">
+    <div class="panel-title">이미지 올리기</div>
+    <div class="fields">
+      <div class="fld"><label>모델명</label><input id="fModel" type="text" placeholder="예: 서아" autocomplete="off" /></div>
+      <div class="fld"><label>구분</label><select id="fCategory"><option value="실사">실사</option><option value="반실사">반실사</option></select></div>
+      <div class="fld"><label>컷 지정</label><select id="fShot">
+        <option value="__batch">4컷 일괄 (정면→측면→전신→바스트 순서)</option>
+        <option value="정면 얼굴">정면 얼굴</option>
+        <option value="측면 얼굴">측면 얼굴</option>
+        <option value="전신 샷">전신 샷</option>
+        <option value="바스트 샷">바스트 샷</option>
+      </select></div>
+    </div>
+    <label class="dropzone" id="dropzone">
+      <div class="dz-title">파일을 드래그하거나 클릭</div>
+      <div class="dz-sub"><b>4컷 일괄</b>은 파일 4장을 순서대로 넣으면 정면·측면·전신·바스트로 자동 배정됩니다</div>
+      <input type="file" id="fileInput" accept="image/*" multiple />
+    </label>
+  </div>
+
+  <div class="toolbar">
+    <h3>모델 <span class="count" id="count">0</span></h3>
+    <div class="actions">
+      <button class="btn btn-ghost" id="refreshBtn"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 018-8 8 8 0 016 2.7L20 8m0-4v4h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 12a8 8 0 01-8 8 8 8 0 01-6-2.7L4 16m0 4v-4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>새로고침</button>
+      <button class="btn btn-primary" id="zipAllBtn"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v10m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>전체 ZIP</button>
+    </div>
+  </div>
+
+  <div id="list"></div>
+  <div class="empty hidden" id="emptyState">
+    <svg class="em-icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 16l5-4 4 3 4-4 5 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8.5" cy="9.5" r="1.4" fill="currentColor"/></svg>
+    <p>모델명을 입력하고 컷을 올리면 여기에 모델별로 정리됩니다.</p>
+  </div>
 </div>
 
-<div class="wrapper">
-    <div class="sidebar d-none d-xl-flex">
-        <div class="brand-logo">NOVELPIA<span>.</span><br><span style="font-size: 0.9rem; font-weight: 500; color: #94a3b8;">Studio Control</span></div>
-        <ul class="nav flex-column gap-2 mt-2">
-            <li class="nav-item"><a class="nav-link active" href="#section-dashboard"><i class="fas fa-chart-line me-3"></i> 통합 대시보드</a></li>
-            <li class="nav-item"><a class="nav-link" href="#section-marketing"><i class="fas fa-bullseye me-3"></i> 마케팅 성과 리포트</a></li>
-            <li class="nav-item"><a class="nav-link" href="#section-platform"><i class="fas fa-database me-3"></i> 플랫폼 지표 분석</a></li>
-            
-            <li class="nav-item mt-4 mb-2"><span class="text-muted small fw-bold px-3">매니지먼트</span></li>
-            <li class="nav-item"><a class="nav-link text-white" href="#" data-bs-toggle="modal" data-bs-target="#manualInputModal" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);"><i class="fas fa-tasks me-3 text-success"></i> 수동 공정/비용 관리</a></li>
-        </ul>
-    </div>
-
-    <div class="main-content">
-        <header class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-            <div>
-                <h2 class="mb-1 fw-bold text-white">AI 애니메이션 통합 관리</h2>
-                <div class="text-muted small">Google Sheets Real-time DB 연동 (Native API)</div>
-            </div>
-            
-            <div class="d-flex flex-wrap align-items-center gap-3">
-                <div class="panel-date-picker shadow-sm">
-                    <span class="text-primary fw-bold me-2" style="font-size:0.75rem;">전역 설정</span>
-                    <input type="date" id="globalStart" class="global-date">
-                    <span class="text-muted mx-1">~</span>
-                    <input type="date" id="globalEnd" class="global-date">
-                </div>
-                <button class="btn btn-primary fw-bold px-3 shadow-sm" onclick="fetchAllSheetData()"><i class="fas fa-sync-alt me-2"></i>DB 갱신</button>
-                <button class="btn btn-outline-light fw-bold px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#manualInputModal"><i class="fas fa-edit me-2"></i>수동 패널 열기</button>
-            </div>
-        </header>
-
-        <div id="section-dashboard" class="pt-2 mb-5">
-            <h5 class="fw-bold text-white mb-4"><i class="fas fa-chart-line me-2 text-primary"></i>통합 대시보드 KPI & 제작 현황</h5>
-            
-            <div class="row g-3 mb-4">
-                <div class="col-md-6 col-xl-3">
-                    <div class="kpi-card blue flex-column align-items-start">
-                        <div class="d-flex align-items-center gap-3 w-100 mb-3">
-                            <div class="kpi-icon blue"><i class="fas fa-wallet"></i></div>
-                            <div>
-                                <div class="text-muted small fw-bold mb-1">현재 진행 총 제작 투입비 (수동)</div>
-                                <h4 class="fw-bold text-white mb-0" id="topTotalCost">₩ 0</h4>
-                            </div>
-                        </div>
-                        <div class="w-100 d-flex justify-content-between border-top pt-2" style="border-color: rgba(255,255,255,0.1) !important; font-size: 0.75rem;">
-                            <div><span class="text-muted">국내:</span> <strong class="text-white" id="topCostDom">₩0</strong></div>
-                            <div><span class="text-muted">PH:</span> <strong class="text-white" id="topCostPh">₩0</strong></div>
-                            <div><span class="text-muted">외주:</span> <strong class="text-white" id="topCostOther">₩0</strong></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                    <div class="kpi-card yellow">
-                        <div class="kpi-icon yellow"><i class="fas fa-bullhorn"></i></div>
-                        <div>
-                            <div class="text-muted small fw-bold mb-1">누적 애니메이션 총 마케팅비 (DB)</div>
-                            <h4 class="fw-bold text-white mb-0" id="topMktCost">₩ 0</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                    <div class="kpi-card green">
-                        <div class="kpi-icon green"><i class="fas fa-user-plus"></i></div>
-                        <div>
-                            <div class="text-muted small fw-bold mb-1">애니메이션 평균 가입 CPA (DB)</div>
-                            <h4 class="fw-bold text-white mb-0" id="topAvgCpa">₩ 0</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                    <div class="kpi-card purple">
-                        <div class="kpi-icon purple"><i class="fas fa-photo-video"></i></div>
-                        <div>
-                            <div class="text-muted small fw-bold mb-1">진행 중 작품 수 & 전체 공정률</div>
-                            <h4 class="fw-bold text-white mb-0" id="topProjectStatus">0개 / 0%</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row g-4" id="projectCardsContainer">
-                <div class="col-12 text-center text-muted py-5"><i class="fas fa-spinner fa-spin me-2"></i>데이터를 불러오는 중입니다...</div>
-            </div>
-        </div>
-
-        <div id="section-marketing" class="pt-5 mb-5 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
-            <h5 class="fw-bold text-white mb-4"><i class="fas fa-bullseye me-2 text-warning"></i>마케팅 성과 리포트 (데이터 연동)</h5>
-            <div class="row g-4">
-                <div class="col-xl-7 col-xxl-8">
-                    <div class="glass-card h-100 d-flex flex-column">
-                        <h6 class="mb-4 fw-bold text-white border-bottom pb-3" style="border-color: rgba(255,255,255,0.05) !important;">제작 성과 트렌드</h6>
-                        <div style="height: 380px; width: 100%;"><canvas id="performanceChart"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-xl-5 col-xxl-4">
-                    <div class="glass-card h-100 d-flex flex-column p-0 overflow-hidden">
-                        <div class="p-4 pb-3 border-bottom d-flex justify-content-between align-items-center" style="border-color: rgba(255,255,255,0.05) !important; background: rgba(0,0,0,0.1);">
-                            <h6 class="mb-0 fw-bold text-white">Animation Marketing</h6>
-                        </div>
-                        <div class="p-4 flex-grow-1 d-flex flex-column">
-                            <div class="row g-3 mb-4">
-                                <div class="col-6"><div class="mkt-box"><div class="mkt-title">광고비 합계</div><div class="mkt-value text-white" id="valAds">0</div></div></div>
-                                <div class="col-6"><div class="mkt-box"><div class="mkt-title">클릭수 합계</div><div class="mkt-value text-info" id="valClicks">0</div></div></div>
-                                <div class="col-6"><div class="mkt-box"><div class="mkt-title">가입수 합계</div><div class="mkt-value text-success" id="valSignups">0</div></div></div>
-                                <div class="col-6"><div class="mkt-box"><div class="mkt-title">결제수 합계</div><div class="mkt-value text-danger" id="valPayments">0</div></div></div>
-                            </div>
-                            <div class="flex-grow-1 d-flex flex-column justify-content-center">
-                                <h6 class="text-white fw-bold mb-3 text-center border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;">작품별 광고 볼륨 비중</h6>
-                                <div class="pie-container" style="position: relative; width: 100%; height: 180px;"><canvas id="pieChartProject"></canvas></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="section-platform" class="pt-5 mb-5 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
-            <h5 class="fw-bold text-white mb-4"><i class="fas fa-database me-2" style="color:#4285F4;"></i>플랫폼 지표 분석 (데이터 연동)</h5>
-            <div class="glass-card p-0 overflow-hidden">
-                <div class="table-responsive">
-                    <table class="looker-table mb-0">
-                        <thead>
-                            <tr>
-                                <th style="width: 35%; padding-left:24px;">소설 명</th>
-                                <th style="width: 20%;">회원 조회수</th>
-                                <th style="width: 20%;">비회원 조회수</th>
-                                <th style="width: 25%; padding-right:24px;">총 조회수 (Total)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="platformDataTbody"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="lightbox hidden" id="lightbox">
+  <button class="lb-close" id="lbClose" aria-label="닫기">✕</button>
+  <img id="lbImg" alt="" /><div class="lb-name" id="lbName"></div>
 </div>
-
-<div class="modal fade" id="episodeDataModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-dark bg-opacity-50">
-                <h5 class="modal-title fw-bold text-white mb-0"><i class="fas fa-chart-bar me-2 text-info"></i>회차별 상세 Data</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-0">
-                <div class="table-responsive" style="max-height: 60vh;">
-                    <table class="looker-table">
-                        <thead style="position: sticky; top: 0; background: #1e293b; z-index: 10;">
-                            <tr>
-                                <th style="width: 35%; padding-left:24px;">novel_name</th>
-                                <th style="width: 15%; text-align: left;">epi_num</th>
-                                <th style="width: 35%; text-align: right;">total_view</th>
-                                <th style="width: 15%; text-align: right; padding-right:24px;">Retention</th>
-                            </tr>
-                        </thead>
-                        <tbody id="episodeDataTbody"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="manualInputModal" tabindex="-1" data-bs-backdrop="static">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-dark bg-opacity-50">
-                <h5 class="modal-title fw-bold text-white mb-0"><i class="fas fa-cloud-upload-alt me-2 text-primary"></i>구글 시트 DB 실시간 동기화 패널</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            
-            <div class="modal-body p-4 p-md-5" style="max-height: 75vh; overflow-y: auto;">
-                <ul class="nav nav-pills custom-nav-pills mb-4 pb-3 border-bottom" style="border-color: rgba(255,255,255,0.05) !important;" role="tablist">
-                    <li class="nav-item"><button class="nav-link active px-4 py-2" data-bs-toggle="pill" data-bs-target="#tab-update" type="button"><i class="fas fa-edit me-2"></i>기존 작품 데이터 수정</button></li>
-                    <li class="nav-item"><button class="nav-link px-4 py-2" data-bs-toggle="pill" data-bs-target="#tab-new" type="button"><i class="fas fa-plus-square me-2"></i>신규 작품 등록</button></li>
-                </ul>
-
-                <div class="tab-content">
-                    <div class="tab-pane fade show active" id="tab-update">
-                        <div class="row g-4">
-                            <div class="col-md-12">
-                                <label class="modal-label text-warning">DB 업데이트 할 작품 선택</label>
-                                <select class="form-select fw-bold fs-5 py-2 text-white" id="projectSelector" onchange="loadProjectData()"></select>
-                            </div>
-                            
-                            <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-info-circle me-2 text-secondary"></i>작품 기본 정보 수정</h6></div>
-                            <div class="col-md-6 mt-2">
-                                <label class="modal-label">작품명 수정 (시트의 novel_name과 일치해야 실적 연동됨)</label>
-                                <input type="text" class="form-control fw-bold text-white" id="updateProjectName">
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <label class="modal-label">총 기획 회차 (에피소드) 동적 변경</label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control fw-bold text-white" id="updateProjectEps" onchange="updateEpisodeCount()">
-                                    <span class="input-group-text bg-dark border-secondary text-muted">화</span>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-12 mt-2">
-                                <label class="modal-label">썸네일 이미지 교체 (PC 파일 업로드)</label>
-                                <div class="d-flex align-items-center gap-3">
-                                    <input type="file" id="updateProjectImgFile" class="form-control fw-bold text-white" accept="image/*" onchange="previewImage(this, 'updateImgPreview')">
-                                    <img id="updateImgPreview" src="" style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover; display: none;">
-                                </div>
-                                <input type="hidden" id="updateProjectImg">
-                            </div>
-
-                            <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-users me-2 text-info"></i>인력 및 비용 세팅 (스튜디오 혼합 지정 가능)</h6></div>
-                            <div class="col-md-4 mt-2">
-                                <label class="modal-label">담당 팀 및 PD</label>
-                                <input type="text" class="form-control fw-bold text-white" id="updateTeamPD">
-                            </div>
-                            <div class="col-md-8 mt-2">
-                                <label class="modal-label text-muted">총 산출 인건비 (국내 + 필리핀 합산)</label>
-                                <input type="text" id="updateLaborResult" class="form-control fw-bold text-muted" readonly>
-                            </div>
-
-                            <div class="col-md-6 mt-2">
-                                <div class="p-3 rounded border" style="background: rgba(59, 130, 246, 0.05); border-color: rgba(59, 130, 246, 0.2) !important;">
-                                    <label class="modal-label text-primary mb-2"><i class="fas fa-building me-1"></i>국내 AI 스튜디오 (인당 250만)</label>
-                                    <div class="d-flex gap-2">
-                                        <div class="input-group"><input type="number" id="updateDomMembers" class="form-control fw-bold text-white" oninput="calcUpdateTotalCost()" placeholder="0"><span class="input-group-text bg-dark border-secondary text-muted">명</span></div>
-                                        <div class="input-group"><span class="input-group-text bg-dark border-secondary text-muted">비율</span><input type="number" id="updateDomRatio" step="0.1" class="form-control fw-bold text-white" oninput="calcUpdateTotalCost()" placeholder="1.0"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <div class="p-3 rounded border" style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2) !important;">
-                                    <label class="modal-label text-success mb-2"><i class="fas fa-globe-asia me-1"></i>글로벌 필리핀 (인당 60만)</label>
-                                    <div class="d-flex gap-2">
-                                        <div class="input-group"><input type="number" id="updatePhMembers" class="form-control fw-bold text-white" oninput="calcUpdateTotalCost()" placeholder="0"><span class="input-group-text bg-dark border-secondary text-muted">명</span></div>
-                                        <div class="input-group"><span class="input-group-text bg-dark border-secondary text-muted">비율</span><input type="number" id="updatePhRatio" step="0.1" class="form-control fw-bold text-white" oninput="calcUpdateTotalCost()" placeholder="1.0"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-flag-checkered me-2 text-success"></i>성과 KPI 목표치 설정</h6></div>
-                            <div class="col-md-6 mt-2">
-                                <label class="modal-label">목표 가입 CPA (₩)</label>
-                                <div class="input-group"><span class="input-group-text bg-dark border-secondary text-muted">₩</span><input type="number" id="updateTargetCpa" class="form-control fw-bold text-white" placeholder="예: 2500"></div>
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <label class="modal-label">목표 총 조회수 (뷰)</label>
-                                <div class="input-group"><input type="number" id="updateTargetViews" class="form-control fw-bold text-white" placeholder="예: 500000"><span class="input-group-text bg-dark border-secondary text-muted">회</span></div>
-                            </div>
-
-                            <div class="col-12 mt-4"><h6 class="fw-bold text-white border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fas fa-money-check-alt me-2 text-danger"></i>부대 비용 관리 (누적액)</h6></div>
-                            <div class="col-md-6 mt-2">
-                                <div class="border rounded p-3" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.05) !important;">
-                                    <div class="form-check form-switch d-flex align-items-center mb-2">
-                                        <input class="form-check-input" type="checkbox" id="toggleApi" onchange="calcUpdateTotalCost()" style="transform: scale(1.2); margin-top:0;">
-                                        <label class="form-check-label text-white fw-bold ms-3">API 비용 발생</label>
-                                    </div>
-                                    <div id="wrapApiCost" class="input-group mt-2" style="display: none;"><span class="input-group-text bg-dark border-secondary">₩</span><input type="number" id="apiCostInput" class="form-control fw-bold text-white" oninput="calcUpdateTotalCost()"></div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <div class="border rounded p-3" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.05) !important;">
-                                    <div class="form-check form-switch d-flex align-items-center mb-2">
-                                        <input class="form-check-input" type="checkbox" id="toggleOutsource" onchange="calcUpdateTotalCost()" style="transform: scale(1.2); margin-top:0;">
-                                        <label class="form-check-label text-white fw-bold ms-3">외주 비용 발생</label>
-                                    </div>
-                                    <div id="wrapOutsourceCost" class="input-group mt-2" style="display: none;"><span class="input-group-text bg-dark border-secondary">₩</span><input type="number" id="outsourceCostInput" class="form-control fw-bold text-white" oninput="calcUpdateTotalCost()"></div>
-                                </div>
-                            </div>
-
-                            <div class="col-12 mt-5">
-                                <div class="d-flex justify-content-between align-items-end border-bottom pb-2 mb-3" style="border-color: rgba(255,255,255,0.05) !important;">
-                                    <h6 class="fw-bold text-white mb-0"><i class="fas fa-list-ul me-2 text-warning"></i>회차별 세부 공정 설정 (4단계)</h6>
-                                    <div class="bg-success bg-opacity-10 border border-success px-3 py-1 rounded">
-                                        <span class="text-white small me-2">자동 합산 진행률:</span><strong class="text-success fs-5" id="totalProgressBar">0%</strong>
-                                    </div>
-                                </div>
-                                <div class="p-3 bg-dark bg-opacity-25 border rounded mb-3" style="border-color: rgba(255,255,255,0.05) !important;">
-                                    <p class="mb-0 text-muted small"><i class="fas fa-info-circle me-1"></i> 토글 스위치를 클릭하여 회차별 완료된 공정을 체크하세요. 메인 카드의 [완료/진행 회차] 영역에 즉각 분리 반영됩니다.</p>
-                                </div>
-                                <div id="episodeListContainer" style="max-height: 400px; overflow-y: auto; padding-right: 10px;"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="tab-new">
-                        <div class="row g-4">
-                            <div class="col-12"><h6 class="fw-bold text-white mb-0 border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;">작품 기본 정보</h6></div>
-                            <div class="col-md-6"><label class="modal-label">작품 고유 ID (영/숫자)</label><input type="text" id="newProjectId" class="form-control fw-bold text-white" placeholder="예: nv3"></div>
-                            <div class="col-md-6"><label class="modal-label">신규 작품명</label><input type="text" id="newProjectName" class="form-control fw-bold text-white"></div>
-                            <div class="col-md-6"><label class="modal-label">총 기획 회차</label><div class="input-group"><input type="number" id="newProjectEps" class="form-control fw-bold text-white" value="12"><span class="input-group-text bg-dark border-secondary text-muted">화</span></div></div>
-                            
-                            <div class="col-md-6">
-                                <label class="modal-label">썸네일 파일 업로드 (PC 이미지)</label>
-                                <div class="d-flex align-items-center gap-3">
-                                    <input type="file" id="newProjectImgFile" class="form-control fw-bold text-white" accept="image/*" onchange="previewImage(this, 'newImgPreview')">
-                                    <img id="newImgPreview" src="" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; display:none;">
-                                </div>
-                                <input type="hidden" id="newProjectImg">
-                            </div>
-
-                            <div class="col-12 mt-4"><h6 class="fw-bold text-white mb-0 border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;">제작 파이프라인 및 인건비 설계</h6></div>
-                            <div class="col-md-4 mt-2"><label class="modal-label">담당 팀 및 PD</label><input type="text" id="newProjectPD" class="form-control fw-bold text-white"></div>
-                            <div class="col-md-8 mt-2"><label class="modal-label text-danger">총 기본 인건비 산출액</label><input type="text" id="newLaborResult" class="form-control text-danger fw-bold" readonly style="background: rgba(239, 68, 68, 0.1) !important;"></div>
-
-                            <div class="col-md-6 mt-2">
-                                <div class="p-3 rounded border" style="background: rgba(59, 130, 246, 0.05); border-color: rgba(59, 130, 246, 0.2) !important;">
-                                    <label class="modal-label text-primary mb-2"><i class="fas fa-building me-1"></i>국내 AI 스튜디오 (인당 250만)</label>
-                                    <div class="d-flex gap-2">
-                                        <div class="input-group"><input type="number" id="newDomMembers" class="form-control fw-bold text-white" oninput="calcNewLabor()" placeholder="0" value="1"><span class="input-group-text bg-dark border-secondary text-muted">명</span></div>
-                                        <div class="input-group"><span class="input-group-text bg-dark border-secondary text-muted">비율</span><input type="number" id="newDomRatio" step="0.1" class="form-control fw-bold text-white" oninput="calcNewLabor()" placeholder="1.0" value="1.0"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <div class="p-3 rounded border" style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2) !important;">
-                                    <label class="modal-label text-success mb-2"><i class="fas fa-globe-asia me-1"></i>글로벌 필리핀 (인당 60만)</label>
-                                    <div class="d-flex gap-2">
-                                        <div class="input-group"><input type="number" id="newPhMembers" class="form-control fw-bold text-white" oninput="calcNewLabor()" placeholder="0" value="0"><span class="input-group-text bg-dark border-secondary text-muted">명</span></div>
-                                        <div class="input-group"><span class="input-group-text bg-dark border-secondary text-muted">비율</span><input type="number" id="newPhRatio" step="0.1" class="form-control fw-bold text-white" oninput="calcNewLabor()" placeholder="1.0" value="1.0"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6 mt-4"><label class="modal-label">초기 목표 가입 CPA (₩)</label><input type="number" id="newTargetCpa" class="form-control fw-bold text-white" value="3000"></div>
-                            <div class="col-md-6 mt-4"><label class="modal-label">초기 목표 조회수 (뷰)</label><input type="number" id="newTargetViews" class="form-control fw-bold text-white" value="100000"></div>
-
-                            <div class="col-12 mt-4 text-end">
-                                <button type="button" class="btn btn-success px-4 fw-bold" onclick="addNewProject()"><i class="fas fa-plus me-2"></i>DB에 새 프로젝트 생성</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="modal-footer bg-dark bg-opacity-25 d-flex justify-content-between">
-                <button type="button" class="btn btn-outline-danger fw-bold" onclick="deleteProject()"><i class="fas fa-trash-alt me-2"></i>작품 영구 삭제</button>
-                <div>
-                    <button type="button" class="btn btn-secondary fw-medium me-2" data-bs-dismiss="modal">닫기</button>
-                    <button type="button" id="btnSaveToSheet" class="btn btn-primary px-4 fw-bold" onclick="saveManualData()"><i class="fas fa-cloud-upload-alt me-2"></i>구글 시트 DB에 기록</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="toasts" id="toasts"></div>
 
 <script>
-    // ★★★ 여기에 본인의 '새 버전' 배포 URL을 넣어주세요! ★★★
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6DX4XNhxa7ORDJbZd32Hv6fx3PQbiJWOuCwBsBEFVj-mitSCkq6Hq54nWCkZtNOG0/exec';
-
-    // 🔧 디버그: 콘솔에서 Apps Script 응답을 직접 확인할 수 있는 헬퍼
-    window._debugSave = async function(testId) {
-        const id = testId || Object.keys(mData)[0];
-        if (!id) { console.warn('mData가 비어있음'); return; }
-        const body = JSON.stringify({ action: 'save', payload: { ...mData[id], id, img: '' } });
-        console.log('▶ 전송 데이터:', body);
-        const res = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body, redirect: 'follow' });
-        const text = await res.text();
-        console.log('◀ 서버 응답 (raw):', text);
-        try { console.log('◀ 서버 응답 (parsed):', JSON.parse(text)); } catch(e) {}
-    };
-    
-    let mData = {};
-    let dbData = { marketing: [], platform: [], episode: [], project: [] };
-    let dbProjectStats = {}; 
-    let perfChart, projectPieChart;
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const today = new Date();
-        const y = today.getFullYear();
-        const m = String(today.getMonth() + 1).padStart(2, '0');
-        const d = String(today.getDate()).padStart(2, '0');
-        document.getElementById('globalStart').value = `${y}-${m}-01`;
-        document.getElementById('globalEnd').value = `${y}-${m}-${d}`;
-
-        Chart.defaults.color = '#cbd5e1'; 
-        Chart.defaults.font.family = 'Pretendard';
-        
-        const perfCtx = document.getElementById('performanceChart');
-        if (perfCtx) {
-            perfChart = new Chart(perfCtx.getContext('2d'), {
-                type: 'line', data: { labels: [], datasets: [] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#fff' } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' } }, y1: { position: 'right', grid: { drawOnChartArea: false } } } }
-            });
-        }
-
-        const pieCtx = document.getElementById('pieChartProject');
-        if (pieCtx) {
-            projectPieChart = new Chart(pieCtx, { 
-                type: 'pie', data: { labels: [], datasets: [] }, 
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#cbd5e1' } } } } 
-            });
-        }
-
-        document.querySelectorAll('.global-date').forEach(el => el.addEventListener('change', renderData));
-        
-        fetchAllSheetData(); 
-        document.getElementById('manualInputModal').addEventListener('shown.bs.modal', function() {
-            // 🔧 수정: 모달이 열릴 때 selector에 현재 값이 없으면 첫 번째 항목으로 초기화
-            const pSel = document.getElementById('projectSelector');
-            if (pSel && pSel.options.length > 0 && !mData[pSel.value]) {
-                pSel.value = pSel.options[0].value;
-            }
-            loadProjectData();
-        });
-    });
-
-    const navLinks = document.querySelectorAll('.sidebar .nav-link');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            if(this.getAttribute('href') !== '#') {
-                navLinks.forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
-            }
-        });
-    });
-
-    async function fetchAllSheetData() {
-        const overlay = document.getElementById('loadingOverlay');
-        const loadingText = document.getElementById('loadingText');
-        if(overlay) overlay.style.display = 'flex';
-        try {
-            const response = await fetch(SCRIPT_URL);
-            dbData = await response.json();
-            
-            mData = {};
-            if(dbData.project && dbData.project.length > 0) {
-                dbData.project.forEach(row => {
-                    if(row.id) {
-                        mData[row.id] = {
-                            name: row.name, pd: row.pd || '',
-                            domM: parseFloat(row.domM) || 0, domR: parseFloat(row.domR) || 0,
-                            phM: parseFloat(row.phM) || 0, phR: parseFloat(row.phR) || 0,
-                            useApi: row.useApi === true || row.useApi === 'TRUE' || row.useApi === 'true',
-                            api: parseFloat(row.api) || 0,
-                            useOut: row.useOut === true || row.useOut === 'TRUE' || row.useOut === 'true',
-                            out: parseFloat(row.out) || 0,
-                            eps: parseInt(row.eps) || 12,
-                            targetCpa: parseFloat(row.targetCpa) || 0, targetViews: parseFloat(row.targetViews) || 0,
-                            img: row.img || 'https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&q=80&w=100',
-                            progress: (typeof row.progress === 'string') ? JSON.parse(row.progress) : (row.progress || [])
-                        };
-                    }
-                });
-            }
-            // 🚨 임시 가짜 데이터(fallback) 코드를 완전히 삭제했습니다!
-
-            populateSelectors();
-            renderData();
-        } catch (error) {
-            console.error('시트 로드 에러:', error);
-            if(loadingText) loadingText.innerText = "데이터 로드 실패. URL을 확인하세요.";
-        } finally {
-            if(overlay) overlay.style.display = 'none';
-        }
-    }
-
-    function sFloat(v) { let p = parseFloat(String(v).replace(/,/g, '')); return isNaN(p) ? 0 : p; }
-
-    function renderData() {
-        if(!dbData || !dbData.marketing) return;
-        const gs = new Date(document.getElementById('globalStart').value); 
-        const ge = new Date(document.getElementById('globalEnd').value + 'T23:59:59');
-        let tmkt=0, ads=0, click=0, sign=0, pay=0;
-        let tMap = {}, pMap = {};
-        dbProjectStats = {}; 
-
-        (dbData.marketing || []).forEach(row => {
-            let dObj = new Date(row.date);
-            if(isNaN(dObj.getTime())) return;
-            let name = row.novel_name || '기타';
-            let rAds = sFloat(row.ad_cost), rClick = sFloat(row.clicks), rSign = sFloat(row.signups), rPay = sFloat(row.payments);
-            
-            if(dObj >= gs && dObj <= ge) {
-                ads += rAds; click += rClick; sign += rSign; pay += rPay; tmkt += rAds;
-                if(pMap[name]) pMap[name]+=rAds; else pMap[name]=rAds;
-                if(!dbProjectStats[name]) dbProjectStats[name] = { ads: 0, signups: 0, views: 0, mem: 0, non: 0 };
-                dbProjectStats[name].ads += rAds;
-                dbProjectStats[name].signups += rSign;
-            }
-        });
-
-        (dbData.platform || []).forEach(row => {
-            let dObj = new Date(row.date);
-            if(isNaN(dObj.getTime())) return;
-            let name = row.novel_name || '기타';
-            let rTot = sFloat(row.total_views), rSub = sFloat(row.sub_conversions);
-            let rMem = sFloat(row.member_views), rNon = sFloat(row.non_member_views);
-            
-            if(dObj >= gs && dObj <= ge) {
-                let k = dObj.toISOString().split('T')[0];
-                if(!tMap[k]) tMap[k] = {v:0, s:0};
-                tMap[k].v += rTot; tMap[k].s += rSub;
-                
-                if(!dbProjectStats[name]) dbProjectStats[name] = { ads: 0, signups: 0, views: 0, mem: 0, non: 0 };
-                dbProjectStats[name].views += rTot;
-                dbProjectStats[name].mem += rMem;
-                dbProjectStats[name].non += rNon;
-            }
-        });
-
-        if (document.getElementById('valAds')) document.getElementById('valAds').innerText = ads.toLocaleString();
-        if (document.getElementById('valClicks')) document.getElementById('valClicks').innerText = click.toLocaleString();
-        if (document.getElementById('valSignups')) document.getElementById('valSignups').innerText = sign.toLocaleString();
-        if (document.getElementById('valPayments')) document.getElementById('valPayments').innerText = pay.toLocaleString();
-
-        const globalCpa = sign > 0 ? (ads / sign) : 0;
-        if (document.getElementById('topMktCost')) document.getElementById('topMktCost').innerText = `₩ ${tmkt.toLocaleString()}`;
-        if (document.getElementById('topAvgCpa')) document.getElementById('topAvgCpa').innerText = `₩ ${Math.round(globalCpa).toLocaleString()}`;
-
-        if (projectPieChart && document.getElementById('pieChartProject')) {
-            projectPieChart.data.labels = Object.keys(pMap);
-            projectPieChart.data.datasets = [{ data: Object.values(pMap), backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444', '#10b981', '#8b5cf6'], borderWidth: 0 }];
-            projectPieChart.update();
-        }
-
-        if (perfChart && document.getElementById('performanceChart')) {
-            let dates = Object.keys(tMap).sort();
-            perfChart.data.labels = dates;
-            perfChart.data.datasets[0] = { label: '총 조회수', data: dates.map(d=>tMap[d].v), borderColor: '#818cf8', backgroundColor: 'rgba(129,140,248,0.1)', borderWidth: 3, tension: 0.4, fill: true, yAxisID: 'y' };
-            perfChart.data.datasets[1] = { label: '구독 전환', data: dates.map(d=>tMap[d].s), borderColor: '#34d399', borderWidth: 3, borderDash: [5,5], tension: 0.4, yAxisID: 'y1' };
-            perfChart.update();
-        }
-        
-        const tbody = document.getElementById('platformDataTbody');
-        if(tbody) {
-            tbody.innerHTML = '';
-            let pArr = Object.keys(dbProjectStats).map(k => ({
-                name: k, 
-                tot: dbProjectStats[k].views, 
-                m: dbProjectStats[k].mem || 0, 
-                nm: dbProjectStats[k].non || 0
-            })); 
-            pArr.sort((a,b) => b.tot - a.tot);
-            let mTot = Math.max(...pArr.map(d=>d.tot), 1);
-
-            pArr.forEach(d => {
-                let mPct=(d.m/mTot)*100, nmPct=(d.nm/mTot)*100, tPct=(d.tot/mTot)*100;
-                tbody.insertAdjacentHTML('beforeend', `
-                <tr>
-                    <td class="fw-bold" style="padding-left:24px;">${d.name}</td>
-                    <td><div class="view-bar-container" style="justify-content:flex-start;"><span class="view-text text-start" style="width:45px;">${d.m.toLocaleString()}</span><div class="bar-blue" style="width:${mPct}%;"></div></div></td>
-                    <td><div class="view-bar-container" style="justify-content:flex-start;"><span class="view-text text-start" style="width:45px;">${d.nm.toLocaleString()}</span><div class="bar-orange" style="width:${nmPct}%;"></div></div></td>
-                    <td><div class="view-bar-container" style="justify-content:flex-start; padding-right:24px;"><span class="view-text text-start text-info" style="width:50px;">${d.tot.toLocaleString()}</span><div class="bar-purple" style="width:${tPct}%;"></div></div></td>
-                </tr>`);
-            });
-        }
-        renderProjectCards(); 
-    }
-
-    function populateSelectors() {
-        const pSel = document.getElementById('projectSelector');
-        if(!pSel) return;
-        const currentVal = pSel.value; 
-        pSel.innerHTML = '';
-        for (const [key, val] of Object.entries(mData)) { pSel.insertAdjacentHTML('beforeend', `<option value="${key}">${val.name} (${key})</option>`); }
-        if(mData[currentVal]) pSel.value = currentVal;
-    }
-
-    function renderProjectCards() {
-        const container = document.getElementById('projectCardsContainer');
-        if(!container) return;
-        container.innerHTML = '';
-        
-        let globalTotalCost = 0, costDom = 0, costPh = 0, costOther = 0;
-        let projCount = 0, totalProgSum = 0;
-
-        // 🚨 아무 작품도 없을 때 대시보드를 비우고 숫자를 0으로 리셋합니다.
-        if (Object.keys(mData).length === 0) {
-            container.innerHTML = '<div class="col-12 text-center py-5 text-muted">등록된 프로젝트가 없습니다. 수동 패널에서 신규 작품을 등록해주세요.</div>';
-            if (document.getElementById('topTotalCost')) document.getElementById('topTotalCost').innerText = "₩ 0";
-            if (document.getElementById('topCostDom')) document.getElementById('topCostDom').innerText = "₩ 0";
-            if (document.getElementById('topCostPh')) document.getElementById('topCostPh').innerText = "₩ 0";
-            if (document.getElementById('topCostOther')) document.getElementById('topCostOther').innerText = "₩ 0";
-            if (document.getElementById('topProjectStatus')) document.getElementById('topProjectStatus').innerText = `0개 / 0%`;
-            return;
-        }
-
-        for (const [id, data] of Object.entries(mData)) {
-            projCount++;
-            
-            const domLabor = (data.domM || 0) * (data.domR || 0) * 2500000;
-            const phLabor = (data.phM || 0) * (data.phR || 0) * 600000;
-            const laborCost = domLabor + phLabor;
-            const totalCost = laborCost + data.api + data.out;
-            
-            globalTotalCost += totalCost;
-            costDom += domLabor; costPh += phLabor; costOther += data.api + data.out;
-            
-            let studioLabel = '';
-            if (data.domM > 0 && data.phM == 0) studioLabel = '국내 AI 아트사업팀';
-            else if (data.domM == 0 && data.phM > 0) studioLabel = '글로벌 필리핀 스튜디오';
-            else if (data.domM > 0 && data.phM > 0) studioLabel = '국내/필리핀 혼합 팀';
-            else studioLabel = '스튜디오 미지정';
-
-            let membersLabel = [];
-            if (data.domM > 0) membersLabel.push(`국내 ${data.domM}명`);
-            if (data.phM > 0) membersLabel.push(`필리핀 ${data.phM}명`);
-            let memStr = membersLabel.join(' + ');
-            if (!memStr) memStr = '인력 없음';
-
-            let totalChecks = 0, completedEps = [], inProgressEp = -1, inProgressStatus = 0;
-
-            for(let i=0; i<data.eps; i++) {
-                let p = data.progress[i];
-                totalChecks += p;
-                if(p === 4) { completedEps.push(i + 1); } 
-                else if (p > 0 && inProgressEp === -1) { inProgressEp = i + 1; inProgressStatus = p; } 
-                else if (p === 0 && inProgressEp === -1) { inProgressEp = i + 1; inProgressStatus = 0; }
-            }
-            
-            const progressPct = ((totalChecks / (data.eps * 4)) * 100).toFixed(1);
-            totalProgSum += parseFloat(progressPct);
-            
-            let compText = completedEps.length > 0 ? `1~${completedEps.length}화 완료` : '완료된 회차 없음';
-            if (completedEps.length === data.eps) compText = '전체 회차 완료';
-
-            let ingText = '';
-            let s1='wait', i1='far fa-circle', t1='콘티 대기', s2='wait', i2='far fa-circle', t2='이미지 대기';
-            let s3='wait', i3='far fa-circle', t3='영상 대기', s4='wait', i4='far fa-circle', t4='업로드 대기';
-
-            if (completedEps.length === data.eps) {
-                ingText = '진행중인 회차 없음 (완료됨)';
-                s1='done'; i1='fa-check-circle'; t1='콘티 완료'; s2='done'; i2='fa-check-circle'; t2='이미지 완료';
-                s3='done'; i3='fa-check-circle'; t3='영상 완료'; s4='done'; i4='fa-check-circle'; t4='업로드 완료';
-            } else {
-                ingText = `<span class="text-primary">${inProgressEp}화</span> 공정 진행 중`;
-                s1 = inProgressStatus >= 1 ? 'done' : 'wait'; i1 = inProgressStatus >= 1 ? 'fa-check-circle' : 'far fa-circle'; t1 = inProgressStatus >= 1 ? '콘티 완료' : '콘티 진행';
-                s2 = inProgressStatus >= 2 ? 'done' : (inProgressStatus==1 ? 'ing':'wait'); i2 = inProgressStatus >= 2 ? 'fa-check-circle' : (inProgressStatus==1?'fa-spinner fa-spin':'far fa-circle'); t2 = inProgressStatus >= 2 ? '이미지 완료' : '이미지 진행';
-                s3 = inProgressStatus >= 3 ? 'done' : (inProgressStatus==2 ? 'ing':'wait'); i3 = inProgressStatus >= 3 ? 'fa-check-circle' : (inProgressStatus==2?'fa-spinner fa-spin':'far fa-circle'); t3 = inProgressStatus >= 3 ? '영상 완료' : '영상 진행';
-                s4 = inProgressStatus >= 4 ? 'done' : (inProgressStatus==3 ? 'ing':'wait'); i4 = inProgressStatus >= 4 ? 'fa-check-circle' : (inProgressStatus==3?'fa-spinner fa-spin':'far fa-circle'); t4 = inProgressStatus >= 4 ? '업로드 완료' : '업로드 대기';
-            }
-
-            const addBadge = data.useApi ? `<span class="badge bg-secondary ms-1" style="font-size:0.65rem;">API</span>` : (data.useOut ? `<span class="badge bg-secondary ms-1" style="font-size:0.65rem;">외주</span>` : '');
-            
-            const stats = dbProjectStats[data.name] || { ads: 0, signups: 0, views: 0 };
-            const actualCpa = stats.signups > 0 ? Math.round(stats.ads / stats.signups) : 0;
-            const actualViews = stats.views;
-
-            const cpaSuccess = (actualCpa > 0 && actualCpa <= data.targetCpa) ? 'success' : (actualCpa === 0 ? 'wait' : 'fail');
-            const cpaText = cpaSuccess === 'success' ? '달성' : (cpaSuccess === 'fail' ? '미달' : '대기');
-            const viewSuccess = actualViews >= data.targetViews ? 'success' : 'ing';
-            const viewText = viewSuccess === 'success' ? '달성' : '진행중';
-
-            let linksHtml = '';
-            for(let i=0; i<data.eps; i++) {
-                if(data.progress[i] === 4) {
-                    const epTitle = i === 0 ? '프롤로그: 시작' : `${i}화: 에피소드${i}`;
-                    linksHtml += `<div class="link-btn"><i class="fas fa-play"></i> ${epTitle}</div>`;
-                }
-            }
-            if(linksHtml === '') linksHtml = '<span class="text-muted small">업로드된 회차가 없습니다.</span>';
-
-            const html = `
-            <div class="col-xl-6">
-                <div class="proj-card h-100 d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-start mb-4">
-                        <div class="d-flex gap-3 align-items-center">
-                            <img src="${data.img}" class="rounded" style="width: 80px; height: 80px; object-fit: cover;">
-                            <div>
-                                <h4 class="mb-1 text-white fw-bold">${data.name}</h4>
-                                <div class="text-muted small mb-1">총 ${data.eps}화 기획</div>
-                                <div class="text-warning" style="font-size: 0.85rem; font-weight: 700;"><i class="fas fa-chart-pie me-1"></i>전체 진행률: ${progressPct}%</div>
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <div class="text-info fw-bold">${studioLabel}</div>
-                            <div class="text-muted small mt-1">${data.pd}</div>
-                        </div>
-                    </div>
-
-                    <div class="row g-2 mb-3">
-                        <div class="col-6"><div class="proj-info-box"><span class="text-muted small fw-bold mb-1">인건비 (${memStr})</span><span class="text-danger fw-bold fs-5">₩${laborCost.toLocaleString()}</span></div></div>
-                        <div class="col-6"><div class="proj-info-box"><span class="text-muted small fw-bold mb-1">부대 비용</span><span class="text-danger fw-bold fs-5">₩${(data.api+data.out).toLocaleString()} ${addBadge}</span></div></div>
-                    </div>
-
-                    <div class="proj-total-cost mb-4">
-                        <span class="text-white fw-bold"><i class="fas fa-wallet me-2"></i>총 제작 투입 비용</span>
-                        <span class="text-primary fw-bold fs-5">₩ ${totalCost.toLocaleString()}</span>
-                    </div>
-
-                    <div class="row g-2 mb-4">
-                        <div class="col-6"><div class="proj-info-box py-2"><span class="text-muted small mb-1">목표 CPA (₩${data.targetCpa.toLocaleString()})</span><div class="text-white fw-bold">현재: ₩${actualCpa.toLocaleString()} <span class="kpi-badge ${cpaSuccess}">${cpaText}</span></div></div></div>
-                        <div class="col-6"><div class="proj-info-box py-2"><span class="text-muted small mb-1">목표 조회수 (${data.targetViews.toLocaleString()})</span><div class="text-white fw-bold">현재: ${actualViews.toLocaleString()} <span class="kpi-badge ${viewSuccess === 'success' ? 'success' : 'wait'}">${viewText}</span></div></div></div>
-                    </div>
-
-                    <div class="status-split-box">
-                        <div class="status-split-item">
-                            <span class="text-success small fw-bold mb-1"><i class="fas fa-check-double me-1"></i>완료된 회차 누적</span>
-                            <strong class="text-white fs-6">${compText}</strong>
-                        </div>
-                        <div class="status-split-item">
-                            <span class="text-primary small fw-bold mb-1"><i class="fas fa-spinner fa-spin me-1"></i>현재 작업 타겟</span>
-                            <strong class="text-white fs-6">${ingText}</strong>
-                        </div>
-                    </div>
-
-                    <div class="process-grid mb-4">
-                        <div class="step-badge ${s1}"><i class="fas ${i1}"></i> ${t1}</div>
-                        <div class="step-badge ${s2}"><i class="fas ${i2}"></i> ${t2}</div>
-                        <div class="step-badge ${s3}"><i class="fas ${i3}"></i> ${t3}</div>
-                        <div class="step-badge ${s4}"><i class="fas ${i4}"></i> ${t4}</div>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="text-white small fw-bold mb-2"><i class="fas fa-link me-1"></i> 바로보기 링크 (업로드 완료)</div>
-                        <div class="d-flex flex-wrap">${linksHtml}</div>
-                    </div>
-
-                    <div class="mt-auto text-end border-top pt-3" style="border-color: rgba(255,255,255,0.05) !important;">
-                        <button class="btn btn-outline-info btn-sm fw-bold border-secondary text-info bg-dark bg-opacity-50 px-3" onclick="openEpisodeDataModal('${data.name}')">
-                            <i class="fas fa-list-ol me-2"></i>에피소드별 리텐션 DB
-                        </button>
-                    </div>
-                </div>
-            </div>`;
-            container.insertAdjacentHTML('beforeend', html);
-        }
-        
-        if (document.getElementById('topTotalCost')) document.getElementById('topTotalCost').innerText = "₩ " + globalTotalCost.toLocaleString();
-        if (document.getElementById('topCostDom')) document.getElementById('topCostDom').innerText = "₩" + costDom.toLocaleString();
-        if (document.getElementById('topCostPh')) document.getElementById('topCostPh').innerText = "₩" + costPh.toLocaleString();
-        if (document.getElementById('topCostOther')) document.getElementById('topCostOther').innerText = "₩" + costOther.toLocaleString();
-        
-        const avgProgress = projCount > 0 ? (totalProgSum / projCount).toFixed(1) : 0;
-        if (document.getElementById('topProjectStatus')) document.getElementById('topProjectStatus').innerText = `${projCount}개 / ${avgProgress}%`;
-    }
-
-    // ============================================================================
-    // 4. 수동 관리 패널 로직 (이미지 초고속 압축 기능 추가)
-    // ============================================================================
-    
-    function previewImage(input, previewId) {
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById(previewId).src = e.target.result;
-                document.getElementById(previewId).style.display = 'block';
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    // 🌟 이미지 용량을 획기적으로 줄여서 서버 오류를 차단하는 압축 함수
-    function resizeImage(file, maxSize, callback) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                let width = img.width;
-                let height = img.height;
-                if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } }
-                else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } }
-                const canvas = document.createElement('canvas');
-                canvas.width = width; canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                // 60% 퀄리티로 초강력 압축 (썸네일이므로 화질 문제 없음)
-                callback(canvas.toDataURL('image/jpeg', 0.6)); 
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-
-    // 🔧 수정: 이미지는 Imgur 무료 CDN에 익명 업로드 (구글 시트 용량 제한 우회)
-    // Imgur Client-ID는 공개 익명 업로드용 (별도 로그인 불필요)
-    async function uploadImageToDrive(fileInputId) {
-        const fileInput = document.getElementById(fileInputId);
-        if (!fileInput || !fileInput.files || fileInput.files.length === 0) return null;
-        const file = fileInput.files[0];
-
-        return new Promise((resolve, reject) => {
-            resizeImage(file, 400, async function(base64Data) {
-                try {
-                    // base64에서 헤더 제거 (data:image/jpeg;base64, 부분 제거)
-                    const pureBase64 = base64Data.split(',')[1];
-                    const formData = new FormData();
-                    formData.append('image', pureBase64);
-                    formData.append('type', 'base64');
-
-                    const res = await fetch('https://api.imgur.com/3/image', {
-                        method: 'POST',
-                        headers: { 'Authorization': 'Client-ID 546c25a59c58ad7' },
-                        body: formData
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                        resolve(data.data.link);
-                    } else {
-                        console.warn('Imgur 업로드 실패, base64 직접 사용:', data);
-                        resolve(base64Data); // 실패 시 base64 직접 사용 (로컬 표시용)
-                    }
-                } catch(err) {
-                    console.warn('이미지 업로드 실패, base64 직접 사용:', err);
-                    resolve(base64Data); // 네트워크 오류 시 base64 직접 사용
-                }
-            });
-        });
-    }
-
-    function syncCheckboxesToArray(d) {
-        const rows = document.querySelectorAll('.ep-row');
-        rows.forEach((row, i) => {
-            if (i < d.progress.length) {
-                const checks = row.querySelectorAll('.ep-check');
-                let val = 0;
-                if(checks[0] && checks[0].checked) val=1;
-                if(checks[1] && checks[1].checked) val=2;
-                if(checks[2] && checks[2].checked) val=3;
-                if(checks[3] && checks[3].checked) val=4;
-                d.progress[i] = val;
-            }
-        });
-    }
-
-    window.updateEpisodeCount = function() {
-        const pSel = document.getElementById('projectSelector');
-        if(!pSel) return;
-        const id = pSel.value;
-        const newEps = parseInt(document.getElementById('updateProjectEps').value) || 1;
-        const d = mData[id];
-        if(!d) return;
-        
-        syncCheckboxesToArray(d); 
-        
-        if(newEps > d.eps) {
-            for(let i=0; i < newEps - d.eps; i++) d.progress.push(0); 
-        } else if (newEps < d.eps) {
-            d.progress = d.progress.slice(0, newEps); 
-        }
-        d.eps = newEps;
-        renderEpisodeChecklist(d); 
-    }
-
-    function renderEpisodeChecklist(d) {
-        const container = document.getElementById('episodeListContainer');
-        if (!container) return;
-        container.innerHTML = ''; 
-        for (let i = 0; i < d.eps; i++) {
-            const p = d.progress[i] || 0;
-            const comp = p === 4 ? 'completed' : ''; 
-            const chk1 = p >= 1 ? 'checked' : ''; const chk2 = p >= 2 ? 'checked' : ''; const chk3 = p >= 3 ? 'checked' : ''; const chk4 = p === 4 ? 'checked' : '';
-            
-            const html = `
-            <div class="ep-row ${comp}">
-                <div class="fw-bold text-white mb-2 mb-md-0" style="width: 80px;">제 ${i+1}화</div>
-                <div class="d-flex gap-4 flex-wrap flex-grow-1 justify-content-end align-items-center">
-                    <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk1} style="transform: scale(1.1);"><label class="form-check-label text-light small fw-bold ms-2 mt-1">콘티</label></div>
-                    <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk2} style="transform: scale(1.1);"><label class="form-check-label text-light small fw-bold ms-2 mt-1">이미지</label></div>
-                    <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk3} style="transform: scale(1.1);"><label class="form-check-label text-light small fw-bold ms-2 mt-1">영상</label></div>
-                    <div class="form-check form-switch m-0 d-flex align-items-center"><input class="form-check-input ep-check" type="checkbox" role="switch" onchange="calcTotalProgress()" ${chk4} style="transform: scale(1.1);"><label class="form-check-label text-warning small fw-bold ms-2 mt-1">업로드</label></div>
-                </div>
-            </div>`;
-            container.insertAdjacentHTML('beforeend', html);
-        }
-        calcTotalProgress();
-    }
-
-    function loadProjectData() {
-        const pSel = document.getElementById('projectSelector');
-        if(!pSel) return;
-        const id = pSel.value;
-        const d = mData[id];
-        if(!d) return;
-
-        if(document.getElementById('updateProjectName')) document.getElementById('updateProjectName').value = d.name;
-        if(document.getElementById('updateProjectEps')) document.getElementById('updateProjectEps').value = d.eps;
-        
-        if(document.getElementById('updateProjectImgFile')) document.getElementById('updateProjectImgFile').value = '';
-        if(document.getElementById('updateProjectImg')) document.getElementById('updateProjectImg').value = d.img || '';
-        // 🔧 수정: 작품 전환 시 해당 작품의 기존 썸네일을 미리보기에 항상 표시
-        const prevEl = document.getElementById('updateImgPreview');
-        if(prevEl) {
-            if (d.img) { prevEl.src = d.img; prevEl.style.display = 'block'; }
-            else { prevEl.src = ''; prevEl.style.display = 'none'; }
-        }
-
-        if(document.getElementById('updateTeamPD')) document.getElementById('updateTeamPD').value = d.pd;
-        if(document.getElementById('updateDomMembers')) document.getElementById('updateDomMembers').value = d.domM || 0;
-        if(document.getElementById('updateDomRatio')) document.getElementById('updateDomRatio').value = d.domR || 1.0;
-        if(document.getElementById('updatePhMembers')) document.getElementById('updatePhMembers').value = d.phM || 0;
-        if(document.getElementById('updatePhRatio')) document.getElementById('updatePhRatio').value = d.phR || 1.0;
-        
-        if(document.getElementById('toggleApi')) document.getElementById('toggleApi').checked = d.useApi;
-        if(document.getElementById('toggleOutsource')) document.getElementById('toggleOutsource').checked = d.useOut;
-        if(document.getElementById('apiCostInput')) document.getElementById('apiCostInput').value = d.api || '';
-        if(document.getElementById('outsourceCostInput')) document.getElementById('outsourceCostInput').value = d.out || '';
-        if(document.getElementById('wrapApiCost')) document.getElementById('wrapApiCost').style.display = d.useApi ? 'flex' : 'none';
-        if(document.getElementById('wrapOutsourceCost')) document.getElementById('wrapOutsourceCost').style.display = d.useOut ? 'flex' : 'none';
-
-        if(document.getElementById('updateTargetCpa')) document.getElementById('updateTargetCpa').value = d.targetCpa || '';
-        if(document.getElementById('updateTargetViews')) document.getElementById('updateTargetViews').value = d.targetViews || '';
-        
-        calcUpdateTotalCost();
-        renderEpisodeChecklist(d);
-    }
-
-    function calcUpdateTotalCost() {
-        const domM = parseFloat(document.getElementById('updateDomMembers').value) || 0;
-        const domR = parseFloat(document.getElementById('updateDomRatio').value) || 0;
-        const phM = parseFloat(document.getElementById('updatePhMembers').value) || 0;
-        const phR = parseFloat(document.getElementById('updatePhRatio').value) || 0;
-        
-        const laborCost = (domM * domR * 2500000) + (phM * phR * 600000);
-        if(document.getElementById('updateLaborResult')) document.getElementById('updateLaborResult').value = laborCost > 0 ? "₩ " + laborCost.toLocaleString() : "₩ 0";
-
-        const useApi = document.getElementById('toggleApi').checked;
-        const useOut = document.getElementById('toggleOutsource').checked;
-        if(document.getElementById('wrapApiCost')) document.getElementById('wrapApiCost').style.display = useApi ? 'flex' : 'none';
-        if(document.getElementById('wrapOutsourceCost')) document.getElementById('wrapOutsourceCost').style.display = useOut ? 'flex' : 'none';
-
-        const apiCost = useApi ? (parseFloat(document.getElementById('apiCostInput').value) || 0) : 0;
-        const outCost = useOut ? (parseFloat(document.getElementById('outsourceCostInput').value) || 0) : 0;
-        if(document.getElementById('updateTotalCostResult')) document.getElementById('updateTotalCostResult').innerText = "₩ " + (laborCost + apiCost + outCost).toLocaleString();
-    }
-
-    function calcTotalProgress() {
-        const checkboxes = document.querySelectorAll('.ep-check');
-        if(checkboxes.length === 0) return;
-        let checkedCount = 0;
-        checkboxes.forEach(cb => { if(cb.checked) checkedCount++; });
-        const percentage = (checkedCount / checkboxes.length) * 100;
-        if(document.getElementById('totalProgressBar')) document.getElementById('totalProgressBar').innerText = percentage.toFixed(1) + '%';
-        
-        document.querySelectorAll('.ep-row').forEach(row => {
-            const checks = row.querySelectorAll('.ep-check:checked');
-            if(checks.length === 4) row.classList.add('completed');
-            else row.classList.remove('completed');
-        });
-    }
-
-    async function sendPostRequest(action, payloadObj) {
-        // 🔧 수정: 이미지(base64) 필드는 구글 시트 용량 초과 방지를 위해 제거 후 전송
-        const sanitized = Object.assign({}, payloadObj);
-        if (sanitized.img && sanitized.img.startsWith('data:')) {
-            sanitized.img = ''; // base64는 시트에 저장 불가 → 빈 값 처리
-        }
-
-        const body = JSON.stringify({ action: action, payload: sanitized });
-
-        // 🔧 수정: Google Apps Script CORS 우회를 위해 no-redirect + text/plain 헤더 명시
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: body,
-                redirect: 'follow'
-            });
-            const text = await response.text();
-            let result;
-            try { result = JSON.parse(text); }
-            catch(e) {
-                // Apps Script가 HTML 리다이렉트 페이지를 반환하는 경우 → 성공으로 간주
-                if (text.includes('<!DOCTYPE') || text.includes('<html')) {
-                    console.warn('Apps Script redirect 응답 → 저장 성공으로 처리');
-                    return true;
-                }
-                throw new Error('응답 파싱 실패: ' + text.substring(0, 100));
-            }
-            if (result.status !== 'success') {
-                alert("서버 오류:\n" + (result.message || JSON.stringify(result)));
-                return false;
-            }
-            return true;
-        } catch (error) {
-            console.error('sendPostRequest 오류:', error);
-            alert("서버 연결 실패.\n구글 Apps Script URL과 배포 버전을 확인하세요.\n\n오류: " + error.message);
-            return false;
-        }
-    }
-
-    window.deleteProject = async function() {
-        const pSel = document.getElementById('projectSelector');
-        if(!pSel) return;
-        const id = pSel.value;
-        if(!id || !mData[id]) return;
-        const projName = mData[id].name;
-        
-        if(confirm(`정말 [${projName}] 작품을 DB에서 영구 삭제하시겠습니까?`)) {
-            const btn = document.querySelector('.btn-outline-danger');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>삭제 중...';
-            btn.disabled = true;
-
-            // 🔧 수정: delete는 sendPostRequest 대신 직접 fetch로 전송
-            // payload.id + 최상위 id 두 곳에 모두 실어서 Apps Script가 어떤 구조든 찾을 수 있게 함
-            let success = false;
-            try {
-                const body = JSON.stringify({ action: 'delete', id: id, payload: { id: id } });
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: body,
-                    redirect: 'follow'
-                });
-                const text = await response.text();
-                console.log('삭제 응답:', text);
-                try {
-                    const result = JSON.parse(text);
-                    if (result.status === 'success') success = true;
-                    else alert("삭제 서버 오류:\n" + (result.message || text));
-                } catch(e) {
-                    // HTML 리다이렉트 응답 → 성공으로 처리
-                    if (text.includes('<!DOCTYPE') || text.includes('<html')) success = true;
-                    else alert("응답 파싱 실패:\n" + text.substring(0, 200));
-                }
-            } catch(err) {
-                alert("서버 연결 실패:\n" + err.message);
-            }
-
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-
-            if(success) {
-                delete mData[id];
-                // 🔧 dbData.project에서도 제거
-                if (dbData.project) {
-                    dbData.project = dbData.project.filter(p => String(p.id) !== String(id));
-                }
-                populateSelectors(); 
-                
-                const newId = document.getElementById('projectSelector').value;
-                if(newId && mData[newId]) { 
-                    loadProjectData(); 
-                } else {
-                    document.getElementById('updateProjectName').value = '';
-                    if(document.getElementById('updateProjectImgFile')) document.getElementById('updateProjectImgFile').value = '';
-                    if(document.getElementById('updateImgPreview')) document.getElementById('updateImgPreview').style.display = 'none';
-                    if(document.getElementById('updateTeamPD')) document.getElementById('updateTeamPD').value = '';
-                    document.getElementById('episodeListContainer').innerHTML = '';
-                    if(document.getElementById('updateTotalCostResult')) document.getElementById('updateTotalCostResult').innerText = "₩ 0";
-                    if(document.getElementById('updateLaborResult')) document.getElementById('updateLaborResult').value = "₩ 0";
-                }
-                renderProjectCards(); 
-                alert('DB에서 성공적으로 삭제되었습니다.');
-                bootstrap.Modal.getInstance(document.getElementById('manualInputModal')).hide();
-            }
-        }
-    }
-
-    window.saveManualData = async function() {
-        const pSel = document.getElementById('projectSelector');
-        if(!pSel) return;
-        const id = pSel.value;
-        if(!id || !mData[id]) return;
-        
-        const btn = document.getElementById('btnSaveToSheet');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>DB 기록 중...';
-        btn.disabled = true;
-
-        try {
-            // 🌟 이미지 업로드 (Imgur CDN) - 실패해도 기존 이미지 유지
-            let uploadedUrl = null;
-            try {
-                uploadedUrl = await uploadImageToDrive('updateProjectImgFile');
-            } catch(imgErr) {
-                console.warn("이미지 업로드 스킵:", imgErr);
-            }
-            // 🔧 수정: 새 이미지가 있을 때만 교체, 없으면 기존 이미지 유지
-            if (uploadedUrl) mData[id].img = uploadedUrl;
-
-            mData[id].id = id;
-            mData[id].name = document.getElementById('updateProjectName').value || mData[id].name;
-            const newEps = parseInt(document.getElementById('updateProjectEps').value) || 1;
-            if(mData[id].eps !== newEps) {
-                syncCheckboxesToArray(mData[id]);
-                if(newEps > mData[id].eps) { for(let i=0; i<newEps-mData[id].eps; i++) mData[id].progress.push(0); }
-                else { mData[id].progress = mData[id].progress.slice(0, newEps); }
-                mData[id].eps = newEps;
-            }
-
-            mData[id].pd = document.getElementById('updateTeamPD').value;
-            mData[id].domM = parseFloat(document.getElementById('updateDomMembers').value) || 0;
-            mData[id].domR = parseFloat(document.getElementById('updateDomRatio').value) || 0;
-            mData[id].phM = parseFloat(document.getElementById('updatePhMembers').value) || 0;
-            mData[id].phR = parseFloat(document.getElementById('updatePhRatio').value) || 0;
-            
-            mData[id].useApi = document.getElementById('toggleApi').checked;
-            mData[id].useOut = document.getElementById('toggleOutsource').checked;
-            mData[id].api = mData[id].useApi ? (parseFloat(document.getElementById('apiCostInput').value) || 0) : 0;
-            mData[id].out = mData[id].useOut ? (parseFloat(document.getElementById('outsourceCostInput').value) || 0) : 0;
-            mData[id].targetCpa = parseFloat(document.getElementById('updateTargetCpa').value) || 0;
-            mData[id].targetViews = parseFloat(document.getElementById('updateTargetViews').value) || 0;
-
-            syncCheckboxesToArray(mData[id]);
-
-            const success = await sendPostRequest('save', mData[id]);
-            
-            if(success) {
-                // 🔧 수정: dbData.project도 최신 상태로 동기화
-                if (!dbData.project) dbData.project = [];
-                const projIdx = dbData.project.findIndex(p => p.id === id);
-                if (projIdx >= 0) dbData.project[projIdx] = { ...mData[id] };
-                else dbData.project.push({ ...mData[id] });
-
-                populateSelectors(); 
-                document.getElementById('projectSelector').value = id; 
-                renderData(); 
-                alert('구글 시트 DB에 저장되고 화면에 반영되었습니다.');
-                bootstrap.Modal.getInstance(document.getElementById('manualInputModal')).hide();
-            }
-        } catch(e) {
-            alert("전송 중 알 수 없는 오류가 발생했습니다.");
-        } finally {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    }
-
-    function calcNewLabor() {
-        const domM = parseFloat(document.getElementById('newDomMembers').value) || 0;
-        const domR = parseFloat(document.getElementById('newDomRatio').value) || 0;
-        const phM = parseFloat(document.getElementById('newPhMembers').value) || 0;
-        const phR = parseFloat(document.getElementById('newPhRatio').value) || 0;
-        const cost = (domM * domR * 2500000) + (phM * phR * 600000);
-        if(document.getElementById('newLaborResult')) document.getElementById('newLaborResult').value = cost > 0 ? "₩ " + cost.toLocaleString() : "₩ 0";
-    }
-
-    window.addNewProject = async function() {
-        const id = document.getElementById('newProjectId').value.trim().toLowerCase();
-        const name = document.getElementById('newProjectName').value.trim();
-        const pd = document.getElementById('newProjectPD').value.trim();
-        const eps = parseInt(document.getElementById('newProjectEps').value) || 12;
-        
-        if(!id || !name) { alert("작품 고유 ID와 신규 작품명은 필수 입력 사항입니다."); return; }
-        if(mData[id]) { alert("이미 존재하는 작품 ID입니다. 다른 ID를 입력해주세요."); return; }
-
-        const btn = document.querySelector('.btn-success');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>업로드 및 생성 중...';
-        btn.disabled = true;
-
-        try {
-            // 🌟 에러 방지: 이미지 업로드가 실패해도 기본 이미지로 등록 진행
-            let imgUrl = 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=100'; 
-            try {
-                let uploadedUrl = await uploadImageToDrive('newProjectImgFile');
-                if (uploadedUrl) imgUrl = uploadedUrl;
-            } catch(imgE) { console.warn("이미지 업로드 스킵"); }
-
-            const newProjectData = { 
-                id: id, name: name, pd: pd, 
-                domM: parseFloat(document.getElementById('newDomMembers').value)||0, 
-                domR: parseFloat(document.getElementById('newDomRatio').value)||0, 
-                phM: parseFloat(document.getElementById('newPhMembers').value)||0, 
-                phR: parseFloat(document.getElementById('newPhRatio').value)||0, 
-                useApi: false, api: 0, useOut: false, out: 0, 
-                eps: eps, progress: Array(eps).fill(0), img: imgUrl,
-                targetCpa: parseFloat(document.getElementById('newTargetCpa').value) || 0,
-                targetViews: parseFloat(document.getElementById('newTargetViews').value) || 0
-            };
-
-            const success = await sendPostRequest('save', newProjectData);
-
-            if (success) {
-                // 🔧 수정: mData와 dbData.project 모두 동기화
-                mData[id] = newProjectData;
-                if (!dbData.project) dbData.project = [];
-                dbData.project.push({ ...newProjectData });
-
-                populateSelectors(); 
-                renderProjectCards();
-                alert("신규 작품이 DB에 등록되고 대시보드에 생성되었습니다!");
-                
-                document.getElementById('newProjectId').value = ''; document.getElementById('newProjectName').value = ''; document.getElementById('newProjectPD').value = ''; 
-                document.getElementById('newProjectImgFile').value = ''; document.getElementById('newImgPreview').style.display = 'none';
-                // 🔧 수정: 탭 전환 후 setTimeout으로 selector 값 설정 및 데이터 로드
-                document.querySelector('[data-bs-target="#tab-update"]').click();
-                setTimeout(() => {
-                    document.getElementById('projectSelector').value = id;
-                    loadProjectData();
-                }, 150);
-            }
-        } catch(e) {
-            alert("처리 중 오류가 발생했습니다.");
-        } finally {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    }
-
-    // ============================================================================
-    // 5. 모달 (에피소드) 연동
-    // ============================================================================
-    window.openEpisodeDataModal = function(searchName) {
-        const tbody = document.getElementById('episodeDataTbody');
-        if(!tbody) return;
-        tbody.innerHTML = ''; 
-        const list = (dbData.episode || []).filter(d => d.novel_name && d.novel_name.includes(searchName));
-        if(list.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">해당 작품의 에피소드 데이터가 DB에 없습니다.</td></tr>';
-        } else {
-            let maxV = Math.max(...list.map(d=>sFloat(d.total_views)), 1);
-            list.forEach((d, i) => {
-                const retStr = String(d.retention_rate || '');
-                const ret = retStr === '' ? '-' : retStr + '%';
-                const v = sFloat(d.total_views);
-                const title = i === 0 ? `<div class="fw-bold text-white">${d.novel_name}</div>` : '';
-                tbody.insertAdjacentHTML('beforeend', `<tr><td style="padding-left:24px;">${title}</td><td class="text-muted text-start">${d.episode_num} 화</td><td><div class="view-bar-container" style="justify-content:flex-start;"><span class="view-text text-start" style="width:45px;">${v.toLocaleString()}</span><div class="bar-blue" style="width:${(v/maxV)*100}%;"></div></div></td><td class="retention-text" style="padding-right:24px;">${ret}</td></tr>`);
-            });
-        }
-        new bootstrap.Modal(document.getElementById('episodeDataModal')).show();
-    }
+/* ========================================================
+   두 줄만 채우면 이 페이지 URL에서 바로 동작합니다.
+   ======================================================== */
+const SUPABASE_URL = "https://gsfktzoizwnvvuysdyxj.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_lAKmGc1w1lhP3No2p3v_6A_PhvUbiEC";
+const TABLE = "model_assets";
+
+const SHOTS = ["정면 얼굴","측면 얼굴","전신 샷","바스트 샷"];
+const $ = (id) => document.getElementById(id);
+let client = null, rows = [];
+
+function toast(msg,isErr=false){ const t=document.createElement("div"); t.className="toast"+(isErr?" err":""); t.innerHTML='<span class="tdot"></span>'+escapeHtml(msg); $("toasts").appendChild(t); setTimeout(()=>{t.style.opacity="0";t.style.transition="opacity .3s";setTimeout(()=>t.remove(),300);},3400); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function sanitize(s){ return String(s).replace(/[^\w가-힣.\-]+/g,"_"); }
+function extOf(name){ const m=/\.([a-z0-9]+)$/i.exec(name||""); return m?m[1].toLowerCase():"png"; }
+function fileToBase64(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(",")[1]); r.onerror=rej; r.readAsDataURL(file); }); }
+function b64ToBytes(b64){ const bin=atob(b64); const len=bin.length; const bytes=new Uint8Array(len); for(let i=0;i<len;i++) bytes[i]=bin.charCodeAt(i); return bytes; }
+function saveBlob(blob,name){ const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500); }
+
+function boot(){
+  if(!SUPABASE_URL || !SUPABASE_ANON_KEY){ $("setupBanner").classList.remove("hidden"); $("dropzone").classList.add("disabled"); return; }
+  if(!window.supabase || !window.supabase.createClient){ toast("Supabase 로드 실패 — 새로고침",true); return; }
+  client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  $("dot").classList.add("on");
+  try { $("hostLabel").textContent = new URL(SUPABASE_URL).hostname.split(".")[0]; } catch(e){ $("hostLabel").textContent="connected"; }
+  loadAssets();
+}
+
+async function loadAssets(){
+  if(!client) return;
+  const { data, error } = await client.from(TABLE).select("id,model,category,shot,name,mime,size,data,created_at").order("created_at",{ascending:true}).limit(1000);
+  if(error){ toast("로드 실패: "+error.message,true); return; }
+  rows = data||[];
+  render();
+}
+
+function groupByModel(){
+  const map = new Map();
+  for(const r of rows){ if(!map.has(r.model)) map.set(r.model,{ category:r.category, items:{} }); const g=map.get(r.model); g.items[r.shot]=r; if(r.category) g.category=r.category; }
+  return map;
+}
+
+function render(){
+  const groups = groupByModel();
+  $("count").textContent = groups.size;
+  const list = $("list"); list.innerHTML="";
+  $("emptyState").classList.toggle("hidden", groups.size>0);
+
+  for(const [model,g] of groups){
+    const have = SHOTS.filter(s=>g.items[s]).length;
+    const catClass = g.category==="반실사" ? "semi" : "real";
+    const el = document.createElement("div"); el.className="model";
+    const slots = SHOTS.map(shot=>{
+      const r = g.items[shot];
+      if(r){
+        const src = "data:"+r.mime+";base64,"+r.data;
+        return `<div class="slot" data-shot="${shot}">
+          <div class="slot-thumb"><img loading="lazy" src="${src}" data-src="${src}" data-name="${escapeHtml(model+' · '+shot)}"/></div>
+          <div class="slot-label">${shot}</div>
+          <div class="slot-actions">
+            <button class="s-btn dl" data-id="${r.id}"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v10m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>받기</button>
+            <button class="s-btn del" data-id="${r.id}" title="삭제"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0l-.7 12a2 2 0 01-2 1.9H8.7a2 2 0 01-2-1.9L6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+        </div>`;
+      }
+      return `<div class="slot"><div class="slot-thumb"><div class="slot-empty"><span class="plus">＋</span>${shot}<br>없음</div></div><div class="slot-label" style="color:var(--faint)">${shot}</div><div class="slot-actions"><button class="s-btn dl" data-fill="${escapeHtml(model)}|${shot}" style="opacity:.7">올리기</button></div></div>`;
+    }).join("");
+
+    el.innerHTML = `
+      <div class="model-head">
+        <div class="model-name">${escapeHtml(model)}
+          <span class="badge ${catClass}">${escapeHtml(g.category||"실사")}</span>
+          <span class="badge ${have===4?'done':'partial'}">${have}/4 컷</span>
+        </div>
+        <div class="m-actions">
+          <button class="btn btn-ghost zipModel" data-model="${escapeHtml(model)}"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v10m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>모델 ZIP</button>
+        </div>
+      </div>
+      <div class="slots">${slots}</div>`;
+    list.appendChild(el);
+  }
+
+  list.querySelectorAll(".slot-thumb img").forEach(img=>img.addEventListener("click",()=>openLightbox(img.dataset.src,img.dataset.name)));
+  list.querySelectorAll(".s-btn.dl[data-id]").forEach(b=>b.addEventListener("click",()=>downloadOne(b.dataset.id)));
+  list.querySelectorAll(".s-btn.del[data-id]").forEach(b=>b.addEventListener("click",()=>removeOne(b.dataset.id)));
+  list.querySelectorAll(".s-btn.dl[data-fill]").forEach(b=>b.addEventListener("click",()=>{ const [m,s]=b.dataset.fill.split("|"); $("fModel").value=m; $("fShot").value=s; $("fileInput").click(); }));
+  list.querySelectorAll(".zipModel").forEach(b=>b.addEventListener("click",()=>zipModel(b.dataset.model)));
+}
+
+/* upload */
+async function handleFiles(fileList){
+  if(!client){ toast("연결 정보를 먼저 설정하세요",true); return; }
+  const model = $("fModel").value.trim();
+  if(!model){ toast("모델명을 먼저 입력하세요",true); $("fModel").focus(); return; }
+  const category = $("fCategory").value;
+  const mode = $("fShot").value;
+  let files = Array.from(fileList).filter(f=>f.type.startsWith("image/"));
+  if(files.length===0){ toast("이미지 파일만 올릴 수 있습니다",true); return; }
+
+  let assignments = [];
+  if(mode==="__batch"){
+    if(files.length!==4){ toast("4컷 일괄은 파일 4장을 넣어주세요 (현재 "+files.length+"장)",true); }
+    files.slice(0,4).forEach((f,i)=>assignments.push({file:f, shot:SHOTS[i]}));
+  } else {
+    assignments.push({file:files[0], shot:mode});
+    if(files.length>1) toast("단일 컷 모드라 첫 파일만 업로드했습니다",true);
+  }
+
+  for(const a of assignments){
+    try {
+      const base64 = await fileToBase64(a.file);
+      const payload = { model, category, shot:a.shot, name:a.file.name, mime:a.file.type, size:a.file.size, data:base64 };
+      const existing = rows.find(r=>r.model===model && r.shot===a.shot);
+      let error;
+      if(existing){ ({ error } = await client.from(TABLE).update(payload).eq("id",existing.id)); }
+      else { ({ error } = await client.from(TABLE).insert(payload)); }
+      if(error) throw error;
+    } catch(e){ toast(a.shot+" 실패: "+(e.message||e),true); }
+  }
+  toast(model+" · "+assignments.length+"컷 업로드 완료");
+  await loadAssets();
+}
+
+/* downloads */
+function downloadOne(id){ const r=rows.find(x=>x.id===id); if(!r) return; saveBlob(new Blob([b64ToBytes(r.data)],{type:r.mime}), sanitize(r.model)+"_"+sanitize(r.shot)+"."+extOf(r.name)); }
+async function zipModel(model){
+  const items = rows.filter(r=>r.model===model);
+  if(items.length===0) return;
+  const zip = new JSZip();
+  items.forEach(r=>zip.file(sanitize(model)+"_"+sanitize(r.shot)+"."+extOf(r.name), b64ToBytes(r.data)));
+  toast(model+" ZIP 생성 중…");
+  saveBlob(await zip.generateAsync({type:"blob"}), sanitize(model)+".zip");
+}
+async function zipAll(){
+  if(rows.length===0){ toast("내려받을 이미지가 없습니다",true); return; }
+  const zip = new JSZip();
+  for(const r of rows){ zip.folder(sanitize(r.model)).file(sanitize(r.shot)+"."+extOf(r.name), b64ToBytes(r.data)); }
+  toast("전체 ZIP 생성 중…");
+  saveBlob(await zip.generateAsync({type:"blob"}), "model_assets.zip");
+}
+async function removeOne(id){
+  if(!confirm("이 컷을 삭제할까요?")) return;
+  const { error } = await client.from(TABLE).delete().eq("id",id);
+  if(error){ toast("삭제 실패: "+error.message,true); return; }
+  toast("삭제되었습니다"); await loadAssets();
+}
+
+/* lightbox */
+function openLightbox(src,name){ $("lbImg").src=src; $("lbName").textContent=name; $("lightbox").classList.remove("hidden"); }
+function closeLightbox(){ $("lightbox").classList.add("hidden"); $("lbImg").src=""; }
+$("lbClose").addEventListener("click", closeLightbox);
+$("lightbox").addEventListener("click", e=>{ if(e.target.id==="lightbox") closeLightbox(); });
+window.addEventListener("keydown", e=>{ if(e.key==="Escape") closeLightbox(); });
+
+/* events */
+const dz = $("dropzone");
+$("fileInput").addEventListener("change", e=>{ handleFiles(e.target.files); e.target.value=""; });
+["dragenter","dragover"].forEach(ev=>dz.addEventListener(ev,e=>{ e.preventDefault(); dz.classList.add("drag"); }));
+["dragleave","drop"].forEach(ev=>dz.addEventListener(ev,e=>{ e.preventDefault(); if(ev!=="dragover") dz.classList.remove("drag"); }));
+dz.addEventListener("drop", e=>{ if(e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+$("refreshBtn").addEventListener("click", loadAssets);
+$("zipAllBtn").addEventListener("click", zipAll);
+window.addEventListener("dragover", e=>e.preventDefault());
+window.addEventListener("drop", e=>e.preventDefault());
+
+boot();
 </script>
 </body>
 </html>
-
