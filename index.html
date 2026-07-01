@@ -14,7 +14,7 @@
     --bg:#0c0f0e; --bg-grid:#10130f; --surface:#141817; --surface-2:#1a201e;
     --border:#262d2a; --border-hi:#33403b; --text:#e9efeb; --muted:#8a948f;
     --faint:#5c6560; --mint:#2fe0a6; --mint-deep:#14b88a; --mint-dim:rgba(47,224,166,.12);
-    --danger:#f26169; --danger-dim:rgba(242,97,105,.12); --amber:#f5c451; --amber-dim:rgba(245,196,81,.13); --radius:12px;
+    --danger:#f26169; --danger-dim:rgba(242,97,105,.12); --amber:#f5c451; --radius:12px;
     --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
     --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   }
@@ -30,7 +30,6 @@
   .logo svg { width:20px; height:20px; }
   h1 { font-size:20px; font-weight:700; letter-spacing:-.02em; line-height:1.1; }
   .sub { font-family:var(--mono); font-size:11px; color:var(--faint); margin-top:3px; letter-spacing:.02em; }
-  .hdr-right { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .conn-pill { display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11px; color:var(--muted); background:var(--surface); border:1px solid var(--border); padding:8px 12px; border-radius:999px; }
   .dot { width:7px; height:7px; border-radius:50%; background:var(--faint); flex-shrink:0; }
   .dot.on { background:var(--mint); box-shadow:0 0 8px var(--mint); }
@@ -39,15 +38,10 @@
   .setup-banner h4 { font-size:14px; font-weight:600; color:var(--amber); margin-bottom:6px; }
   .setup-banner p { font-size:13px; color:var(--muted); line-height:1.6; }
   .setup-banner code { font-family:var(--mono); font-size:12px; color:var(--mint); background:var(--bg); padding:2px 6px; border-radius:5px; }
-  .setup-banner details { margin-top:12px; }
-  .setup-banner summary { cursor:pointer; font-size:12px; color:var(--muted); font-family:var(--mono); }
-  .setup-banner pre { margin-top:10px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:14px; overflow-x:auto; font-family:var(--mono); font-size:11.5px; line-height:1.6; color:#b7d8c9; }
-  .setup-banner pre .k { color:var(--mint); }
 
-  /* upload panel */
   .panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:14px; }
   .panel-title { font-size:12px; font-family:var(--mono); text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:14px; }
-  .fields { display:grid; grid-template-columns:1.4fr 1fr 1.2fr; gap:12px; margin-bottom:14px; }
+  .fields { display:grid; grid-template-columns:1.6fr 1fr; gap:12px; margin-bottom:14px; }
   .fld label { display:block; font-family:var(--mono); font-size:10.5px; color:var(--faint); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
   .fld input, .fld select { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:9px; color:var(--text); font-family:var(--sans); font-size:13px; padding:11px 12px; transition:border-color .15s,box-shadow .15s; }
   .fld input:focus, .fld select:focus { outline:none; border-color:var(--mint-deep); box-shadow:0 0 0 3px var(--mint-dim); }
@@ -62,7 +56,6 @@
   .dz-sub b { color:var(--mint); }
   .dropzone input[type=file] { display:none; }
 
-  /* toolbar */
   .toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin:32px 0 18px; flex-wrap:wrap; }
   .toolbar h3 { font-size:15px; font-weight:600; display:flex; align-items:center; gap:10px; }
   .count { font-family:var(--mono); font-size:11px; color:var(--mint); background:var(--mint-dim); padding:3px 9px; border-radius:999px; }
@@ -75,32 +68,42 @@
   .btn-ghost:hover { color:var(--text); border-color:var(--border-hi); }
   .btn svg { width:14px; height:14px; }
 
-  /* model group */
   .model { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; overflow:hidden; }
-  .model-head { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 18px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  .model-head { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 16px 14px 18px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
   .model-name { font-size:16px; font-weight:700; letter-spacing:-.01em; display:flex; align-items:center; gap:10px; }
   .badge { font-family:var(--mono); font-size:10.5px; font-weight:500; padding:3px 8px; border-radius:6px; letter-spacing:.02em; }
   .badge.real { color:#7fd3ff; background:rgba(127,211,255,.12); }
   .badge.semi { color:#c9a6ff; background:rgba(201,166,255,.12); }
-  .badge.done { color:var(--mint); background:var(--mint-dim); }
-  .badge.partial { color:var(--amber); background:var(--amber-dim); }
-  .model-head .m-actions { display:flex; gap:8px; }
+  .badge.num { color:var(--muted); background:var(--surface-2); }
+  .m-actions { display:flex; gap:6px; align-items:center; }
+  .ord { display:flex; flex-direction:column; gap:2px; margin-right:2px; }
+  .sq { width:26px; height:16px; border:1px solid var(--border); background:var(--surface-2); color:var(--muted); border-radius:5px; cursor:pointer; display:grid; place-items:center; transition:color .15s,border-color .15s; padding:0; }
+  .sq svg { width:11px; height:11px; }
+  .sq:hover:not(:disabled) { color:var(--mint); border-color:var(--mint-deep); }
+  .sq:disabled { opacity:.3; cursor:default; }
+  .chip { background:var(--surface-2); border:1px solid var(--border); color:var(--muted); border-radius:8px; font-size:12px; font-weight:500; padding:7px 11px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:color .15s,border-color .15s,background .15s; }
+  .chip svg { width:13px; height:13px; }
+  .chip.dl:hover { color:var(--mint); border-color:var(--mint-deep); }
+  .chip.del:hover { color:var(--danger); border-color:var(--danger); background:var(--danger-dim); }
 
-  .slots { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:16px 18px; }
-  .slot { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--bg); display:flex; flex-direction:column; }
-  .slot-thumb { aspect-ratio:3/4; background:var(--bg-grid); display:grid; place-items:center; overflow:hidden; position:relative; }
-  .slot-thumb img { width:100%; height:100%; object-fit:cover; cursor:zoom-in; }
-  .slot-empty { color:var(--faint); font-size:11px; font-family:var(--mono); text-align:center; padding:12px; }
-  .slot-empty .plus { font-size:20px; display:block; margin-bottom:5px; opacity:.6; }
-  .slot-label { font-size:11.5px; font-weight:600; padding:9px 10px 4px; text-align:center; }
-  .slot-actions { display:flex; gap:5px; padding:4px 8px 9px; }
-  .s-btn { flex:1; background:var(--surface-2); border:1px solid var(--border); color:var(--text); border-radius:7px; font-size:11px; font-weight:500; padding:6px 4px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; transition:border-color .15s,color .15s,background .15s; }
+  .shots { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; padding:16px 18px; }
+  .shot { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--bg); display:flex; flex-direction:column; }
+  .shot-thumb { aspect-ratio:3/4; background:var(--bg-grid); display:grid; place-items:center; overflow:hidden; }
+  .shot-thumb img { width:100%; height:100%; object-fit:cover; cursor:zoom-in; }
+  .shot-actions { display:flex; gap:5px; padding:8px; }
+  .s-btn { flex:1; background:var(--surface-2); border:1px solid var(--border); color:var(--text); border-radius:7px; font-size:11.5px; font-weight:500; padding:7px 4px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; transition:border-color .15s,color .15s,background .15s; }
   .s-btn svg { width:12px; height:12px; }
   .s-btn.dl:hover { border-color:var(--mint-deep); color:var(--mint); }
   .s-btn.del { flex:0 0 auto; }
   .s-btn.del:hover { border-color:var(--danger); color:var(--danger); background:var(--danger-dim); }
-  .slot.uploading .slot-thumb { background:var(--surface-2); }
-  .spinner { width:22px; height:22px; border:2.5px solid var(--border-hi); border-top-color:var(--mint); border-radius:50%; animation:spin .7s linear infinite; }
+
+  .model-drop { margin:0 18px 16px; border:1.4px dashed var(--border); border-radius:9px; padding:12px; text-align:center; font-size:12px; color:var(--faint); cursor:pointer; transition:border-color .15s,color .15s; }
+  .model-drop:hover { border-color:var(--mint-deep); color:var(--muted); }
+  .model-drop.drag { border-color:var(--mint); color:var(--mint); background:var(--mint-dim); }
+  .model-drop input { display:none; }
+
+  .uploading { pointer-events:none; }
+  .spinner-sm { width:20px; height:20px; border:2.5px solid var(--border-hi); border-top-color:var(--mint); border-radius:50%; animation:spin .7s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
 
   .empty { text-align:center; padding:70px 20px; color:var(--faint); border:1px dashed var(--border); border-radius:var(--radius); }
@@ -123,7 +126,7 @@
 
   .hidden { display:none !important; }
   @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; } }
-  @media (max-width:720px) { .fields { grid-template-columns:1fr; } .slots { grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:720px) { .fields { grid-template-columns:1fr; } .shots { grid-template-columns:repeat(2,1fr); } }
 </style>
 </head>
 <body>
@@ -131,51 +134,25 @@
   <header>
     <div class="brand">
       <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M4 16l5-5 4 4 3-3 4 4" stroke="#04120c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8.5" cy="8.5" r="1.6" fill="#04120c"/></svg></div>
-      <div><h1>Model Asset Delivery</h1><div class="sub">모델별 4컷 · 흰 스튜디오 배경 · 업로드 &amp; 다운로드</div></div>
+      <div><h1>Model Asset Delivery</h1><div class="sub">모델별 이미지 · 업로드 &amp; 다운로드</div></div>
     </div>
-    <div class="hdr-right">
-      <div class="conn-pill"><span class="dot" id="dot"></span><span id="hostLabel">연결 안 됨</span></div>
-    </div>
+    <div class="conn-pill"><span class="dot" id="dot"></span><span id="hostLabel">연결 안 됨</span></div>
   </header>
 
   <div class="setup-banner hidden" id="setupBanner">
     <h4>연결 정보를 설정하세요</h4>
-    <p>이 파일 상단 <code>&lt;script&gt;</code>의 <code>SUPABASE_URL</code>, <code>SUPABASE_ANON_KEY</code>를 채우고 다시 배포하면 이 URL에서 바로 동작합니다.</p>
-    <details>
-      <summary>＋ 테이블 준비 SQL</summary>
-      <pre><span class="k">create table if not exists</span> public.model_assets (
-  id uuid primary key default gen_random_uuid(),
-  model text not null,
-  category text,          <span class="k">-- 실사 / 반실사</span>
-  shot text not null,     <span class="k">-- 정면 얼굴 / 측면 얼굴 / 전신 샷 / 바스트 샷</span>
-  name text not null,
-  mime text not null,
-  size bigint,
-  data text not null,
-  created_at timestamptz default now()
-);
-alter table public.model_assets enable row level security;
-create policy "anon all" on public.model_assets
-  for all to anon using (true) with check (true);</pre>
-    </details>
+    <p>파일 상단 <code>SUPABASE_URL</code> / <code>SUPABASE_ANON_KEY</code>를 채워야 동작합니다.</p>
   </div>
 
   <div class="panel" id="uploadPanel">
-    <div class="panel-title">이미지 올리기</div>
+    <div class="panel-title">새 이미지 올리기</div>
     <div class="fields">
       <div class="fld"><label>모델명</label><input id="fModel" type="text" placeholder="예: 서아" autocomplete="off" /></div>
       <div class="fld"><label>구분</label><select id="fCategory"><option value="실사">실사</option><option value="반실사">반실사</option></select></div>
-      <div class="fld"><label>컷 지정</label><select id="fShot">
-        <option value="__batch">4컷 일괄 (정면→측면→전신→바스트 순서)</option>
-        <option value="정면 얼굴">정면 얼굴</option>
-        <option value="측면 얼굴">측면 얼굴</option>
-        <option value="전신 샷">전신 샷</option>
-        <option value="바스트 샷">바스트 샷</option>
-      </select></div>
     </div>
     <label class="dropzone" id="dropzone">
       <div class="dz-title">파일을 드래그하거나 클릭</div>
-      <div class="dz-sub"><b>4컷 일괄</b>은 파일 4장을 순서대로 넣으면 정면·측면·전신·바스트로 자동 배정됩니다</div>
+      <div class="dz-sub">여러 장 한 번에 · 순서 상관 없음 · 같은 모델명이면 그 모델에 추가됩니다</div>
       <input type="file" id="fileInput" accept="image/*" multiple />
     </label>
   </div>
@@ -191,7 +168,7 @@ create policy "anon all" on public.model_assets
   <div id="list"></div>
   <div class="empty hidden" id="emptyState">
     <svg class="em-icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 16l5-4 4 3 4-4 5 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8.5" cy="9.5" r="1.4" fill="currentColor"/></svg>
-    <p>모델명을 입력하고 컷을 올리면 여기에 모델별로 정리됩니다.</p>
+    <p>모델명을 입력하고 이미지를 올리면 여기에 모델별로 정리됩니다.</p>
   </div>
 </div>
 
@@ -202,24 +179,22 @@ create policy "anon all" on public.model_assets
 <div class="toasts" id="toasts"></div>
 
 <script>
-/* ========================================================
-   두 줄만 채우면 이 페이지 URL에서 바로 동작합니다.
-   ======================================================== */
 const SUPABASE_URL = "https://gsfktzoizwnvvuysdyxj.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_lAKmGc1w1lhP3No2p3v_6A_PhvUbiEC";
-const TABLE = "model_assets";
+const BUCKET = "model-assets";
+const MODELS_TABLE = "asset_models";
 
-const SHOTS = ["정면 얼굴","측면 얼굴","전신 샷","바스트 샷"];
 const $ = (id) => document.getElementById(id);
-let client = null, rows = [];
+let client = null, models = [];
 
 function toast(msg,isErr=false){ const t=document.createElement("div"); t.className="toast"+(isErr?" err":""); t.innerHTML='<span class="tdot"></span>'+escapeHtml(msg); $("toasts").appendChild(t); setTimeout(()=>{t.style.opacity="0";t.style.transition="opacity .3s";setTimeout(()=>t.remove(),300);},3400); }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function sanitize(s){ return String(s).replace(/[^\w가-힣.\-]+/g,"_"); }
 function extOf(name){ const m=/\.([a-z0-9]+)$/i.exec(name||""); return m?m[1].toLowerCase():"png"; }
-function fileToBase64(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(",")[1]); r.onerror=rej; r.readAsDataURL(file); }); }
-function b64ToBytes(b64){ const bin=atob(b64); const len=bin.length; const bytes=new Uint8Array(len); for(let i=0;i<len;i++) bytes[i]=bin.charCodeAt(i); return bytes; }
+function readable(fname){ return fname.replace(/^\d+_[a-z0-9]+_/i,""); }
+function rand(){ return Math.random().toString(36).slice(2,7); }
 function saveBlob(blob,name){ const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500); }
+function pubUrl(path){ return client.storage.from(BUCKET).getPublicUrl(path).data.publicUrl; }
 
 function boot(){
   if(!SUPABASE_URL || !SUPABASE_ANON_KEY){ $("setupBanner").classList.remove("hidden"); $("dropzone").classList.add("disabled"); return; }
@@ -227,142 +202,185 @@ function boot(){
   client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   $("dot").classList.add("on");
   try { $("hostLabel").textContent = new URL(SUPABASE_URL).hostname.split(".")[0]; } catch(e){ $("hostLabel").textContent="connected"; }
-  loadAssets();
+  loadAll();
 }
 
-async function loadAssets(){
+async function loadAll(){
   if(!client) return;
-  const { data, error } = await client.from(TABLE).select("id,model,category,shot,name,mime,size,data,created_at").order("created_at",{ascending:true}).limit(1000);
+  const { data, error } = await client.from(MODELS_TABLE).select("id,name,category,sort_order").order("sort_order",{ascending:true});
   if(error){ toast("로드 실패: "+error.message,true); return; }
-  rows = data||[];
+  models = data||[];
+  for(const m of models){
+    const { data: files, error: e2 } = await client.storage.from(BUCKET).list(m.id,{limit:500,sortBy:{column:"created_at",order:"asc"}});
+    if(e2){ m.files=[]; continue; }
+    m.files = (files||[]).filter(f=>f.id && /\.(png|jpe?g|webp|gif|avif|bmp)$/i.test(f.name));
+  }
   render();
 }
 
-function groupByModel(){
-  const map = new Map();
-  for(const r of rows){ if(!map.has(r.model)) map.set(r.model,{ category:r.category, items:{} }); const g=map.get(r.model); g.items[r.shot]=r; if(r.category) g.category=r.category; }
-  return map;
-}
-
 function render(){
-  const groups = groupByModel();
-  $("count").textContent = groups.size;
+  $("count").textContent = models.length;
   const list = $("list"); list.innerHTML="";
-  $("emptyState").classList.toggle("hidden", groups.size>0);
+  $("emptyState").classList.toggle("hidden", models.length>0);
 
-  for(const [model,g] of groups){
-    const have = SHOTS.filter(s=>g.items[s]).length;
-    const catClass = g.category==="반실사" ? "semi" : "real";
-    const el = document.createElement("div"); el.className="model";
-    const slots = SHOTS.map(shot=>{
-      const r = g.items[shot];
-      if(r){
-        const src = "data:"+r.mime+";base64,"+r.data;
-        return `<div class="slot" data-shot="${shot}">
-          <div class="slot-thumb"><img loading="lazy" src="${src}" data-src="${src}" data-name="${escapeHtml(model+' · '+shot)}"/></div>
-          <div class="slot-label">${shot}</div>
-          <div class="slot-actions">
-            <button class="s-btn dl" data-id="${r.id}"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v10m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>받기</button>
-            <button class="s-btn del" data-id="${r.id}" title="삭제"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0l-.7 12a2 2 0 01-2 1.9H8.7a2 2 0 01-2-1.9L6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          </div>
-        </div>`;
-      }
-      return `<div class="slot"><div class="slot-thumb"><div class="slot-empty"><span class="plus">＋</span>${shot}<br>없음</div></div><div class="slot-label" style="color:var(--faint)">${shot}</div><div class="slot-actions"><button class="s-btn dl" data-fill="${escapeHtml(model)}|${shot}" style="opacity:.7">올리기</button></div></div>`;
+  models.forEach((m,idx)=>{
+    const catClass = m.category==="반실사" ? "semi" : "real";
+    const el = document.createElement("div"); el.className="model"; el.dataset.id=m.id;
+    const shots = (m.files||[]).map(f=>{
+      const path = m.id+"/"+f.name;
+      const url = pubUrl(path);
+      return `<div class="shot">
+        <div class="shot-thumb"><img loading="lazy" src="${url}" data-src="${url}" data-name="${escapeHtml(m.name)}"/></div>
+        <div class="shot-actions">
+          <button class="s-btn dl" data-path="${escapeHtml(path)}" data-name="${escapeHtml(readable(f.name))}"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v10m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>받기</button>
+          <button class="s-btn del" data-path="${escapeHtml(path)}" title="삭제"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0l-.7 12a2 2 0 01-2 1.9H8.7a2 2 0 01-2-1.9L6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>`;
     }).join("");
 
     el.innerHTML = `
       <div class="model-head">
-        <div class="model-name">${escapeHtml(model)}
-          <span class="badge ${catClass}">${escapeHtml(g.category||"실사")}</span>
-          <span class="badge ${have===4?'done':'partial'}">${have}/4 컷</span>
+        <div class="model-name">${escapeHtml(m.name)}
+          <span class="badge ${catClass}">${escapeHtml(m.category||"실사")}</span>
+          <span class="badge num">${(m.files||[]).length}장</span>
         </div>
         <div class="m-actions">
-          <button class="btn btn-ghost zipModel" data-model="${escapeHtml(model)}"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v10m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>모델 ZIP</button>
+          <div class="ord">
+            <button class="sq up" ${idx===0?"disabled":""} title="위로"><svg viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button class="sq down" ${idx===models.length-1?"disabled":""} title="아래로"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+          <button class="chip dl zipModel"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v10m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>모델 ZIP</button>
+          <button class="chip del delModel"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0l-.7 12a2 2 0 01-2 1.9H8.7a2 2 0 01-2-1.9L6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>모델 삭제</button>
         </div>
       </div>
-      <div class="slots">${slots}</div>`;
+      <div class="shots">${shots || '<div style="color:var(--faint);font-size:12px;padding:8px">아직 이미지가 없습니다.</div>'}</div>
+      <label class="model-drop"><span>＋ 이 모델에 이미지 추가</span><input type="file" accept="image/*" multiple /></label>`;
+
+    el.querySelector(".up").addEventListener("click", ()=>move(m.id,"up"));
+    el.querySelector(".down").addEventListener("click", ()=>move(m.id,"down"));
+    el.querySelector(".zipModel").addEventListener("click", ()=>zipModel(m));
+    el.querySelector(".delModel").addEventListener("click", ()=>deleteModel(m));
+    el.querySelectorAll(".shot-thumb img").forEach(img=>img.addEventListener("click",()=>openLightbox(img.dataset.src,img.dataset.name)));
+    el.querySelectorAll(".s-btn.dl").forEach(b=>b.addEventListener("click",()=>downloadOne(b.dataset.path,b.dataset.name)));
+    el.querySelectorAll(".s-btn.del").forEach(b=>b.addEventListener("click",()=>deleteOne(b.dataset.path)));
+    const mdrop = el.querySelector(".model-drop"), minput = mdrop.querySelector("input");
+    minput.addEventListener("change", e=>{ addToModel(m,e.target.files); e.target.value=""; });
+    ["dragenter","dragover"].forEach(ev=>mdrop.addEventListener(ev,e=>{ e.preventDefault(); mdrop.classList.add("drag"); }));
+    ["dragleave","drop"].forEach(ev=>mdrop.addEventListener(ev,e=>{ e.preventDefault(); if(ev!=="dragover") mdrop.classList.remove("drag"); }));
+    mdrop.addEventListener("drop", e=>{ if(e.dataTransfer.files.length) addToModel(m,e.dataTransfer.files); });
     list.appendChild(el);
-  }
-
-  list.querySelectorAll(".slot-thumb img").forEach(img=>img.addEventListener("click",()=>openLightbox(img.dataset.src,img.dataset.name)));
-  list.querySelectorAll(".s-btn.dl[data-id]").forEach(b=>b.addEventListener("click",()=>downloadOne(b.dataset.id)));
-  list.querySelectorAll(".s-btn.del[data-id]").forEach(b=>b.addEventListener("click",()=>removeOne(b.dataset.id)));
-  list.querySelectorAll(".s-btn.dl[data-fill]").forEach(b=>b.addEventListener("click",()=>{ const [m,s]=b.dataset.fill.split("|"); $("fModel").value=m; $("fShot").value=s; $("fileInput").click(); }));
-  list.querySelectorAll(".zipModel").forEach(b=>b.addEventListener("click",()=>zipModel(b.dataset.model)));
+  });
 }
 
-/* upload */
-async function handleFiles(fileList){
-  if(!client){ toast("연결 정보를 먼저 설정하세요",true); return; }
-  const model = $("fModel").value.trim();
-  if(!model){ toast("모델명을 먼저 입력하세요",true); $("fModel").focus(); return; }
+/* ---- model helpers ---- */
+async function ensureModel(name,category){
+  const found = models.find(m=>m.name===name);
+  if(found){ if(found.category!==category){ await client.from(MODELS_TABLE).update({category}).eq("id",found.id); found.category=category; } return found; }
+  const maxOrder = models.reduce((a,m)=>Math.max(a,m.sort_order||0),0);
+  const { data, error } = await client.from(MODELS_TABLE).insert({name,category,sort_order:maxOrder+1}).select("id,name,category,sort_order").single();
+  if(error) throw error;
+  return data;
+}
+async function uploadInto(model,fileList){
+  const files = Array.from(fileList).filter(f=>f.type.startsWith("image/"));
+  if(files.length===0){ toast("이미지 파일만 올릴 수 있습니다",true); return 0; }
+  let ok=0;
+  for(const file of files){
+    const path = model.id+"/"+Date.now()+"_"+rand()+"_"+sanitize(file.name);
+    const { error } = await client.storage.from(BUCKET).upload(path,file,{contentType:file.type,upsert:false});
+    if(error){ toast(file.name+" 실패: "+error.message,true); } else ok++;
+  }
+  return ok;
+}
+async function handleNewUpload(fileList){
+  if(!client) return;
+  const name = $("fModel").value.trim();
+  if(!name){ toast("모델명을 먼저 입력하세요",true); $("fModel").focus(); return; }
   const category = $("fCategory").value;
-  const mode = $("fShot").value;
-  let files = Array.from(fileList).filter(f=>f.type.startsWith("image/"));
-  if(files.length===0){ toast("이미지 파일만 올릴 수 있습니다",true); return; }
-
-  let assignments = [];
-  if(mode==="__batch"){
-    if(files.length!==4){ toast("4컷 일괄은 파일 4장을 넣어주세요 (현재 "+files.length+"장)",true); }
-    files.slice(0,4).forEach((f,i)=>assignments.push({file:f, shot:SHOTS[i]}));
-  } else {
-    assignments.push({file:files[0], shot:mode});
-    if(files.length>1) toast("단일 컷 모드라 첫 파일만 업로드했습니다",true);
-  }
-
-  for(const a of assignments){
-    try {
-      const base64 = await fileToBase64(a.file);
-      const payload = { model, category, shot:a.shot, name:a.file.name, mime:a.file.type, size:a.file.size, data:base64 };
-      const existing = rows.find(r=>r.model===model && r.shot===a.shot);
-      let error;
-      if(existing){ ({ error } = await client.from(TABLE).update(payload).eq("id",existing.id)); }
-      else { ({ error } = await client.from(TABLE).insert(payload)); }
-      if(error) throw error;
-    } catch(e){ toast(a.shot+" 실패: "+(e.message||e),true); }
-  }
-  toast(model+" · "+assignments.length+"컷 업로드 완료");
-  await loadAssets();
+  toast("업로드 중…");
+  const model = await ensureModel(name,category);
+  const n = await uploadInto(model,fileList);
+  if(n) toast(name+" · "+n+"장 업로드 완료");
+  await loadAll();
+}
+async function addToModel(model,fileList){
+  toast("업로드 중…");
+  const n = await uploadInto(model,fileList);
+  if(n) toast(model.name+" · "+n+"장 추가");
+  await loadAll();
 }
 
-/* downloads */
-function downloadOne(id){ const r=rows.find(x=>x.id===id); if(!r) return; saveBlob(new Blob([b64ToBytes(r.data)],{type:r.mime}), sanitize(r.model)+"_"+sanitize(r.shot)+"."+extOf(r.name)); }
+/* ---- order ---- */
+async function move(id,dir){
+  const idx = models.findIndex(m=>m.id===id);
+  const j = dir==="up"?idx-1:idx+1;
+  if(j<0||j>=models.length) return;
+  const arr = models.slice(); [arr[idx],arr[j]]=[arr[j],arr[idx]];
+  await Promise.all(arr.map((m,i)=>client.from(MODELS_TABLE).update({sort_order:i}).eq("id",m.id)));
+  await loadAll();
+}
+
+/* ---- downloads ---- */
+async function downloadOne(path,name){
+  const { data, error } = await client.storage.from(BUCKET).download(path);
+  if(error){ toast("다운로드 실패: "+error.message,true); return; }
+  saveBlob(data,name);
+}
 async function zipModel(model){
-  const items = rows.filter(r=>r.model===model);
-  if(items.length===0) return;
+  if(!(model.files||[]).length){ toast("이미지가 없습니다",true); return; }
+  toast(model.name+" ZIP 생성 중…");
   const zip = new JSZip();
-  items.forEach(r=>zip.file(sanitize(model)+"_"+sanitize(r.shot)+"."+extOf(r.name), b64ToBytes(r.data)));
-  toast(model+" ZIP 생성 중…");
-  saveBlob(await zip.generateAsync({type:"blob"}), sanitize(model)+".zip");
+  for(const f of model.files){
+    const { data } = await client.storage.from(BUCKET).download(model.id+"/"+f.name);
+    if(data) zip.file(readable(f.name), data);
+  }
+  saveBlob(await zip.generateAsync({type:"blob"}), sanitize(model.name)+".zip");
 }
 async function zipAll(){
-  if(rows.length===0){ toast("내려받을 이미지가 없습니다",true); return; }
+  const total = models.reduce((a,m)=>a+(m.files||[]).length,0);
+  if(total===0){ toast("내려받을 이미지가 없습니다",true); return; }
+  toast("전체 ZIP 생성 중… ("+total+"장)");
   const zip = new JSZip();
-  for(const r of rows){ zip.folder(sanitize(r.model)).file(sanitize(r.shot)+"."+extOf(r.name), b64ToBytes(r.data)); }
-  toast("전체 ZIP 생성 중…");
+  for(const m of models){
+    const folder = zip.folder(sanitize(m.name));
+    for(const f of (m.files||[])){
+      const { data } = await client.storage.from(BUCKET).download(m.id+"/"+f.name);
+      if(data) folder.file(readable(f.name), data);
+    }
+  }
   saveBlob(await zip.generateAsync({type:"blob"}), "model_assets.zip");
 }
-async function removeOne(id){
-  if(!confirm("이 컷을 삭제할까요?")) return;
-  const { error } = await client.from(TABLE).delete().eq("id",id);
+
+/* ---- delete ---- */
+async function deleteOne(path){
+  if(!confirm("이 이미지를 삭제할까요?")) return;
+  const { error } = await client.storage.from(BUCKET).remove([path]);
   if(error){ toast("삭제 실패: "+error.message,true); return; }
-  toast("삭제되었습니다"); await loadAssets();
+  toast("삭제되었습니다"); await loadAll();
+}
+async function deleteModel(model){
+  if(!confirm("'"+model.name+"' 모델과 이미지를 모두 삭제할까요?")) return;
+  const paths = (model.files||[]).map(f=>model.id+"/"+f.name);
+  if(paths.length){ await client.storage.from(BUCKET).remove(paths); }
+  const { error } = await client.from(MODELS_TABLE).delete().eq("id",model.id);
+  if(error){ toast("삭제 실패: "+error.message,true); return; }
+  toast("'"+model.name+"' 삭제됨"); await loadAll();
 }
 
-/* lightbox */
+/* ---- lightbox ---- */
 function openLightbox(src,name){ $("lbImg").src=src; $("lbName").textContent=name; $("lightbox").classList.remove("hidden"); }
 function closeLightbox(){ $("lightbox").classList.add("hidden"); $("lbImg").src=""; }
 $("lbClose").addEventListener("click", closeLightbox);
 $("lightbox").addEventListener("click", e=>{ if(e.target.id==="lightbox") closeLightbox(); });
 window.addEventListener("keydown", e=>{ if(e.key==="Escape") closeLightbox(); });
 
-/* events */
+/* ---- events ---- */
 const dz = $("dropzone");
-$("fileInput").addEventListener("change", e=>{ handleFiles(e.target.files); e.target.value=""; });
+$("fileInput").addEventListener("change", e=>{ handleNewUpload(e.target.files); e.target.value=""; });
 ["dragenter","dragover"].forEach(ev=>dz.addEventListener(ev,e=>{ e.preventDefault(); dz.classList.add("drag"); }));
 ["dragleave","drop"].forEach(ev=>dz.addEventListener(ev,e=>{ e.preventDefault(); if(ev!=="dragover") dz.classList.remove("drag"); }));
-dz.addEventListener("drop", e=>{ if(e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
-$("refreshBtn").addEventListener("click", loadAssets);
+dz.addEventListener("drop", e=>{ if(e.dataTransfer.files.length) handleNewUpload(e.dataTransfer.files); });
+$("refreshBtn").addEventListener("click", loadAll);
 $("zipAllBtn").addEventListener("click", zipAll);
 window.addEventListener("dragover", e=>e.preventDefault());
 window.addEventListener("drop", e=>e.preventDefault());
