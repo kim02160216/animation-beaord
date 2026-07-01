@@ -183,6 +183,7 @@ const SUPABASE_URL = "https://gsfktzoizwnvvuysdyxj.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_lAKmGc1w1lhP3No2p3v_6A_PhvUbiEC";
 const BUCKET = "model-assets";
 const MODELS_TABLE = "asset_models";
+const IMAGES_TABLE = "asset_images";
 
 const $ = (id) => document.getElementById(id);
 let client = null, models = [];
@@ -207,14 +208,14 @@ function boot(){
 
 async function loadAll(){
   if(!client) return;
-  const { data, error } = await client.from(MODELS_TABLE).select("id,name,category,sort_order").order("sort_order",{ascending:true});
+  const { data: ms, error } = await client.from(MODELS_TABLE).select("id,name,category,sort_order").order("sort_order",{ascending:true});
   if(error){ toast("로드 실패: "+error.message,true); return; }
-  models = data||[];
-  for(const m of models){
-    const { data: files, error: e2 } = await client.storage.from(BUCKET).list(m.id,{limit:500,sortBy:{column:"created_at",order:"asc"}});
-    if(e2){ m.files=[]; continue; }
-    m.files = (files||[]).filter(f=>f.id && /\.(png|jpe?g|webp|gif|avif|bmp)$/i.test(f.name));
-  }
+  models = ms||[];
+  const { data: imgs, error: e2 } = await client.from(IMAGES_TABLE).select("path,model_id,orig_name").order("created_at",{ascending:true});
+  if(e2){ toast("이미지 목록 실패: "+e2.message,true); }
+  const byModel = {};
+  (imgs||[]).forEach(r=>{ (byModel[r.model_id]=byModel[r.model_id]||[]).push({path:r.path, name:r.orig_name}); });
+  models.forEach(m=> m.files = byModel[m.id]||[]);
   render();
 }
 
@@ -227,13 +228,12 @@ function render(){
     const catClass = m.category==="반실사" ? "semi" : "real";
     const el = document.createElement("div"); el.className="model"; el.dataset.id=m.id;
     const shots = (m.files||[]).map(f=>{
-      const path = m.id+"/"+f.name;
-      const url = pubUrl(path);
+      const url = pubUrl(f.path);
       return `<div class="shot">
-        <div class="shot-thumb"><img loading="lazy" src="${url}" data-src="${url}" data-name="${escapeHtml(m.name)}"/></div>
+        <div class="shot-thumb"><img loading="lazy" src="${url}" data-src="${url}" data-name="${escapeHtml(m.name+' · '+f.name)}"/></div>
         <div class="shot-actions">
-          <button class="s-btn dl" data-path="${escapeHtml(path)}" data-name="${escapeHtml(readable(f.name))}"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v10m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>받기</button>
-          <button class="s-btn del" data-path="${escapeHtml(path)}" title="삭제"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0l-.7 12a2 2 0 01-2 1.9H8.7a2 2 0 01-2-1.9L6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="s-btn dl" data-path="${escapeHtml(f.path)}" data-name="${escapeHtml(f.name)}"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v10m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>받기</button>
+          <button class="s-btn del" data-path="${escapeHtml(f.path)}" title="삭제"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0l-.7 12a2 2 0 01-2 1.9H8.7a2 2 0 01-2-1.9L6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
       </div>`;
     }).join("");
@@ -286,9 +286,12 @@ async function uploadInto(model,fileList){
   if(files.length===0){ toast("이미지 파일만 올릴 수 있습니다",true); return 0; }
   let ok=0;
   for(const file of files){
-    const path = model.id+"/"+Date.now()+"_"+rand()+"_"+sanitize(file.name);
-    const { error } = await client.storage.from(BUCKET).upload(path,file,{contentType:file.type,upsert:false});
-    if(error){ toast(file.name+" 실패: "+error.message,true); } else ok++;
+    const key = model.id+"/"+Date.now()+"_"+rand()+"."+extOf(file.name);
+    const { error } = await client.storage.from(BUCKET).upload(key,file,{contentType:file.type,upsert:false});
+    if(error){ toast(file.name+" 실패: "+error.message,true); continue; }
+    const { error: e2 } = await client.from(IMAGES_TABLE).insert({path:key, model_id:model.id, orig_name:file.name});
+    if(e2){ await client.storage.from(BUCKET).remove([key]); toast(file.name+" 기록 실패: "+e2.message,true); continue; }
+    ok++;
   }
   return ok;
 }
@@ -331,8 +334,8 @@ async function zipModel(model){
   toast(model.name+" ZIP 생성 중…");
   const zip = new JSZip();
   for(const f of model.files){
-    const { data } = await client.storage.from(BUCKET).download(model.id+"/"+f.name);
-    if(data) zip.file(readable(f.name), data);
+    const { data } = await client.storage.from(BUCKET).download(f.path);
+    if(data) zip.file(f.name, data);
   }
   saveBlob(await zip.generateAsync({type:"blob"}), sanitize(model.name)+".zip");
 }
@@ -344,8 +347,8 @@ async function zipAll(){
   for(const m of models){
     const folder = zip.folder(sanitize(m.name));
     for(const f of (m.files||[])){
-      const { data } = await client.storage.from(BUCKET).download(m.id+"/"+f.name);
-      if(data) folder.file(readable(f.name), data);
+      const { data } = await client.storage.from(BUCKET).download(f.path);
+      if(data) folder.file(f.name, data);
     }
   }
   saveBlob(await zip.generateAsync({type:"blob"}), "model_assets.zip");
@@ -356,11 +359,12 @@ async function deleteOne(path){
   if(!confirm("이 이미지를 삭제할까요?")) return;
   const { error } = await client.storage.from(BUCKET).remove([path]);
   if(error){ toast("삭제 실패: "+error.message,true); return; }
+  await client.from(IMAGES_TABLE).delete().eq("path",path);
   toast("삭제되었습니다"); await loadAll();
 }
 async function deleteModel(model){
   if(!confirm("'"+model.name+"' 모델과 이미지를 모두 삭제할까요?")) return;
-  const paths = (model.files||[]).map(f=>model.id+"/"+f.name);
+  const paths = (model.files||[]).map(f=>f.path);
   if(paths.length){ await client.storage.from(BUCKET).remove(paths); }
   const { error } = await client.from(MODELS_TABLE).delete().eq("id",model.id);
   if(error){ toast("삭제 실패: "+error.message,true); return; }
